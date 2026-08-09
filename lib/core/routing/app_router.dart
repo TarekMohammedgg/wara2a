@@ -16,6 +16,8 @@ import '../../features/invoice_details/views/invoice_details_view.dart';
 import '../../features/home/view_models/home_cubit.dart';
 import '../../features/invoice_capture/view_models/review_cubit.dart';
 import '../../features/invoice_details/view_models/invoice_details_cubit.dart';
+import '../../features/search/view_models/search_cubit.dart';
+import '../../features/settings/view_models/embedding_status_cubit.dart';
 
 GoRouter buildAppRouter(AppDependencies dependencies) {
   return GoRouter(
@@ -34,11 +36,20 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
           ),
           GoRoute(
             path: '/search',
-            builder: (context, state) => const SearchView(),
+            builder: (context, state) => BlocProvider(
+              create: (_) => SearchCubit(dependencies.search),
+              child: const SearchView(),
+            ),
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const SettingsView(),
+            builder: (context, state) => BlocProvider(
+              create: (_) => EmbeddingStatusCubit(
+                dependencies.embeddingEngine,
+                dependencies.embeddingIndexer,
+              )..refresh(),
+              child: const SettingsView(),
+            ),
           ),
         ],
       ),

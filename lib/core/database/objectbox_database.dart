@@ -15,9 +15,14 @@ class ObjectBoxDatabase {
         directory ??
         '${(await getApplicationDocumentsDirectory()).path}/wara2a-objectbox';
     final store = await openStore(directory: resolvedDirectory);
-    final database = ObjectBoxDatabase._(store);
-    DatabaseMigrationRunner(store).migrate();
-    return database;
+    try {
+      final database = ObjectBoxDatabase._(store);
+      DatabaseMigrationRunner(store).migrate();
+      return database;
+    } catch (_) {
+      if (!store.isClosed()) store.close();
+      rethrow;
+    }
   }
 
   void close() {

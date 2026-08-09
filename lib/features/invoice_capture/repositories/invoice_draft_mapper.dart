@@ -1,6 +1,7 @@
 import '../../../core/database/database_versions.dart';
+import '../../../core/database/invoice_embedding_status.dart';
+import '../../../core/utils/invoice_search_text_builder.dart';
 import '../../invoice_details/models/invoice.dart';
-import '../../invoice_details/repositories/invoice_entity_mapper.dart';
 import '../models/invoice_draft.dart';
 
 abstract final class InvoiceDraftMapper {
@@ -9,10 +10,27 @@ abstract final class InvoiceDraftMapper {
     required DateTime reviewedAt,
     DateTime? createdAt,
   }) {
-    final itemNames = draft.items.map((item) => item.name).whereType<String>();
     final warrantyEndDate = _warrantyEndDate(
       draft.purchaseDate,
       draft.warrantyMonths,
+    );
+    final searchText = InvoiceSearchTextBuilder.build(
+      merchant: draft.merchant,
+      documentType: draft.documentType,
+      invoiceNumber: draft.invoiceNumber,
+      purchaseDate: draft.purchaseDate,
+      totalMinor: draft.totalMinor,
+      currencyCode: draft.currencyCode,
+      warrantyMonths: draft.warrantyMonths,
+      warrantyEndDate: warrantyEndDate,
+      items: draft.items
+          .where((item) => item.name?.trim().isNotEmpty == true)
+          .map(
+            (item) => InvoiceSearchItemInput(
+              name: item.name!,
+              quantity: item.quantity,
+            ),
+          ),
     );
     return Invoice(
       id: draft.invoiceId,
@@ -25,25 +43,13 @@ abstract final class InvoiceDraftMapper {
       warrantyEndDate: warrantyEndDate,
       invoiceNumber: draft.invoiceNumber,
       rawExtractedText: draft.rawExtractedText,
-      searchableText: InvoiceEntityMapper.buildSearchableText(
-        merchant: draft.merchant,
-        documentType: draft.documentType,
-        invoiceNumber: draft.invoiceNumber,
-        purchaseDate: draft.purchaseDate,
-        totalMinor: draft.totalMinor,
-        currencyCode: draft.currencyCode,
-        warrantyMonths: draft.warrantyMonths,
-        warrantyEndDate: warrantyEndDate,
-        itemNames: itemNames,
-      ),
-      keywordText: InvoiceEntityMapper.buildKeywordText(
-        merchant: draft.merchant,
-        invoiceNumber: draft.invoiceNumber,
-        itemNames: itemNames,
-      ),
+      searchableText: searchText.searchableText,
+      keywordText: searchText.keywordText,
       imagePath: draft.imagePath,
       thumbnailPath: draft.thumbnailPath,
       sourceType: draft.sourceType,
+      embeddingStatus: InvoiceEmbeddingStatus.pending,
+      embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
       searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
       extractionModelId: draft.extractionModelId,
       createdAt: createdAt ?? reviewedAt,

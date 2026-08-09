@@ -1,7 +1,13 @@
 import '../../objectbox.g.dart';
+import '../ai/embedding/embedding_gemma_artifact.dart';
+import '../ai/embedding/embedding_vector_validator.dart';
+import '../utils/invoice_search_text_builder.dart';
+import '../utils/document_type_normalization.dart';
 import 'database_versions.dart';
 import 'entities/database_metadata_entity.dart';
 import 'entities/invoice_entity.dart';
+import 'entities/invoice_item_entity.dart';
+import 'invoice_embedding_status.dart';
 
 class UnsupportedDatabaseVersion implements Exception {
   const UnsupportedDatabaseVersion(this.stored, this.supported);
@@ -39,13 +45,80 @@ class DatabaseMigrationRunner {
         metadata,
         DatabaseVersions.searchTextSchemaKey,
       );
-      if (searchTextVersion < DatabaseVersions.searchTextSchema) {
-        for (final invoice in invoices.getAll()) {
+      final embeddingVersion = _readVersion(
+        metadata,
+        DatabaseVersions.embeddingSchemaKey,
+      );
+      if (searchTextVersion > DatabaseVersions.searchTextSchema) {
+        throw UnsupportedDatabaseVersion(
+          searchTextVersion,
+          DatabaseVersions.searchTextSchema,
+        );
+      }
+      if (embeddingVersion > DatabaseVersions.embeddingSchema) {
+        throw UnsupportedDatabaseVersion(
+          embeddingVersion,
+          DatabaseVersions.embeddingSchema,
+        );
+      }
+
+      for (final invoice in invoices.getAll()) {
+        final normalizedDocumentType = DocumentTypeNormalization.normalize(
+          invoice.documentType,
+        );
+        final documentTypeStale =
+            invoice.documentTypeNormalized != normalizedDocumentType;
+        if (documentTypeStale) {
+          invoice.documentTypeNormalized = normalizedDocumentType;
+        }
+        final searchTextStale =
+            searchTextVersion < DatabaseVersions.searchTextSchema ||
+            invoice.searchTextSchemaVersion !=
+                DatabaseVersions.searchTextSchema;
+        if (searchTextStale) {
+          final items = _itemsFor(invoice.id);
+          final rebuilt = InvoiceSearchTextBuilder.build(
+            merchant: invoice.merchant,
+            documentType: invoice.documentType,
+            invoiceNumber: invoice.invoiceNumber,
+            purchaseDate: invoice.purchaseDate,
+            totalMinor: invoice.totalMinor,
+            currencyCode: invoice.currencyCode,
+            warrantyMonths: invoice.warrantyMonths,
+            warrantyEndDate: invoice.warrantyEndDate,
+            items: items.map(
+              (item) => InvoiceSearchItemInput(
+                name: item.name,
+                quantity: item.quantity,
+              ),
+            ),
+          );
           invoice
-            ..searchTextSchemaVersion = DatabaseVersions.searchTextSchema
+            ..searchableText = rebuilt.searchableText
+            ..keywordText = rebuilt.keywordText
+            ..searchTextSchemaVersion = DatabaseVersions.searchTextSchema;
+        }
+        final embeddingStale =
+            searchTextStale ||
+            embeddingVersion < DatabaseVersions.embeddingSchema ||
+            invoice.embeddingSchemaVersion !=
+                DatabaseVersions.embeddingSchema ||
+            invoice.embeddingModelId != EmbeddingGemmaArtifact.modelId ||
+            invoice.embeddingDimensions != EmbeddingGemmaArtifact.dimensions ||
+            invoice.embeddingStatus != InvoiceEmbeddingStatus.ready.name ||
+            !_isValidVector(invoice.embedding);
+        if (embeddingStale) {
+          invoice
             ..embedding = null
             ..embeddingModelId = null
-            ..embeddingDimensions = null;
+            ..embeddingDimensions = null
+            ..embeddingStatus = InvoiceEmbeddingStatus.pending.name
+            ..embeddingSchemaVersion = DatabaseVersions.embeddingSchema
+            ..embeddingUpdatedAt = null
+            ..embeddingFailureCode = null
+            ..embeddingAttemptId = null;
+        }
+        if (searchTextStale || embeddingStale || documentTypeStale) {
           invoices.put(invoice);
         }
       }
@@ -66,6 +139,32 @@ class DatabaseMigrationRunner {
         DatabaseVersions.embeddingSchema,
       );
     });
+  }
+
+  List<InvoiceItemEntity> _itemsFor(int invoiceId) {
+    final query = store
+        .box<InvoiceItemEntity>()
+        .query(InvoiceItemEntity_.invoiceId.equals(invoiceId))
+        .order(InvoiceItemEntity_.id)
+        .build();
+    try {
+      return query.find();
+    } finally {
+      query.close();
+    }
+  }
+
+  bool _isValidVector(List<double>? vector) {
+    if (vector == null) return false;
+    try {
+      EmbeddingVectorValidator.validateNormalized(
+        vector,
+        dimensions: EmbeddingGemmaArtifact.dimensions,
+      );
+      return true;
+    } on InvalidEmbeddingVector {
+      return false;
+    }
   }
 
   int _readVersion(Box<DatabaseMetadataEntity> box, String key) {

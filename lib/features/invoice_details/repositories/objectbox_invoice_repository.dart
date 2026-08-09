@@ -1,6 +1,8 @@
 import '../../../core/database/database_versions.dart';
+import '../../../core/database/invoice_embedding_status.dart';
 import '../../../core/database/invoice_store.dart';
 import '../../../core/storage/invoice_file_cleaner.dart';
+import '../../../core/utils/invoice_search_text_builder.dart';
 import '../models/invoice.dart';
 import 'invoice_entity_mapper.dart';
 import 'invoice_repository.dart';
@@ -21,16 +23,51 @@ class ObjectBoxInvoiceRepository implements InvoiceRepository {
       throw InvoiceNotFoundException(invoice.id);
     }
 
+    final searchText = InvoiceSearchTextBuilder.build(
+      merchant: invoice.merchant,
+      documentType: invoice.documentType,
+      invoiceNumber: invoice.invoiceNumber,
+      purchaseDate: invoice.purchaseDate,
+      totalMinor: invoice.totalMinor,
+      currencyCode: invoice.currencyCode,
+      warrantyMonths: invoice.warrantyMonths,
+      warrantyEndDate: invoice.warrantyEndDate,
+      items: invoice.items.map(
+        (item) =>
+            InvoiceSearchItemInput(name: item.name, quantity: item.quantity),
+      ),
+    );
+    final canonicalInvoice = invoice.copyWith(
+      searchableText: searchText.searchableText,
+      keywordText: searchText.keywordText,
+      searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
+    );
     final searchChanged =
         existing != null &&
-        (existing.searchableText != invoice.searchableText ||
+        (existing.searchableText != canonicalInvoice.searchableText ||
+            existing.keywordText != canonicalInvoice.keywordText ||
             existing.searchTextSchemaVersion !=
-                invoice.searchTextSchemaVersion);
-    final prepared = invoice.copyWith(
-      createdAt: existing?.createdAt ?? invoice.createdAt,
-      searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
-      clearEmbedding: searchChanged,
-    );
+                canonicalInvoice.searchTextSchemaVersion);
+    final prepared = existing != null && !searchChanged
+        ? canonicalInvoice.copyWith(
+            createdAt: existing.createdAt,
+            embedding: existing.embedding,
+            embeddingModelId: existing.embeddingModelId,
+            embeddingDimensions: existing.embeddingDimensions,
+            embeddingStatus: existing.embeddingStatus,
+            embeddingSchemaVersion: existing.embeddingSchemaVersion,
+            embeddingUpdatedAt: existing.embeddingUpdatedAt,
+            embeddingFailureCode: existing.embeddingFailureCode,
+            embeddingAttemptId: existing.embeddingAttemptId,
+            searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
+          )
+        : canonicalInvoice.copyWith(
+            createdAt: existing?.createdAt ?? canonicalInvoice.createdAt,
+            searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
+            embeddingStatus: InvoiceEmbeddingStatus.pending,
+            embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
+            clearEmbedding: true,
+          );
     return store.save(InvoiceEntityMapper.toWrite(prepared));
   }
 

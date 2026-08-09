@@ -37,6 +37,7 @@ Future<Directory> pumpTestApp(
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+    await dependencies.dispose();
     if (await directory.exists()) await directory.delete(recursive: true);
   });
   return directory;

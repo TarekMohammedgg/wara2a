@@ -1,4 +1,5 @@
 import '../../invoice_details/repositories/invoice_repository.dart';
+import '../../../core/ai/embedding/reviewed_invoice_indexer.dart';
 import '../models/invoice_draft.dart';
 import 'invoice_draft_mapper.dart';
 
@@ -11,10 +12,12 @@ class LocalInvoiceCaptureRepository implements InvoiceCaptureRepository {
   const LocalInvoiceCaptureRepository(
     this._invoices, {
     DateTime Function()? now,
+    this.indexer,
   }) : _now = now ?? _utcNow;
 
   final InvoiceRepository _invoices;
   final DateTime Function() _now;
+  final ReviewedInvoiceIndexer? indexer;
 
   @override
   Future<int> saveReviewedDraft(InvoiceDraft draft) async {
@@ -22,13 +25,20 @@ class LocalInvoiceCaptureRepository implements InvoiceCaptureRepository {
         ? null
         : await _invoices.get(draft.invoiceId);
     final reviewedAt = _now();
-    return _invoices.save(
+    final invoiceId = await _invoices.save(
       InvoiceDraftMapper.toInvoice(
         draft,
         reviewedAt: reviewedAt,
         createdAt: existing?.createdAt,
       ),
     );
+    try {
+      await indexer?.indexReviewedInvoice(invoiceId);
+    } on Object {
+      // The reviewed invoice is already durable. The persisted pending/failed
+      // state is retried locally and indexing never rolls back user data.
+    }
+    return invoiceId;
   }
 
   @override

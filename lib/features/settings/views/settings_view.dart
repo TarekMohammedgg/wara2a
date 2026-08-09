@@ -7,6 +7,9 @@ import '../models/local_ai_status.dart';
 import '../repositories/local_ai_status_repository.dart';
 import '../view_models/local_ai_status_cubit.dart';
 import '../view_models/settings_cubit.dart';
+import '../view_models/embedding_status_cubit.dart';
+import '../../../core/ai/embedding/embedding_engine.dart';
+import '../../../core/ai/model_management/model_lifecycle_state.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -90,6 +93,8 @@ class SettingsView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _ModelCard(l10n: l10n),
+          const SizedBox(height: 14),
+          const _EmbeddingModelCard(),
           const SizedBox(height: 26),
           Text(l10n.privacy, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
@@ -135,6 +140,129 @@ class SettingsView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EmbeddingModelCard extends StatelessWidget {
+  const _EmbeddingModelCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return BlocBuilder<EmbeddingStatusCubit, EmbeddingStatusState>(
+      builder: (context, state) {
+        final snapshot = state.snapshot;
+        final title = switch (snapshot.capability) {
+          EmbeddingCapability.ready => l10n.embeddingReady,
+          EmbeddingCapability.modelAccessRequired =>
+            l10n.embeddingAccessRequired,
+          EmbeddingCapability.modelNotInstalled => l10n.embeddingNotInstalled,
+          EmbeddingCapability.unsupportedPlatform => l10n.embeddingUnsupported,
+          EmbeddingCapability.runtimeFailure => l10n.embeddingRuntimeFailure,
+          EmbeddingCapability.supported => l10n.embeddingWorking,
+        };
+        final details =
+            snapshot.capability == EmbeddingCapability.modelAccessRequired
+            ? l10n.embeddingInstallRequirement
+            : snapshot.capability == EmbeddingCapability.ready
+            ? l10n.embeddingReadyDetails(state.pendingInvoiceCount)
+            : l10n.embeddingModelDetails;
+        final showProgress =
+            state.busy ||
+            snapshot.status == ModelLifecycleStatus.downloading ||
+            snapshot.status == ModelLifecycleStatus.verifying ||
+            snapshot.status == ModelLifecycleStatus.loading ||
+            snapshot.status == ModelLifecycleStatus.running;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(17),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const _SettingsIcon(
+                      icon: Icons.manage_search_rounded,
+                      color: AppColors.blue,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.embeddingSearchModel,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      snapshot.canEmbed
+                          ? Icons.check_circle_rounded
+                          : Icons.info_outline_rounded,
+                      color: snapshot.canEmbed
+                          ? const Color(0xFF169C75)
+                          : AppColors.warning,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(details, style: Theme.of(context).textTheme.bodySmall),
+                if (snapshot.message?.trim().isNotEmpty == true &&
+                    (snapshot.status == ModelLifecycleStatus.failed ||
+                        snapshot.capability ==
+                            EmbeddingCapability.runtimeFailure)) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    snapshot.message!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+                if (showProgress) ...[
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(value: snapshot.progress),
+                ],
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: state.busy
+                          ? null
+                          : context.read<EmbeddingStatusCubit>().refresh,
+                      child: Text(l10n.modelRefresh),
+                    ),
+                    if (snapshot.capability ==
+                        EmbeddingCapability.modelNotInstalled)
+                      FilledButton.tonal(
+                        onPressed: state.busy
+                            ? null
+                            : context.read<EmbeddingStatusCubit>().install,
+                        child: Text(l10n.installEmbeddingModel),
+                      ),
+                    if (snapshot.canEmbed && state.pendingInvoiceCount > 0)
+                      FilledButton.tonal(
+                        onPressed: state.busy
+                            ? null
+                            : context.read<EmbeddingStatusCubit>().reindex,
+                        child: Text(l10n.reindexInvoices),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
