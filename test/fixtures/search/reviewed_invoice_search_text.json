@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Deterministic reviewed-invoice searchable-text contract goldens.",
+  "cases": [
+    {
+      "id": "arabic_reviewed_invoice",
+      "language": "ar",
+      "input": {
+        "merchant": "  بــي تِك  ",
+        "documentType": "فاتورة شراء",
+        "invoiceNumber": "BT-١٢٣",
+        "purchaseDate": "2026-01-31T00:00:00Z",
+        "totalMinor": 2499900,
+        "currencyCode": "egp",
+        "warrantyMonths": 1,
+        "warrantyEndDate": "2026-02-28T00:00:00Z",
+        "items": [
+          {"name": "شاشة سامسونج", "quantity": 1},
+          {"name": "شَاشَة سامسونج", "quantity": 2}
+        ]
+      },
+      "expected": {
+        "searchableText": "نوع المستند: فاتورة شراء\nالمتجر: بي تك\nرقم الفاتورة: bt-123\nالمنتجات: شاشة سامسونج × 3\nالاجمالي: 24999.00 EGP جنيه جنيه مصري ج م\nتاريخ الشراء: 2026-01-31، يناير 2026\nالضمان: 1 شهر، ينتهي فبراير 2026",
+        "keywordText": " بي تك فاتورة شراء bt 123 شاشة سامسونج egp جنيه مصري ج م "
+      }
+    },
+    {
+      "id": "english_reviewed_invoice",
+      "language": "en",
+      "input": {
+        "merchant": "  IKEA Cairo  ",
+        "documentType": "Warranty Receipt",
+        "invoiceNumber": "US-0099",
+        "purchaseDate": "2026-08-09T00:00:00Z",
+        "totalMinor": 125050,
+        "currencyCode": "USD",
+        "warrantyMonths": 24,
+        "warrantyEndDate": "2028-08-09T00:00:00Z",
+        "items": [
+          {"name": "Office Chair", "quantity": 2},
+          {"name": "Desk Lamp", "quantity": 0.5}
+        ]
+      },
+      "expected": {
+        "searchableText": "نوع المستند: warranty receipt\nالمتجر: ikea cairo\nرقم الفاتورة: us-0099\nالمنتجات: office chair × 2، desk lamp × 0.5\nالاجمالي: 1250.50 USD دولار دولار امريكي\nتاريخ الشراء: 2026-08-09، اغسطس 2026\nالضمان: 24 شهر، ينتهي اغسطس 2028",
+        "keywordText": " ikea cairo warranty receipt us 0099 office chair desk lamp usd دولار امريكي "
+      }
+    },
+    {
+      "id": "mixed_reviewed_invoice",
+      "language": "ar-en",
+      "input": {
+        "merchant": "Carrefour مِصر",
+        "documentType": "إيصال Return",
+        "invoiceNumber": "INV-۱۲۳",
+        "purchaseDate": "2026-12-05T00:00:00Z",
+        "totalMinor": 79999,
+        "currencyCode": "AED",
+        "warrantyMonths": 12,
+        "warrantyEndDate": "2027-12-05T00:00:00Z",
+        "items": [
+          {"name": "Apple AirPods Pro", "quantity": 1},
+          {"name": "سماعة AirPods Pro", "quantity": 1}
+        ]
+      },
+      "expected": {
+        "searchableText": "نوع المستند: ايصال return\nالمتجر: carrefour مصر\nرقم الفاتورة: inv-123\nالمنتجات: apple airpods pro × 1، سماعة airpods pro × 1\nالاجمالي: 799.99 AED درهم درهم اماراتي\nتاريخ الشراء: 2026-12-05، ديسمبر 2026\nالضمان: 12 شهر، ينتهي ديسمبر 2027",
+        "keywordText": " carrefour مصر ايصال return inv 123 apple airpods pro سماعة aed درهم اماراتي "
+      }
+    }
+  ]
+}

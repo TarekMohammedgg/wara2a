@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "contract_only",
+  "purpose": "Exercise local embedding, indexing, and retrieval plumbing with multilingual invoice-shaped queries.",
+  "productionSemanticQualityClaim": false,
+  "modelContract": {
+    "modelId": "litert-community/embeddinggemma-300m/embeddinggemma-300M_seq256_mixed-precision.tflite@model-37115ef7bff76cd37dd86abe503ff511b1032bf85fc624a85c49c84899e92bc5.tokenizer-d6daa52d93d7aad10e8388bd526c4e501d914b47177398d1d9621f1fe48438c7.runtime-litertlm-0.14.0.prompt-flutter_gemma_embeddings-1.0.4-retrieval-prompts-v1.schema-2",
+    "dimensions": 768,
+    "embeddingSchemaVersion": 2
+  },
+  "corpusInvoiceIds": [101, 102, 103],
+  "cases": [
+    {
+      "id": "arabic_warranty_query",
+      "language": "ar",
+      "query": "ضمان شاشة سامسونج",
+      "topK": 3,
+      "relevantInvoiceIds": [101]
+    },
+    {
+      "id": "english_product_query",
+      "language": "en",
+      "query": "office chair receipt",
+      "topK": 3,
+      "relevantInvoiceIds": [102]
+    },
+    {
+      "id": "mixed_merchant_query",
+      "language": "ar-en",
+      "query": "Carrefour سماعة AirPods",
+      "topK": 3,
+      "relevantInvoiceIds": [103]
+    }
+  ]
+}

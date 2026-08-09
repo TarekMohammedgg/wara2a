@@ -24,7 +24,7 @@ void main() {
 
     expect(invoice.totalMinor, 2499900);
     expect(invoice.keywordText, contains('bt 123'));
-    expect(invoice.searchableText, contains('Samsung A56'));
+    expect(invoice.searchableText, contains('samsung a56 × 1'));
     expect(invoice.warrantyEndDate, DateTime.utc(2026, 2, 28));
     expect(invoice.reviewedAt, reviewedAt);
     expect(invoice.items.single.name, 'Samsung A56');

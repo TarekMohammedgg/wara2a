@@ -7,6 +7,7 @@ class InvoiceEntity {
     this.merchant,
     this.merchantNormalized,
     this.documentType,
+    this.documentTypeNormalized,
     this.purchaseDate,
     this.totalMinor,
     this.currencyCode,
@@ -22,6 +23,11 @@ class InvoiceEntity {
     this.embedding,
     this.embeddingModelId,
     this.embeddingDimensions,
+    this.embeddingStatus = 'pending',
+    this.embeddingSchemaVersion = 0,
+    this.embeddingUpdatedAt,
+    this.embeddingFailureCode,
+    this.embeddingAttemptId,
     required this.searchTextSchemaVersion,
     this.extractionModelId,
     required this.createdAt,
@@ -40,14 +46,22 @@ class InvoiceEntity {
   @Index()
   String? documentType;
 
+  @Index()
+  String? documentTypeNormalized;
+
   @Property(type: PropertyType.date)
+  @Index()
   DateTime? purchaseDate;
 
+  @Index()
   int? totalMinor;
+
+  @Index()
   String? currencyCode;
   int? warrantyMonths;
 
   @Property(type: PropertyType.date)
+  @Index()
   DateTime? warrantyEndDate;
 
   @Index()
@@ -66,6 +80,21 @@ class InvoiceEntity {
 
   String? embeddingModelId;
   int? embeddingDimensions;
+
+  @Index()
+  String embeddingStatus;
+
+  @Index()
+  int embeddingSchemaVersion;
+
+  @Property(type: PropertyType.date)
+  DateTime? embeddingUpdatedAt;
+
+  String? embeddingFailureCode;
+
+  String? embeddingAttemptId;
+
+  @Index()
   int searchTextSchemaVersion;
   String? extractionModelId;
 

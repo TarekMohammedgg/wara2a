@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../core/database/invoice_embedding_status.dart';
+
 enum InvoiceSourceType { camera, gallery }
 
 class InvoiceItem extends Equatable {
@@ -47,6 +49,11 @@ class Invoice extends Equatable {
     this.embedding,
     this.embeddingModelId,
     this.embeddingDimensions,
+    this.embeddingStatus = InvoiceEmbeddingStatus.pending,
+    this.embeddingSchemaVersion = 0,
+    this.embeddingUpdatedAt,
+    this.embeddingFailureCode,
+    this.embeddingAttemptId,
     required this.searchTextSchemaVersion,
     this.extractionModelId,
     required this.createdAt,
@@ -73,6 +80,11 @@ class Invoice extends Equatable {
   final List<double>? embedding;
   final String? embeddingModelId;
   final int? embeddingDimensions;
+  final InvoiceEmbeddingStatus embeddingStatus;
+  final int embeddingSchemaVersion;
+  final DateTime? embeddingUpdatedAt;
+  final String? embeddingFailureCode;
+  final String? embeddingAttemptId;
   final int searchTextSchemaVersion;
   final String? extractionModelId;
   final DateTime createdAt;
@@ -99,6 +111,11 @@ class Invoice extends Equatable {
     List<double>? embedding,
     String? embeddingModelId,
     int? embeddingDimensions,
+    InvoiceEmbeddingStatus? embeddingStatus,
+    int? embeddingSchemaVersion,
+    DateTime? embeddingUpdatedAt,
+    String? embeddingFailureCode,
+    String? embeddingAttemptId,
     int? searchTextSchemaVersion,
     String? extractionModelId,
     DateTime? createdAt,
@@ -130,6 +147,20 @@ class Invoice extends Equatable {
       embeddingDimensions: clearEmbedding
           ? null
           : embeddingDimensions ?? this.embeddingDimensions,
+      embeddingStatus: clearEmbedding
+          ? InvoiceEmbeddingStatus.pending
+          : embeddingStatus ?? this.embeddingStatus,
+      embeddingSchemaVersion:
+          embeddingSchemaVersion ?? this.embeddingSchemaVersion,
+      embeddingUpdatedAt: clearEmbedding
+          ? null
+          : embeddingUpdatedAt ?? this.embeddingUpdatedAt,
+      embeddingFailureCode: clearEmbedding
+          ? null
+          : embeddingFailureCode ?? this.embeddingFailureCode,
+      embeddingAttemptId: clearEmbedding
+          ? null
+          : embeddingAttemptId ?? this.embeddingAttemptId,
       searchTextSchemaVersion:
           searchTextSchemaVersion ?? this.searchTextSchemaVersion,
       extractionModelId: extractionModelId ?? this.extractionModelId,
@@ -160,6 +191,11 @@ class Invoice extends Equatable {
     embedding,
     embeddingModelId,
     embeddingDimensions,
+    embeddingStatus,
+    embeddingSchemaVersion,
+    embeddingUpdatedAt,
+    embeddingFailureCode,
+    embeddingAttemptId,
     searchTextSchemaVersion,
     extractionModelId,
     createdAt,

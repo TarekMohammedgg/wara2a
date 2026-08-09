@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -34,7 +36,7 @@ class Wara2aApp extends StatefulWidget {
   State<Wara2aApp> createState() => _Wara2aAppState();
 }
 
-class _Wara2aAppState extends State<Wara2aApp> {
+class _Wara2aAppState extends State<Wara2aApp> with WidgetsBindingObserver {
   late final GoRouter _router;
   late final InvoiceCaptureCubit _captureCubit;
   late final SettingsCubit _settingsCubit;
@@ -42,6 +44,7 @@ class _Wara2aAppState extends State<Wara2aApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _captureCubit = InvoiceCaptureCubit(
       widget.imageRepository ?? ImagePickerInvoiceImageRepository(),
     );
@@ -52,11 +55,26 @@ class _Wara2aAppState extends State<Wara2aApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _captureCubit.close();
     _settingsCubit.close();
     _router.dispose();
-    widget.dependencies.dispose();
+    unawaited(widget.dependencies.dispose());
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      unawaited(widget.dependencies.embeddingEngine.unload());
+    }
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    unawaited(widget.dependencies.embeddingEngine.unload());
   }
 
   @override

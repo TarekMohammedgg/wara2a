@@ -19,7 +19,10 @@ android {
         applicationId = "com.tarek.wara2a"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 29
+        // LiteRT-LM 0.14.0 used by flutter_gemma_embeddings requires API 30
+        // Bionic symbols at runtime. Keeping API 29 would allow an install that
+        // can fail opaquely as soon as semantic indexing loads the library.
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

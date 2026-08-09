@@ -1,6 +1,13 @@
 import 'dart:convert';
 
-enum ModelArtifactFormat { onnx, yaml, liteRtLm, mediaPipeTask, tflite }
+enum ModelArtifactFormat {
+  onnx,
+  yaml,
+  liteRtLm,
+  mediaPipeTask,
+  tflite,
+  sentencePiece,
+}
 
 class ModelArtifactManifest {
   const ModelArtifactManifest({

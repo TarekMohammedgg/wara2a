@@ -144,6 +144,40 @@ class AppLocalizations {
   String get recentQueryMerchant => _value('recentQueryMerchant');
   String get recentQueryAmount => _value('recentQueryAmount');
   String get recentQueryCategory => _value('recentQueryCategory');
+  String get searchSuggestions => _value('searchSuggestions');
+  String get applyFilters => _value('applyFilters');
+  String get clearFilters => _value('clearFilters');
+  String get minimumAmount => _value('minimumAmount');
+  String get maximumAmount => _value('maximumAmount');
+  String get purchaseDateFilter => _value('purchaseDateFilter');
+  String get warrantyEndDateFilter => _value('warrantyEndDateFilter');
+  String get semanticCalibrationRequired =>
+      _value('semanticCalibrationRequired');
+  String get semanticModelUnavailable => _value('semanticModelUnavailable');
+  String get semanticQueryTooLong => _value('semanticQueryTooLong');
+  String get semanticRuntimeFailure => _value('semanticRuntimeFailure');
+  String get keywordFallback => _value('keywordFallback');
+  String get searchError => _value('searchError');
+  String get allCurrencies => _value('allCurrencies');
+  String get allDocumentTypes => _value('allDocumentTypes');
+  String get selectRange => _value('selectRange');
+  String get invalidAmountRange => _value('invalidAmountRange');
+  String get purchaseInvoice => _value('purchaseInvoice');
+  String get receipt => _value('receipt');
+  String get creditNote => _value('creditNote');
+  String get warrantyCertificate => _value('warrantyCertificate');
+  String get embeddingSearchModel => _value('embeddingSearchModel');
+  String get embeddingReady => _value('embeddingReady');
+  String get embeddingAccessRequired => _value('embeddingAccessRequired');
+  String get embeddingNotInstalled => _value('embeddingNotInstalled');
+  String get embeddingUnsupported => _value('embeddingUnsupported');
+  String get embeddingRuntimeFailure => _value('embeddingRuntimeFailure');
+  String get embeddingWorking => _value('embeddingWorking');
+  String get embeddingInstallRequirement =>
+      _value('embeddingInstallRequirement');
+  String get embeddingModelDetails => _value('embeddingModelDetails');
+  String get installEmbeddingModel => _value('installEmbeddingModel');
+  String get reindexInvoices => _value('reindexInvoices');
 
   String invoicesCount(int count) {
     if (isArabic) return '$count فاتورة';
@@ -153,6 +187,21 @@ class AppLocalizations {
   String searchMatches(int count) {
     if (isArabic) return '$count نتائج مطابقة';
     return '$count matching results';
+  }
+
+  String searchIndexPending(int count) {
+    if (isArabic) return '$count فاتورة في انتظار الفهرسة بالمعنى.';
+    return '$count invoices are waiting for semantic indexing.';
+  }
+
+  String embeddingReadyDetails(int pendingCount) {
+    if (isArabic) {
+      return 'ملفات النموذج اجتازت فحص الحجم وSHA-256، ويتحقق المشغل من '
+          'الأبعاد الـ768 عند التحميل. $pendingCount فاتورة تنتظر الفهرسة.';
+    }
+    return 'The model files passed byte-length and SHA-256 checks; the runtime '
+        'enforces 768 dimensions when loaded. $pendingCount invoices await '
+        'indexing.';
   }
 
   static const _ar = <String, String>{
@@ -271,7 +320,7 @@ class AppLocalizations {
     'installModel': 'تثبيت الذكاء المحلي',
     'privacy': 'الخصوصية',
     'privacyBody':
-        'الصور والبيانات لا تغادر جهازك. لا حسابات ولا تحليلات ولا خوادم خارجية.',
+        'صور الفواتير وبياناتها وعبارات البحث لا تغادر جهازك، ولا توجد حسابات أو تحليلات. قد يتصل تثبيت النماذج فقط بالمصدر المعتمد.',
     'localStorage': 'التخزين المحلي',
     'localStorageBody': 'يتم حفظ فواتيرك داخل مساحة التطبيق الآمنة.',
     'about': 'عن wara2a',
@@ -293,6 +342,42 @@ class AppLocalizations {
     'recentQueryMerchant': 'سامسونج',
     'recentQueryAmount': 'أكثر من ١٠٠٠ جنيه',
     'recentQueryCategory': 'إلكترونيات',
+    'searchSuggestions': 'اقتراحات للبحث',
+    'applyFilters': 'تطبيق الفلاتر',
+    'clearFilters': 'مسح الكل',
+    'minimumAmount': 'أقل مبلغ',
+    'maximumAmount': 'أعلى مبلغ',
+    'purchaseDateFilter': 'نطاق تاريخ الشراء',
+    'warrantyEndDateFilter': 'نطاق انتهاء الضمان',
+    'semanticCalibrationRequired':
+        'البحث بالمعنى متوقف حتى يعتمد حد المسافة على مجموعة تقييم من 100 استعلام على الأقل.',
+    'semanticModelUnavailable':
+        'نموذج EmbeddingGemma المحلي غير مثبت أو غير متاح على هذا الجهاز.',
+    'semanticQueryTooLong': 'الاستعلام أطول من الحد الآمن للنموذج المحلي.',
+    'semanticRuntimeFailure': 'تعذر تشغيل محرك البحث بالمعنى محلياً.',
+    'keywordFallback': 'تم عرض التطابقات المباشرة التي تحقق الفلاتر فقط.',
+    'searchError': 'تعذر إكمال البحث',
+    'allCurrencies': 'كل العملات',
+    'allDocumentTypes': 'كل أنواع المستندات',
+    'selectRange': 'اختر نطاقاً',
+    'invalidAmountRange': 'يجب ألا يكون الحد الأدنى أكبر من الحد الأقصى.',
+    'purchaseInvoice': 'فاتورة شراء',
+    'receipt': 'إيصال',
+    'creditNote': 'إشعار دائن',
+    'warrantyCertificate': 'شهادة ضمان',
+    'embeddingSearchModel': 'محرك البحث بالمعنى',
+    'embeddingReady': 'EmbeddingGemma جاهز محلياً',
+    'embeddingAccessRequired': 'يلزم قبول ترخيص النموذج وتوفير مصدر معتمد',
+    'embeddingNotInstalled': 'EmbeddingGemma غير مثبت',
+    'embeddingUnsupported': 'البحث بالمعنى غير مدعوم على هذا الجهاز',
+    'embeddingRuntimeFailure': 'تعذر تهيئة محرك EmbeddingGemma',
+    'embeddingWorking': 'جارٍ تجهيز محرك البحث بالمعنى',
+    'embeddingInstallRequirement':
+        'يتطلب قبول شروط Gemma ووصولاً مرخصاً معتمداً لملف TFLite بحجم 179,131,736 بايت وملف SentencePiece بحجم 4,683,319 بايت. لا يحتوي التطبيق على رمز وصول.',
+    'embeddingModelDetails':
+        'يستخدم النموذج المحلي CPU فقط وينتج متجهات من 768 بُعداً. الحد الأدنى لأندرويد هو API 30 ومعمارية arm64.',
+    'installEmbeddingModel': 'تثبيت النموذج',
+    'reindexInvoices': 'فهرسة الفواتير المعلقة',
   };
 
   static const _en = <String, String>{
@@ -415,7 +500,7 @@ class AppLocalizations {
     'installModel': 'Install offline AI',
     'privacy': 'Privacy',
     'privacyBody':
-        'Images and data never leave your device. No accounts, analytics, or external servers.',
+        'Invoice images, data, and search queries stay on your device, with no accounts or analytics. Only model installation may contact the approved host.',
     'localStorage': 'Local storage',
     'localStorageBody': 'Your invoices are stored inside the app sandbox.',
     'about': 'About wara2a',
@@ -441,6 +526,44 @@ class AppLocalizations {
     'recentQueryMerchant': 'Samsung',
     'recentQueryAmount': 'Over EGP 1,000',
     'recentQueryCategory': 'Electronics',
+    'searchSuggestions': 'Search suggestions',
+    'applyFilters': 'Apply filters',
+    'clearFilters': 'Clear all',
+    'minimumAmount': 'Minimum amount',
+    'maximumAmount': 'Maximum amount',
+    'purchaseDateFilter': 'Purchase date range',
+    'warrantyEndDateFilter': 'Warranty expiry range',
+    'semanticCalibrationRequired':
+        'Semantic search stays disabled until its distance threshold is approved on at least 100 labeled queries.',
+    'semanticModelUnavailable':
+        'The local EmbeddingGemma model is not installed or unavailable on this device.',
+    'semanticQueryTooLong': 'The query exceeds the local model safety limit.',
+    'semanticRuntimeFailure': 'The local semantic-search runtime failed.',
+    'keywordFallback':
+        'Only exact keyword matches that satisfy the filters are shown.',
+    'searchError': 'Search could not be completed',
+    'allCurrencies': 'All currencies',
+    'allDocumentTypes': 'All document types',
+    'selectRange': 'Select a range',
+    'invalidAmountRange': 'The minimum amount must not exceed the maximum.',
+    'purchaseInvoice': 'Purchase invoice',
+    'receipt': 'Receipt',
+    'creditNote': 'Credit note',
+    'warrantyCertificate': 'Warranty certificate',
+    'embeddingSearchModel': 'Semantic search engine',
+    'embeddingReady': 'EmbeddingGemma is ready locally',
+    'embeddingAccessRequired':
+        'License acceptance and an approved model source are required',
+    'embeddingNotInstalled': 'EmbeddingGemma is not installed',
+    'embeddingUnsupported': 'Semantic search is unsupported on this device',
+    'embeddingRuntimeFailure': 'EmbeddingGemma could not be initialized',
+    'embeddingWorking': 'Preparing the semantic-search engine',
+    'embeddingInstallRequirement':
+        'Requires accepted Gemma terms and approved licensed access to the 179,131,736-byte TFLite file and 4,683,319-byte SentencePiece file. No access token is embedded.',
+    'embeddingModelDetails':
+        'The local model is CPU-only and produces 768-dimensional vectors. Android requires API 30 and arm64.',
+    'installEmbeddingModel': 'Install model',
+    'reindexInvoices': 'Index pending invoices',
   };
 }
 

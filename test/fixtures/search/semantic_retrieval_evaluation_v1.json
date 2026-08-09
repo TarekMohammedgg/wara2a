@@ -1,0 +1,1312 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "unexecuted_labeled_fixture",
+  "approvedForThreshold": false,
+  "productionSemanticQualityClaim": false,
+  "requiredModelId": "litert-community/embeddinggemma-300m/embeddinggemma-300M_seq256_mixed-precision.tflite@model-37115ef7bff76cd37dd86abe503ff511b1032bf85fc624a85c49c84899e92bc5.tokenizer-d6daa52d93d7aad10e8388bd526c4e501d914b47177398d1d9621f1fe48438c7.runtime-litertlm-0.14.0.prompt-flutter_gemma_embeddings-1.0.4-retrieval-prompts-v1.schema-2",
+  "note": "Synthetic invoice-shaped labels for wiring and future device evaluation. No retrieval metric or threshold is approved until all cases run with the licensed real model on the reference corpus.",
+  "corpus": [
+    {
+      "id": 1001,
+      "merchant": "بي تك",
+      "product": "Samsung Galaxy A56",
+      "purchaseDate": "2026-01-15",
+      "warrantyEndDate": "2028-01-15",
+      "totalMinor": 2499900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1002,
+      "merchant": "IKEA Cairo",
+      "product": "office chair",
+      "purchaseDate": "2026-08-09",
+      "warrantyEndDate": "2028-08-09",
+      "totalMinor": 125050,
+      "currencyCode": "USD"
+    },
+    {
+      "id": 1003,
+      "merchant": "Carrefour",
+      "product": "AirPods Pro",
+      "purchaseDate": "2026-06-12",
+      "warrantyEndDate": "2027-06-12",
+      "totalMinor": 1199900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1004,
+      "merchant": "جرير",
+      "product": "Lenovo ThinkPad E14",
+      "purchaseDate": "2026-03-20",
+      "warrantyEndDate": "2029-03-20",
+      "totalMinor": 3899900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1005,
+      "merchant": "Amazon Egypt",
+      "product": "Philips air fryer",
+      "purchaseDate": "2025-11-03",
+      "warrantyEndDate": "2027-11-03",
+      "totalMinor": 699900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1006,
+      "merchant": "توكيل العربي",
+      "product": "Toshiba washing machine",
+      "purchaseDate": "2026-05-18",
+      "warrantyEndDate": "2031-05-18",
+      "totalMinor": 2199900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1007,
+      "merchant": "Decathlon",
+      "product": "Riverside bicycle",
+      "purchaseDate": "2026-04-07",
+      "warrantyEndDate": null,
+      "totalMinor": 1450000,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1008,
+      "merchant": "صيدليات العزبي",
+      "product": "Omron blood pressure monitor",
+      "purchaseDate": "2026-02-22",
+      "warrantyEndDate": "2028-02-22",
+      "totalMinor": 325000,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1009,
+      "merchant": "LC Waikiki",
+      "product": "winter jacket",
+      "purchaseDate": "2025-12-14",
+      "warrantyEndDate": null,
+      "totalMinor": 179900,
+      "currencyCode": "EGP"
+    },
+    {
+      "id": 1010,
+      "merchant": "Vodafone",
+      "product": "Samsung S25 Ultra",
+      "purchaseDate": "2026-07-01",
+      "warrantyEndDate": "2027-07-01",
+      "totalMinor": 6299900,
+      "currencyCode": "EGP"
+    }
+  ],
+  "cases": [
+    {
+      "id": "q001",
+      "language": "ar",
+      "query": "فاتورة بي تك",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q002",
+      "language": "ar",
+      "query": "عايز فاتورة Samsung Galaxy A56",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q003",
+      "language": "ar-en",
+      "query": "Samsung Galaxy A56 من بي تك",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q004",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من بي تك من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q005",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Samsung Galaxy A56 هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q006",
+      "language": "ar-en",
+      "query": "فاتورة Samsung Galaxy A56 بتاريخ 2026-01-15",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q007",
+      "language": "ar-en",
+      "query": "بدور على إيصال بي تك بتاع Samsung Galaxy A56",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q008",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 24999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q009",
+      "language": "en",
+      "query": "receipt for Samsung Galaxy A56 from بي تك",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q010",
+      "language": "ar",
+      "query": "فين فاتورة Samsung Galaxy A56 اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1001
+      ]
+    },
+    {
+      "id": "q011",
+      "language": "ar",
+      "query": "فاتورة IKEA Cairo",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q012",
+      "language": "ar",
+      "query": "عايز فاتورة office chair",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q013",
+      "language": "ar-en",
+      "query": "office chair من IKEA Cairo",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q014",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من IKEA Cairo من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q015",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان office chair هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q016",
+      "language": "ar-en",
+      "query": "فاتورة office chair بتاريخ 2026-08-09",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q017",
+      "language": "ar-en",
+      "query": "بدور على إيصال IKEA Cairo بتاع office chair",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q018",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 1250.50 USD",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q019",
+      "language": "en",
+      "query": "receipt for office chair from IKEA Cairo",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q020",
+      "language": "ar",
+      "query": "فين فاتورة office chair اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1002
+      ]
+    },
+    {
+      "id": "q021",
+      "language": "ar",
+      "query": "فاتورة Carrefour",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q022",
+      "language": "ar",
+      "query": "عايز فاتورة AirPods Pro",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q023",
+      "language": "ar-en",
+      "query": "AirPods Pro من Carrefour",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q024",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من Carrefour من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q025",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان AirPods Pro هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q026",
+      "language": "ar-en",
+      "query": "فاتورة AirPods Pro بتاريخ 2026-06-12",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q027",
+      "language": "ar-en",
+      "query": "بدور على إيصال Carrefour بتاع AirPods Pro",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q028",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 11999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q029",
+      "language": "en",
+      "query": "receipt for AirPods Pro from Carrefour",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q030",
+      "language": "ar",
+      "query": "فين فاتورة AirPods Pro اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1003
+      ]
+    },
+    {
+      "id": "q031",
+      "language": "ar",
+      "query": "فاتورة جرير",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q032",
+      "language": "ar",
+      "query": "عايز فاتورة Lenovo ThinkPad E14",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q033",
+      "language": "ar-en",
+      "query": "Lenovo ThinkPad E14 من جرير",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q034",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من جرير من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q035",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Lenovo ThinkPad E14 هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q036",
+      "language": "ar-en",
+      "query": "فاتورة Lenovo ThinkPad E14 بتاريخ 2026-03-20",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q037",
+      "language": "ar-en",
+      "query": "بدور على إيصال جرير بتاع Lenovo ThinkPad E14",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q038",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 38999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q039",
+      "language": "en",
+      "query": "receipt for Lenovo ThinkPad E14 from جرير",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q040",
+      "language": "ar",
+      "query": "فين فاتورة Lenovo ThinkPad E14 اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1004
+      ]
+    },
+    {
+      "id": "q041",
+      "language": "ar",
+      "query": "فاتورة Amazon Egypt",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q042",
+      "language": "ar",
+      "query": "عايز فاتورة Philips air fryer",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q043",
+      "language": "ar-en",
+      "query": "Philips air fryer من Amazon Egypt",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q044",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من Amazon Egypt من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q045",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Philips air fryer هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q046",
+      "language": "ar-en",
+      "query": "فاتورة Philips air fryer بتاريخ 2025-11-03",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q047",
+      "language": "ar-en",
+      "query": "بدور على إيصال Amazon Egypt بتاع Philips air fryer",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q048",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 6999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q049",
+      "language": "en",
+      "query": "receipt for Philips air fryer from Amazon Egypt",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q050",
+      "language": "ar",
+      "query": "فين فاتورة Philips air fryer اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1005
+      ]
+    },
+    {
+      "id": "q051",
+      "language": "ar",
+      "query": "فاتورة توكيل العربي",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q052",
+      "language": "ar",
+      "query": "عايز فاتورة Toshiba washing machine",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q053",
+      "language": "ar-en",
+      "query": "Toshiba washing machine من توكيل العربي",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q054",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من توكيل العربي من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q055",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Toshiba washing machine هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q056",
+      "language": "ar-en",
+      "query": "فاتورة Toshiba washing machine بتاريخ 2026-05-18",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q057",
+      "language": "ar-en",
+      "query": "بدور على إيصال توكيل العربي بتاع Toshiba washing machine",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q058",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 21999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q059",
+      "language": "en",
+      "query": "receipt for Toshiba washing machine from توكيل العربي",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q060",
+      "language": "ar",
+      "query": "فين فاتورة Toshiba washing machine اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1006
+      ]
+    },
+    {
+      "id": "q061",
+      "language": "ar",
+      "query": "فاتورة Decathlon",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q062",
+      "language": "ar",
+      "query": "عايز فاتورة Riverside bicycle",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q063",
+      "language": "ar-en",
+      "query": "Riverside bicycle من Decathlon",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q064",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من Decathlon من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q065",
+      "language": "ar",
+      "query": "فاتورة Riverside bicycle من غير ضمان",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q066",
+      "language": "ar-en",
+      "query": "فاتورة Riverside bicycle بتاريخ 2026-04-07",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q067",
+      "language": "ar-en",
+      "query": "بدور على إيصال Decathlon بتاع Riverside bicycle",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q068",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 14500.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q069",
+      "language": "en",
+      "query": "receipt for Riverside bicycle from Decathlon",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q070",
+      "language": "ar",
+      "query": "فين فاتورة Riverside bicycle اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1007
+      ]
+    },
+    {
+      "id": "q071",
+      "language": "ar",
+      "query": "فاتورة صيدليات العزبي",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q072",
+      "language": "ar",
+      "query": "عايز فاتورة Omron blood pressure monitor",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q073",
+      "language": "ar-en",
+      "query": "Omron blood pressure monitor من صيدليات العزبي",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q074",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من صيدليات العزبي من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q075",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Omron blood pressure monitor هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q076",
+      "language": "ar-en",
+      "query": "فاتورة Omron blood pressure monitor بتاريخ 2026-02-22",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q077",
+      "language": "ar-en",
+      "query": "بدور على إيصال صيدليات العزبي بتاع Omron blood pressure monitor",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q078",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 3250.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q079",
+      "language": "en",
+      "query": "receipt for Omron blood pressure monitor from صيدليات العزبي",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q080",
+      "language": "ar",
+      "query": "فين فاتورة Omron blood pressure monitor اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1008
+      ]
+    },
+    {
+      "id": "q081",
+      "language": "ar",
+      "query": "فاتورة LC Waikiki",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q082",
+      "language": "ar",
+      "query": "عايز فاتورة winter jacket",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q083",
+      "language": "ar-en",
+      "query": "winter jacket من LC Waikiki",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q084",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من LC Waikiki من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q085",
+      "language": "ar",
+      "query": "فاتورة winter jacket من غير ضمان",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q086",
+      "language": "ar-en",
+      "query": "فاتورة winter jacket بتاريخ 2025-12-14",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q087",
+      "language": "ar-en",
+      "query": "بدور على إيصال LC Waikiki بتاع winter jacket",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q088",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 1799.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q089",
+      "language": "en",
+      "query": "receipt for winter jacket from LC Waikiki",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q090",
+      "language": "ar",
+      "query": "فين فاتورة winter jacket اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1009
+      ]
+    },
+    {
+      "id": "q091",
+      "language": "ar",
+      "query": "فاتورة Vodafone",
+      "intentTags": [
+        "merchant"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q092",
+      "language": "ar",
+      "query": "عايز فاتورة Samsung S25 Ultra",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q093",
+      "language": "ar-en",
+      "query": "Samsung S25 Ultra من Vodafone",
+      "intentTags": [
+        "merchant",
+        "product"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q094",
+      "language": "ar",
+      "query": "الحاجة اللي اشتريتها من Vodafone من فترة",
+      "intentTags": [
+        "merchant",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q095",
+      "language": "ar",
+      "query": "الفاتورة اللي ضمان Samsung S25 Ultra هينتهي",
+      "intentTags": [
+        "product",
+        "warranty"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q096",
+      "language": "ar-en",
+      "query": "فاتورة Samsung S25 Ultra بتاريخ 2026-07-01",
+      "intentTags": [
+        "product",
+        "date"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q097",
+      "language": "ar-en",
+      "query": "بدور على إيصال Vodafone بتاع Samsung S25 Ultra",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q098",
+      "language": "ar",
+      "query": "الفاتورة بقيمة 62999.00 EGP",
+      "intentTags": [
+        "amount",
+        "currency"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q099",
+      "language": "en",
+      "query": "receipt for Samsung S25 Ultra from Vodafone",
+      "intentTags": [
+        "merchant",
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    },
+    {
+      "id": "q100",
+      "language": "ar",
+      "query": "فين فاتورة Samsung S25 Ultra اللي اشتريتها",
+      "intentTags": [
+        "product",
+        "paraphrase"
+      ],
+      "relevantInvoiceIds": [
+        1010
+      ]
+    }
+  ]
+}

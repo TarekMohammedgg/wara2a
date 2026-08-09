@@ -1,6 +1,9 @@
 import '../../../core/database/entities/invoice_entity.dart';
 import '../../../core/database/entities/invoice_item_entity.dart';
+import '../../../core/database/invoice_embedding_status.dart';
 import '../../../core/database/invoice_record.dart';
+import '../../../core/utils/invoice_search_text_builder.dart';
+import '../../../core/utils/document_type_normalization.dart';
 import '../../../core/utils/text_normalization.dart';
 import '../models/invoice.dart';
 
@@ -28,6 +31,13 @@ abstract final class InvoiceEntityMapper {
           : List<double>.unmodifiable(entity.embedding!),
       embeddingModelId: entity.embeddingModelId,
       embeddingDimensions: entity.embeddingDimensions,
+      embeddingStatus: invoiceEmbeddingStatusFromStorage(
+        entity.embeddingStatus,
+      ),
+      embeddingSchemaVersion: entity.embeddingSchemaVersion,
+      embeddingUpdatedAt: entity.embeddingUpdatedAt,
+      embeddingFailureCode: entity.embeddingFailureCode,
+      embeddingAttemptId: entity.embeddingAttemptId,
       searchTextSchemaVersion: entity.searchTextSchemaVersion,
       extractionModelId: entity.extractionModelId,
       createdAt: entity.createdAt,
@@ -54,6 +64,9 @@ abstract final class InvoiceEntityMapper {
         merchant: invoice.merchant,
         merchantNormalized: _nullableNormalize(invoice.merchant),
         documentType: invoice.documentType,
+        documentTypeNormalized: DocumentTypeNormalization.normalize(
+          invoice.documentType,
+        ),
         purchaseDate: invoice.purchaseDate,
         totalMinor: invoice.totalMinor,
         currencyCode: invoice.currencyCode?.toUpperCase(),
@@ -71,6 +84,11 @@ abstract final class InvoiceEntityMapper {
             : List<double>.of(invoice.embedding!),
         embeddingModelId: invoice.embeddingModelId,
         embeddingDimensions: invoice.embeddingDimensions,
+        embeddingStatus: invoice.embeddingStatus.storageValue,
+        embeddingSchemaVersion: invoice.embeddingSchemaVersion,
+        embeddingUpdatedAt: invoice.embeddingUpdatedAt,
+        embeddingFailureCode: invoice.embeddingFailureCode,
+        embeddingAttemptId: invoice.embeddingAttemptId,
         searchTextSchemaVersion: invoice.searchTextSchemaVersion,
         extractionModelId: invoice.extractionModelId,
         createdAt: invoice.createdAt,
@@ -97,9 +115,11 @@ abstract final class InvoiceEntityMapper {
     String? invoiceNumber,
     required Iterable<String> itemNames,
   }) {
-    return TextNormalization.normalize(
-      [merchant, invoiceNumber, ...itemNames].whereType<String>().join(' '),
-    );
+    return InvoiceSearchTextBuilder.build(
+      merchant: merchant,
+      invoiceNumber: invoiceNumber,
+      items: itemNames.map((name) => InvoiceSearchItemInput(name: name)),
+    ).keywordText;
   }
 
   static String buildSearchableText({
@@ -113,20 +133,17 @@ abstract final class InvoiceEntityMapper {
     DateTime? warrantyEndDate,
     required Iterable<String> itemNames,
   }) {
-    final values = <String>[
-      if (documentType != null) 'نوع المستند: $documentType',
-      if (merchant != null) 'المتجر: $merchant',
-      if (invoiceNumber != null) 'رقم الفاتورة: $invoiceNumber',
-      if (itemNames.isNotEmpty) 'المنتجات: ${itemNames.join(', ')}',
-      if (totalMinor != null)
-        'الإجمالي: ${(totalMinor / 100).toStringAsFixed(2)} ${currencyCode ?? ''}',
-      if (purchaseDate != null)
-        'تاريخ الشراء: ${purchaseDate.toIso8601String().split('T').first}',
-      if (warrantyMonths != null) 'الضمان: $warrantyMonths شهر',
-      if (warrantyEndDate != null)
-        'نهاية الضمان: ${warrantyEndDate.toIso8601String().split('T').first}',
-    ];
-    return values.join('\n');
+    return InvoiceSearchTextBuilder.build(
+      merchant: merchant,
+      documentType: documentType,
+      invoiceNumber: invoiceNumber,
+      purchaseDate: purchaseDate,
+      totalMinor: totalMinor,
+      currencyCode: currencyCode,
+      warrantyMonths: warrantyMonths,
+      warrantyEndDate: warrantyEndDate,
+      items: itemNames.map((name) => InvoiceSearchItemInput(name: name)),
+    ).searchableText;
   }
 
   static InvoiceSourceType _sourceTypeFromStorage(String value) {
