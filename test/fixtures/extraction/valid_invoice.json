@@ -1,0 +1,17 @@
+{
+  "merchant": "بي تك",
+  "documentType": "فاتورة شراء",
+  "purchaseDate": "2026-08-09",
+  "total": 24999,
+  "currency": "EGP",
+  "products": [
+    {
+      "name": "Samsung Galaxy A56",
+      "quantity": 1,
+      "unitPrice": 24999,
+      "lineTotal": 24999
+    }
+  ],
+  "warrantyMonths": 12,
+  "rawText": null
+}

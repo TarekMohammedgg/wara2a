@@ -34,6 +34,7 @@ migrate_working_dir/
 /coverage/
 /tmp/
 /devtools_options.yaml
+/android/build/
 /download/
 /lib/objectbox.dll
 /lib/libobjectbox.so

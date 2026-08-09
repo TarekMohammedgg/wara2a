@@ -9,7 +9,7 @@ abstract final class InvoiceDraftMapper {
     required DateTime reviewedAt,
     DateTime? createdAt,
   }) {
-    final itemNames = draft.items.map((item) => item.name);
+    final itemNames = draft.items.map((item) => item.name).whereType<String>();
     final warrantyEndDate = _warrantyEndDate(
       draft.purchaseDate,
       draft.warrantyMonths,
@@ -52,7 +52,7 @@ abstract final class InvoiceDraftMapper {
       items: draft.items
           .map(
             (item) => InvoiceItem(
-              name: item.name,
+              name: item.name ?? '',
               quantity: item.quantity,
               unitPriceMinor: item.unitPriceMinor,
               lineTotalMinor: item.lineTotalMinor,

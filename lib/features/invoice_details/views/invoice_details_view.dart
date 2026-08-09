@@ -428,7 +428,7 @@ Invoice _preview() {
     items: draft.items
         .map(
           (item) => InvoiceItem(
-            name: item.name,
+            name: item.name ?? '',
             quantity: item.quantity,
             unitPriceMinor: item.unitPriceMinor,
             lineTotalMinor: item.lineTotalMinor,

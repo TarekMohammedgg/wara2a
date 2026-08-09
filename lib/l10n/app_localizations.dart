@@ -89,8 +89,16 @@ class AppLocalizations {
   String get darkMode => _value('darkMode');
   String get modelStatus => _value('modelStatus');
   String get modelReady => _value('modelReady');
-  String get modelSize => _value('modelSize');
-  String get installModel => _value('installModel');
+  String get modelReadyDetails => _value('modelReadyDetails');
+  String get modelChecking => _value('modelChecking');
+  String get modelNotInstalled => _value('modelNotInstalled');
+  String get modelArtifactBlocked => _value('modelArtifactBlocked');
+  String get modelUnsupported => _value('modelUnsupported');
+  String get modelVerificationFailed => _value('modelVerificationFailed');
+  String get modelRuntimeUnavailable => _value('modelRuntimeUnavailable');
+  String get modelError => _value('modelError');
+  String get modelRequirement => _value('modelRequirement');
+  String get modelRefresh => _value('modelRefresh');
   String get privacy => _value('privacy');
   String get privacyBody => _value('privacyBody');
   String get localStorage => _value('localStorage');
@@ -198,8 +206,20 @@ class AppLocalizations {
     'english': 'English',
     'darkMode': 'الوضع الداكن',
     'modelStatus': 'محرك استخراج الفواتير المحلي',
-    'modelReady': 'تظهر هنا حالة تثبيت PaddleOCR وQwen2.5-0.5B',
-    'modelSize': 'الحجم التقريبي 550–650 ميجابايت (OCR + Qwen)',
+    'modelReady': 'جاهز للاستخدام بدون إنترنت',
+    'modelReadyDetails':
+        'تم التحقق من ملفات OCR وأبلغ مفسّر النص المحلي أنه متاح.',
+    'modelChecking': 'جارٍ التحقق من المحرك المحلي',
+    'modelNotInstalled': 'نماذج قراءة الفواتير غير مثبتة',
+    'modelArtifactBlocked': 'ملف Qwen المتوافق مع LiteRT-LM غير متاح بعد',
+    'modelUnsupported': 'الاستخراج المحلي غير مدعوم على هذا الجهاز حالياً',
+    'modelVerificationFailed': 'فشل التحقق من ملفات النماذج',
+    'modelRuntimeUnavailable': 'محرك قراءة الفواتير غير متاح',
+    'modelError': 'تعذر فحص حالة النماذج',
+    'modelRequirement':
+        'يتطلب نحو 21 م.ب لملفات OCR وملف Qwen بصيغة .litertlm تم اختباره والتحقق منه.',
+    'modelRefresh': 'إعادة التحقق',
+    'modelSize': 'الحجم يعتمد على ملفات OCR ونموذج Qwen المثبت',
     'installModel': 'إدارة النموذج',
     'privacy': 'الخصوصية',
     'privacyBody':
@@ -303,8 +323,21 @@ class AppLocalizations {
     'english': 'English',
     'darkMode': 'Dark mode',
     'modelStatus': 'Local invoice extraction engine',
-    'modelReady': 'PaddleOCR and Qwen2.5-0.5B installation status appears here',
-    'modelSize': 'Approx. 550–650 MB (OCR + Qwen)',
+    'modelReady': 'Ready to use offline',
+    'modelReadyDetails':
+        'OCR files are verified and the local text interpreter reports ready.',
+    'modelChecking': 'Checking the local engine',
+    'modelNotInstalled': 'Invoice-reading models are not installed',
+    'modelArtifactBlocked':
+        'A LiteRT-LM-compatible Qwen file is not available yet',
+    'modelUnsupported': 'Local extraction is not supported on this device yet',
+    'modelVerificationFailed': 'Model file verification failed',
+    'modelRuntimeUnavailable': 'The invoice-reading runtime is unavailable',
+    'modelError': 'Could not inspect local model status',
+    'modelRequirement':
+        'Requires about 21 MB of OCR files and a tested, verified Qwen .litertlm file.',
+    'modelRefresh': 'Check again',
+    'modelSize': 'Size depends on the installed OCR files and Qwen model',
     'installModel': 'Manage model',
     'privacy': 'Privacy',
     'privacyBody':

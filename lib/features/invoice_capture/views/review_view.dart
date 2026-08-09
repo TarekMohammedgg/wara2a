@@ -223,7 +223,7 @@ class _ReviewViewState extends State<ReviewView> {
                   (item) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: _ProductRow(
-                      name: item.name,
+                      name: item.name ?? '—',
                       quantity: item.quantity?.toString() ?? '—',
                     ),
                   ),

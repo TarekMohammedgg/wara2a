@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../models/local_ai_status.dart';
+import '../repositories/local_ai_status_repository.dart';
+import '../view_models/local_ai_status_cubit.dart';
 import '../view_models/settings_cubit.dart';
 
 class SettingsView extends StatelessWidget {
@@ -15,113 +18,123 @@ class SettingsView extends StatelessWidget {
     final controller = context.read<SettingsCubit>();
     final isDark = settings.themeMode == ThemeMode.dark;
     final isArabic = settings.localeCode == 'ar';
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
-      children: [
-        Text(
-          l10n.settingsTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 22),
-        Text(l10n.appearance, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
-        Card(
-          child: Column(
-            children: [
-              SwitchListTile.adaptive(
-                value: isDark,
-                onChanged: (value) => controller.setThemeMode(
-                  value ? ThemeMode.dark : ThemeMode.light,
-                ),
-                secondary: _SettingsIcon(
-                  icon: Icons.dark_mode_outlined,
-                  color: AppColors.blue,
-                ),
-                title: Text(l10n.darkMode),
-              ),
-              Divider(
-                height: 1,
-                indent: 72,
-                endIndent: 18,
-                color: Theme.of(context).dividerColor,
-              ),
-              ListTile(
-                leading: _SettingsIcon(
-                  icon: Icons.translate_rounded,
-                  color: AppColors.cyan,
-                ),
-                title: Text(l10n.language),
-                trailing: SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment<bool>(value: true, label: Text(l10n.arabic)),
-                    ButtonSegment<bool>(
-                      value: false,
-                      label: Text(l10n.english),
-                    ),
-                  ],
-                  selected: {isArabic},
-                  onSelectionChanged: (selection) => controller.setLocale(
-                    Locale(selection.first ? 'ar' : 'en'),
-                  ),
-                  style: ButtonStyle(
-                    visualDensity: VisualDensity.compact,
-                    textStyle: const WidgetStatePropertyAll(
-                      TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    return BlocProvider<LocalAiStatusCubit>(
+      create: (_) =>
+          LocalAiStatusCubit(DeviceLocalAiStatusRepository())..refresh(),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+        children: [
+          Text(
+            l10n.settingsTitle,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-        ),
-        const SizedBox(height: 26),
-        Text(l10n.modelStatus, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
-        _ModelCard(l10n: l10n),
-        const SizedBox(height: 26),
-        Text(l10n.privacy, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(17),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 22),
+          Text(l10n.appearance, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 10),
+          Card(
+            child: Column(
               children: [
-                const _SettingsIcon(
-                  icon: Icons.shield_outlined,
-                  color: Color(0xFF169C75),
+                SwitchListTile.adaptive(
+                  value: isDark,
+                  onChanged: (value) => controller.setThemeMode(
+                    value ? ThemeMode.dark : ThemeMode.light,
+                  ),
+                  secondary: _SettingsIcon(
+                    icon: Icons.dark_mode_outlined,
+                    color: AppColors.blue,
+                  ),
+                  title: Text(l10n.darkMode),
                 ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.privacy,
-                        style: Theme.of(context).textTheme.titleMedium,
+                Divider(
+                  height: 1,
+                  indent: 72,
+                  endIndent: 18,
+                  color: Theme.of(context).dividerColor,
+                ),
+                ListTile(
+                  leading: _SettingsIcon(
+                    icon: Icons.translate_rounded,
+                    color: AppColors.cyan,
+                  ),
+                  title: Text(l10n.language),
+                  trailing: SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment<bool>(
+                        value: true,
+                        label: Text(l10n.arabic),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.privacyBody,
-                        style: Theme.of(context).textTheme.bodySmall,
+                      ButtonSegment<bool>(
+                        value: false,
+                        label: Text(l10n.english),
                       ),
                     ],
+                    selected: {isArabic},
+                    onSelectionChanged: (selection) => controller.setLocale(
+                      Locale(selection.first ? 'ar' : 'en'),
+                    ),
+                    style: ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      textStyle: const WidgetStatePropertyAll(
+                        TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 26),
-        Text(l10n.about, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 6),
-          leading: const Icon(Icons.info_outline_rounded),
-          title: Text(l10n.appName),
-          subtitle: Text(l10n.version),
-        ),
-      ],
+          const SizedBox(height: 26),
+          Text(
+            l10n.modelStatus,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          _ModelCard(l10n: l10n),
+          const SizedBox(height: 26),
+          Text(l10n.privacy, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 10),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(17),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _SettingsIcon(
+                    icon: Icons.shield_outlined,
+                    color: Color(0xFF169C75),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.privacy,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          l10n.privacyBody,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 26),
+          Text(l10n.about, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 6),
+            leading: const Icon(Icons.info_outline_rounded),
+            title: Text(l10n.appName),
+            subtitle: Text(l10n.version),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -133,6 +146,18 @@ class _ModelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<LocalAiStatusCubit, LocalAiStatusState>(
+      builder: (context, state) {
+        final presentation = _ModelStatusPresentation.fromState(l10n, state);
+        return _buildCard(context, presentation);
+      },
+    );
+  }
+
+  Widget _buildCard(
+    BuildContext context,
+    _ModelStatusPresentation presentation,
+  ) {
     return Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
@@ -153,54 +178,154 @@ class _ModelCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(13),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: AppColors.mint,
-                ),
+                child: const Icon(Icons.memory_rounded, color: AppColors.mint),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  l10n.modelReady,
+                  presentation.title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              const Icon(Icons.check_circle_rounded, color: AppColors.mint),
+              Icon(presentation.icon, color: presentation.iconColor),
             ],
           ),
           const SizedBox(height: 17),
           Text(
-            l10n.modelSize,
+            presentation.details,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: const LinearProgressIndicator(
-              value: 1,
-              minHeight: 6,
-              backgroundColor: Color(0x3349D9BF),
-              valueColor: AlwaysStoppedAnimation(AppColors.mint),
+          if (presentation.showProgress) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: presentation.progress,
+                minHeight: 6,
+                backgroundColor: const Color(0x3349D9BF),
+                valueColor: const AlwaysStoppedAnimation(AppColors.mint),
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: 12),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton(
-              onPressed: () {},
+              onPressed: presentation.canRefresh
+                  ? () => context.read<LocalAiStatusCubit>().refresh()
+                  : null,
               style: TextButton.styleFrom(foregroundColor: Colors.white),
-              child: Text(l10n.installModel),
+              child: Text(l10n.modelRefresh),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _ModelStatusPresentation {
+  const _ModelStatusPresentation({
+    required this.title,
+    required this.details,
+    required this.icon,
+    required this.iconColor,
+    required this.showProgress,
+    required this.canRefresh,
+    this.progress,
+  });
+
+  final String title;
+  final String details;
+  final IconData icon;
+  final Color iconColor;
+  final bool showProgress;
+  final bool canRefresh;
+  final double? progress;
+
+  factory _ModelStatusPresentation.fromState(
+    AppLocalizations l10n,
+    LocalAiStatusState state,
+  ) {
+    if (state is LocalAiStatusLoading || state is LocalAiStatusInitial) {
+      return _ModelStatusPresentation(
+        title: l10n.modelChecking,
+        details: l10n.modelRequirement,
+        icon: Icons.hourglass_top_rounded,
+        iconColor: AppColors.mint,
+        showProgress: true,
+        canRefresh: false,
+      );
+    }
+    if (state is LocalAiStatusFailure) {
+      return _ModelStatusPresentation(
+        title: l10n.modelError,
+        details: l10n.modelRequirement,
+        icon: Icons.error_outline_rounded,
+        iconColor: AppColors.warning,
+        showProgress: false,
+        canRefresh: true,
+      );
+    }
+    final readiness = (state as LocalAiStatusLoaded).status.readiness;
+    return switch (readiness) {
+      LocalAiReadiness.ready => _ModelStatusPresentation(
+        title: l10n.modelReady,
+        details: l10n.modelReadyDetails,
+        icon: Icons.check_circle_rounded,
+        iconColor: AppColors.mint,
+        showProgress: true,
+        progress: 1,
+        canRefresh: true,
+      ),
+      LocalAiReadiness.modelsNotInstalled => _ModelStatusPresentation(
+        title: l10n.modelNotInstalled,
+        details: l10n.modelRequirement,
+        icon: Icons.download_for_offline_outlined,
+        iconColor: AppColors.warning,
+        showProgress: false,
+        canRefresh: true,
+      ),
+      LocalAiReadiness.modelVerificationFailed => _ModelStatusPresentation(
+        title: l10n.modelVerificationFailed,
+        details: l10n.modelRequirement,
+        icon: Icons.gpp_bad_outlined,
+        iconColor: AppColors.warning,
+        showProgress: false,
+        canRefresh: true,
+      ),
+      LocalAiReadiness.interpreterArtifactIncompatible =>
+        _ModelStatusPresentation(
+          title: l10n.modelArtifactBlocked,
+          details: l10n.modelRequirement,
+          icon: Icons.extension_off_outlined,
+          iconColor: AppColors.warning,
+          showProgress: false,
+          canRefresh: true,
+        ),
+      LocalAiReadiness.unsupportedPlatform => _ModelStatusPresentation(
+        title: l10n.modelUnsupported,
+        details: l10n.modelRequirement,
+        icon: Icons.phonelink_erase_rounded,
+        iconColor: AppColors.warning,
+        showProgress: false,
+        canRefresh: true,
+      ),
+      LocalAiReadiness.runtimeUnavailable => _ModelStatusPresentation(
+        title: l10n.modelRuntimeUnavailable,
+        details: l10n.modelRequirement,
+        icon: Icons.memory_outlined,
+        iconColor: AppColors.warning,
+        showProgress: false,
+        canRefresh: true,
+      ),
+    };
   }
 }
 
