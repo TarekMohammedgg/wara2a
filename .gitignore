@@ -49,3 +49,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Optional local renders for synthetic evaluation specs
+/test/fixtures/evaluation/generated_images/
