@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/theme/app_colors.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
 import 'package:wara2a/features/invoice_capture/repositories/invoice_image_repository.dart';
-import 'package:wara2a/main.dart';
+
+import 'helpers/test_app.dart';
 
 void main() {
   testWidgets('renders the Arabic home experience', (tester) async {
-    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
-    await tester.pumpAndSettle();
+    await pumpTestApp(tester, imageRepository: _TestImageRepository());
 
     expect(find.text('أهلاً بك، تذكّر كل فاتورة.'), findsOneWidget);
     expect(find.text('إضافة فاتورة'), findsOneWidget);
@@ -18,8 +18,7 @@ void main() {
   testWidgets('opens the invoice source sheet from the home hero', (
     tester,
   ) async {
-    await tester.pumpWidget(const Wara2aApp());
-    await tester.pumpAndSettle();
+    await pumpTestApp(tester, imageRepository: _TestImageRepository());
 
     await tester.tap(find.widgetWithText(FilledButton, 'إضافة فاتورة'));
     await tester.pumpAndSettle();
@@ -33,8 +32,7 @@ void main() {
   testWidgets('opens notifications without navigating to settings', (
     tester,
   ) async {
-    await tester.pumpWidget(const Wara2aApp());
-    await tester.pumpAndSettle();
+    await pumpTestApp(tester, imageRepository: _TestImageRepository());
 
     await tester.tap(find.byIcon(Icons.notifications_none_rounded));
     await tester.pumpAndSettle();
@@ -45,8 +43,7 @@ void main() {
   });
 
   testWidgets('keeps add invoice labels readable in dark mode', (tester) async {
-    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
-    await tester.pumpAndSettle();
+    await pumpTestApp(tester, imageRepository: _TestImageRepository());
 
     await tester.tap(find.text('الإعدادات').last);
     await tester.pumpAndSettle();
@@ -63,8 +60,7 @@ void main() {
   });
 
   testWidgets('navigates through the presentation flow', (tester) async {
-    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
-    await tester.pumpAndSettle();
+    await pumpTestApp(tester, imageRepository: _TestImageRepository());
 
     await tester.tap(find.text('البحث').last);
     await tester.pumpAndSettle();

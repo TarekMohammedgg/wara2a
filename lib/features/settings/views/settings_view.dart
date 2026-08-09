@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/app_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../view_models/settings_cubit.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -10,9 +11,10 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final controller = AppControllerScope.of(context);
-    final isDark = controller.themeMode == ThemeMode.dark;
-    final isArabic = controller.locale.languageCode == 'ar';
+    final settings = context.watch<SettingsCubit>().state.settings;
+    final controller = context.read<SettingsCubit>();
+    final isDark = settings.themeMode == ThemeMode.dark;
+    final isArabic = settings.localeCode == 'ar';
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
       children: [

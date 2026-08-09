@@ -1,0 +1,232 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:8921434432553373422",
+      "lastPropertyId": "4:3643071994016781563",
+      "name": "DatabaseMetadataEntity",
+      "properties": [
+        {
+          "id": "1:6931778386883607773",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1572597354653537197",
+          "name": "key",
+          "indexId": "1:8225976486212192645",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "3:5318725767002560801",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "4:3643071994016781563",
+          "name": "updatedAt",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:2710519800567843983",
+      "lastPropertyId": "24:8327496945878684493",
+      "name": "InvoiceEntity",
+      "properties": [
+        {
+          "id": "1:3079184095061451688",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5980377059448444664",
+          "name": "merchant",
+          "type": 9
+        },
+        {
+          "id": "3:171865172451866644",
+          "name": "merchantNormalized",
+          "indexId": "2:9154832734347378190",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:4944936005697346823",
+          "name": "documentType",
+          "indexId": "3:8953472198375689066",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:2775593172922476841",
+          "name": "purchaseDate",
+          "type": 10
+        },
+        {
+          "id": "6:3100164715877639181",
+          "name": "totalMinor",
+          "type": 6
+        },
+        {
+          "id": "7:3670264727628614195",
+          "name": "currencyCode",
+          "type": 9
+        },
+        {
+          "id": "8:6125850420181387561",
+          "name": "warrantyMonths",
+          "type": 6
+        },
+        {
+          "id": "9:6638178550246040538",
+          "name": "warrantyEndDate",
+          "type": 10
+        },
+        {
+          "id": "10:1514928858998725598",
+          "name": "invoiceNumber",
+          "indexId": "4:1010180079252887381",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "11:4295785881058077758",
+          "name": "rawExtractedText",
+          "type": 9
+        },
+        {
+          "id": "12:7798973669944971901",
+          "name": "searchableText",
+          "type": 9
+        },
+        {
+          "id": "13:429315488774195355",
+          "name": "keywordText",
+          "type": 9
+        },
+        {
+          "id": "14:4408019907279837061",
+          "name": "imagePath",
+          "type": 9
+        },
+        {
+          "id": "15:8691153843913632104",
+          "name": "thumbnailPath",
+          "type": 9
+        },
+        {
+          "id": "16:8064367121695413798",
+          "name": "sourceType",
+          "type": 9
+        },
+        {
+          "id": "17:3475944700035130751",
+          "name": "embedding",
+          "indexId": "5:5674699518843013707",
+          "type": 28,
+          "flags": 8
+        },
+        {
+          "id": "18:7143753898001492162",
+          "name": "embeddingModelId",
+          "type": 9
+        },
+        {
+          "id": "19:374733033470212667",
+          "name": "embeddingDimensions",
+          "type": 6
+        },
+        {
+          "id": "20:1725022977967834170",
+          "name": "searchTextSchemaVersion",
+          "type": 6
+        },
+        {
+          "id": "21:1288771452257188839",
+          "name": "extractionModelId",
+          "type": 9
+        },
+        {
+          "id": "22:3179250191803199211",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "23:137729607138466433",
+          "name": "updatedAt",
+          "type": 10
+        },
+        {
+          "id": "24:8327496945878684493",
+          "name": "reviewedAt",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:7266021108998744756",
+      "lastPropertyId": "7:7525869773311577887",
+      "name": "InvoiceItemEntity",
+      "properties": [
+        {
+          "id": "1:549211893111121153",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7620150830275011697",
+          "name": "invoiceId",
+          "indexId": "6:5092787116082410787",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:5824603851181885386",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:8251323373360254933",
+          "name": "nameNormalized",
+          "type": 9
+        },
+        {
+          "id": "5:881694135585227179",
+          "name": "quantity",
+          "type": 8
+        },
+        {
+          "id": "6:7002408373483038361",
+          "name": "unitPriceMinor",
+          "type": 6
+        },
+        {
+          "id": "7:7525869773311577887",
+          "name": "lineTotalMinor",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "3:7266021108998744756",
+  "lastIndexId": "6:5092787116082410787",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

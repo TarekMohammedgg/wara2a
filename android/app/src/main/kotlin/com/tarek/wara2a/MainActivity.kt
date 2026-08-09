@@ -1,4 +1,4 @@
-package com.example.wara2a
+package com.tarek.wara2a
 
 import io.flutter.embedding.android.FlutterActivity
 

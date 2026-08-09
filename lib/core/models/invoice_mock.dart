@@ -1,4 +1,6 @@
-class InvoiceMock {
+import '../widgets/invoice_card_data.dart';
+
+class InvoiceMock implements InvoiceCardData {
   const InvoiceMock({
     required this.merchant,
     required this.category,
@@ -11,14 +13,21 @@ class InvoiceMock {
     this.warranty = '12 شهر',
   });
 
+  @override
   final String merchant;
+  @override
   final String category;
+  @override
   final String date;
+  @override
   final String total;
+  @override
   final String currency;
   final String number;
   final String warranty;
+  @override
   final int accent;
+  @override
   final int icon;
 }
 

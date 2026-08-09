@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_dependencies.dart';
+import '../mock/mock_data.dart';
 import '../widgets/app_shell.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/home/views/home_view.dart';
@@ -10,15 +13,25 @@ import '../../features/invoice_capture/views/image_preview_view.dart';
 import '../../features/invoice_capture/views/processing_view.dart';
 import '../../features/invoice_capture/views/review_view.dart';
 import '../../features/invoice_details/views/invoice_details_view.dart';
+import '../../features/home/view_models/home_cubit.dart';
+import '../../features/invoice_capture/view_models/review_cubit.dart';
+import '../../features/invoice_details/view_models/invoice_details_cubit.dart';
 
-GoRouter buildAppRouter() {
+GoRouter buildAppRouter(AppDependencies dependencies) {
   return GoRouter(
     initialLocation: '/',
     routes: [
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
-          GoRoute(path: '/', builder: (context, state) => const HomeView()),
+          GoRoute(
+            path: '/',
+            builder: (context, state) => BlocProvider(
+              create: (_) =>
+                  HomeCubit(dependencies.homeInvoices)..watchInvoices(),
+              child: const HomeView(),
+            ),
+          ),
           GoRoute(
             path: '/search',
             builder: (context, state) => const SearchView(),
@@ -37,10 +50,46 @@ GoRouter buildAppRouter() {
         path: '/processing',
         builder: (context, state) => const ProcessingView(),
       ),
-      GoRoute(path: '/review', builder: (context, state) => const ReviewView()),
+      GoRoute(
+        path: '/review',
+        builder: (context, state) {
+          final invoiceId = int.tryParse(
+            state.uri.queryParameters['invoiceId'] ?? '',
+          );
+          return BlocProvider(
+            create: (_) {
+              final cubit = ReviewCubit(
+                dependencies.invoiceCapture,
+                initialDraft: MockData.draft,
+              );
+              if (invoiceId != null && invoiceId > 0) {
+                cubit.loadForEditing(invoiceId);
+              }
+              return cubit;
+            },
+            child: ReviewView(invoiceId: invoiceId),
+          );
+        },
+      ),
       GoRoute(
         path: '/details',
-        builder: (context, state) => const InvoiceDetailsView(),
+        builder: (context, state) => const InvoiceDetailsView.preview(),
+      ),
+      GoRoute(
+        path: '/details/:invoiceId',
+        builder: (context, state) {
+          final invoiceId = int.tryParse(
+            state.pathParameters['invoiceId'] ?? '',
+          );
+          if (invoiceId == null || invoiceId <= 0) {
+            return const _UnknownRouteView();
+          }
+          return BlocProvider(
+            create: (_) =>
+                InvoiceDetailsCubit(dependencies.invoices)..load(invoiceId),
+            child: InvoiceDetailsView(invoiceId: invoiceId),
+          );
+        },
       ),
     ],
     errorBuilder: (context, state) => const _UnknownRouteView(),

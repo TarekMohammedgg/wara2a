@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../models/invoice_mock.dart';
 import '../theme/app_colors.dart';
+import 'invoice_card_data.dart';
 
 class InvoiceCard extends StatelessWidget {
   const InvoiceCard({required this.invoice, this.onTap, super.key});
 
-  final InvoiceMock invoice;
+  final InvoiceCardData invoice;
   final VoidCallback? onTap;
 
   @override

@@ -34,6 +34,9 @@ migrate_working_dir/
 /coverage/
 /tmp/
 /devtools_options.yaml
+/download/
+/lib/objectbox.dll
+/lib/libobjectbox.so
 
 # Symbolication related
 app.*.symbols

@@ -1,32 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/database/database_versions.dart';
 import '../../../core/mock/mock_data.dart';
-import '../../../core/models/invoice_mock.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../models/invoice.dart';
+import '../view_models/invoice_details_cubit.dart';
 
 class InvoiceDetailsView extends StatelessWidget {
-  const InvoiceDetailsView({super.key});
+  const InvoiceDetailsView({required this.invoiceId, super.key});
+
+  const InvoiceDetailsView.preview({super.key}) : invoiceId = null;
+
+  final int? invoiceId;
+
+  @override
+  Widget build(BuildContext context) {
+    if (invoiceId == null) return _LoadedInvoiceDetails(invoice: _preview());
+    return BlocBuilder<InvoiceDetailsCubit, InvoiceDetailsState>(
+      builder: (context, state) {
+        if (state.status == InvoiceDetailsStatus.loading ||
+            state.status == InvoiceDetailsStatus.initial) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (state.invoice == null) {
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () => context.go('/'),
+                icon: const Icon(Icons.arrow_forward_rounded),
+              ),
+            ),
+            body: Center(child: Text(AppLocalizations.of(context).noResults)),
+          );
+        }
+        return _LoadedInvoiceDetails(invoice: state.invoice!);
+      },
+    );
+  }
+}
+
+class _LoadedInvoiceDetails extends StatelessWidget {
+  const _LoadedInvoiceDetails({required this.invoice});
+
+  final Invoice invoice;
+
+  Future<void> _delete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.delete),
+        content: Text(l10n.detailsTitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final deleted = await context.read<InvoiceDetailsCubit>().delete();
+    if (deleted && context.mounted) context.go('/');
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final invoice = MockData.invoices.first;
+    final persisted = invoice.id > 0;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => context.pop(),
+          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
           icon: const Icon(Icons.arrow_forward_rounded),
         ),
         title: Text(l10n.detailsTitle),
         actions: [
-          IconButton(
-            onPressed: () => context.push('/review'),
-            tooltip: l10n.edit,
-            icon: const Icon(Icons.edit_outlined),
-          ),
+          if (persisted)
+            IconButton(
+              onPressed: () => context.push('/review?invoiceId=${invoice.id}'),
+              tooltip: l10n.edit,
+              icon: const Icon(Icons.edit_outlined),
+            ),
+          if (persisted)
+            IconButton(
+              onPressed: () => _delete(context),
+              tooltip: l10n.delete,
+              icon: const Icon(Icons.delete_outline_rounded),
+            ),
           const SizedBox(width: 6),
         ],
       ),
@@ -39,7 +110,7 @@ class InvoiceDetailsView extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  invoice.merchant,
+                  invoice.merchant ?? '—',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
@@ -48,7 +119,7 @@ class InvoiceDetailsView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${invoice.category} · ${invoice.date}',
+            '${invoice.documentType ?? '—'} · ${_formatDate(invoice.purchaseDate)}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 22),
@@ -56,14 +127,20 @@ class InvoiceDetailsView extends StatelessWidget {
           const SizedBox(height: 22),
           Text(l10n.products, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
-          _DetailProduct(
-            name: 'Samsung Galaxy A56',
-            meta: l10n.invoicesCount(1),
-            price: '24,999 ج.م',
+          ...invoice.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _DetailProduct(
+                name: item.name,
+                meta: item.quantity?.toString() ?? '—',
+                price: _formatMoney(
+                  item.lineTotalMinor ?? item.unitPriceMinor,
+                  invoice.currencyCode,
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          _DetailProduct(name: 'ضمان ممتد', meta: invoice.warranty, price: '—'),
-          const SizedBox(height: 22),
+          const SizedBox(height: 14),
           Text(
             l10n.invoiceImage,
             style: Theme.of(context).textTheme.titleMedium,
@@ -85,7 +162,7 @@ class InvoiceDetailsView extends StatelessWidget {
 class _DetailsHero extends StatelessWidget {
   const _DetailsHero({required this.invoice});
 
-  final InvoiceMock invoice;
+  final Invoice invoice;
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +214,7 @@ class _DetailsHero extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              'BT-2026-0841',
+              invoice.invoiceNumber ?? '—',
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(color: AppColors.navy),
@@ -157,7 +234,7 @@ class _DetailsHero extends StatelessWidget {
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.invoice});
 
-  final InvoiceMock invoice;
+  final Invoice invoice;
 
   @override
   Widget build(BuildContext context) {
@@ -169,14 +246,20 @@ class _SummaryCard extends StatelessWidget {
           children: [
             _DetailLine(
               label: l10n.total,
-              value: '${invoice.total} ${invoice.currency}',
+              value: _formatMoney(invoice.totalMinor, invoice.currencyCode),
               accent: true,
             ),
-            _DetailLine(label: l10n.purchaseDate, value: invoice.date),
-            _DetailLine(label: l10n.invoiceNumber, value: invoice.number),
+            _DetailLine(
+              label: l10n.purchaseDate,
+              value: _formatDate(invoice.purchaseDate),
+            ),
+            _DetailLine(
+              label: l10n.invoiceNumber,
+              value: invoice.invoiceNumber ?? '—',
+            ),
             _DetailLine(
               label: l10n.warranty,
-              value: invoice.warranty,
+              value: invoice.warrantyMonths?.toString() ?? '—',
               last: true,
             ),
           ],
@@ -245,7 +328,7 @@ class _DetailProduct extends StatelessWidget {
           height: 42,
           decoration: const BoxDecoration(
             color: AppColors.softBlue,
-            borderRadius: BorderRadius.all(Radius.circular(13)),
+            shape: BoxShape.circle,
           ),
           child: const Icon(Icons.inventory_2_outlined, color: AppColors.blue),
         ),
@@ -265,25 +348,17 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.softMint,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.lock_rounded, size: 12, color: Color(0xFF169C75)),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Color(0xFF167A61),
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: const Color(0xFF167A61),
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -297,44 +372,68 @@ class _SmallInvoiceImage extends StatelessWidget {
     return Container(
       height: 150,
       decoration: BoxDecoration(
-        color: const Color(0xFFE4EAF2),
-        borderRadius: BorderRadius.circular(19),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
-      child: Center(
-        child: Container(
-          width: 110,
-          height: 126,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(5),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.navy.withValues(alpha: 0.09),
-                blurRadius: 12,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(width: 42, height: 8, color: AppColors.blue),
-              const SizedBox(height: 15),
-              ...List.generate(
-                6,
-                (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Container(
-                    height: 4,
-                    width: index.isEven ? 60 : 45,
-                    color: const Color(0xFFDDE4EC),
-                  ),
-                ),
-              ),
-            ],
-          ),
+      child: const Center(
+        child: Icon(
+          Icons.receipt_long_rounded,
+          size: 54,
+          color: AppColors.blue,
         ),
       ),
     );
   }
+}
+
+String _formatMoney(int? minor, String? currency) {
+  if (minor == null) return '—';
+  final amount = minor / 100;
+  final value = amount == amount.roundToDouble()
+      ? amount.toStringAsFixed(0)
+      : amount.toStringAsFixed(2);
+  return currency == null || currency.isEmpty ? value : '$value $currency';
+}
+
+String _formatDate(DateTime? date) {
+  if (date == null) return '—';
+  return '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
+}
+
+Invoice _preview() {
+  final draft = MockData.draft;
+  final reviewedAt = DateTime.utc(2026, 8, 9);
+  return Invoice(
+    merchant: draft.merchant,
+    documentType: draft.documentType,
+    purchaseDate: draft.purchaseDate,
+    totalMinor: draft.totalMinor,
+    currencyCode: draft.currencyCode,
+    warrantyMonths: draft.warrantyMonths,
+    invoiceNumber: draft.invoiceNumber,
+    rawExtractedText: draft.rawExtractedText,
+    searchableText: '',
+    keywordText: '',
+    imagePath: draft.imagePath,
+    thumbnailPath: draft.thumbnailPath,
+    sourceType: draft.sourceType,
+    searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
+    extractionModelId: draft.extractionModelId,
+    createdAt: reviewedAt,
+    updatedAt: reviewedAt,
+    reviewedAt: reviewedAt,
+    items: draft.items
+        .map(
+          (item) => InvoiceItem(
+            name: item.name,
+            quantity: item.quantity,
+            unitPriceMinor: item.unitPriceMinor,
+            lineTotalMinor: item.lineTotalMinor,
+          ),
+        )
+        .toList(growable: false),
+  );
 }

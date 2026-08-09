@@ -1,4 +1,6 @@
 import '../models/invoice_mock.dart';
+import '../../features/invoice_capture/models/invoice_draft.dart';
+import '../../features/invoice_details/models/invoice.dart';
 
 class MockData {
   const MockData._();
@@ -40,5 +42,25 @@ class MockData {
 
   static final searchResults = <InvoiceMock>[invoices[0], invoices[1]];
 
-  static const draft = InvoiceDraftMock();
+  static final draft = InvoiceDraft(
+    merchant: invoices.first.merchant,
+    documentType: 'فاتورة شراء',
+    purchaseDate: DateTime.utc(2026, 8, 9),
+    totalMinor: 2499900,
+    currencyCode: 'EGP',
+    warrantyMonths: 12,
+    invoiceNumber: invoices.first.number,
+    rawExtractedText: 'Mock extraction remains active until Phase 7.',
+    imagePath: 'assets/images/wara2a_logo.png',
+    sourceType: InvoiceSourceType.camera,
+    items: const [
+      InvoiceItemDraft(
+        name: 'Samsung Galaxy A56',
+        quantity: 1,
+        unitPriceMinor: 2499900,
+        lineTotalMinor: 2499900,
+      ),
+      InvoiceItemDraft(name: 'ضمان ممتد'),
+    ],
+  );
 }

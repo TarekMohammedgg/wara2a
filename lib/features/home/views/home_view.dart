@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/mock/mock_data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/invoice_card.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -12,6 +11,7 @@ import '../../invoice_capture/models/invoice_image_draft.dart';
 import '../../invoice_capture/view_models/invoice_capture_cubit.dart';
 import '../../invoice_capture/view_models/invoice_capture_state.dart';
 import '../../invoice_capture/widgets/capture_error_message.dart';
+import '../view_models/home_cubit.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -96,6 +96,8 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
+    final homeState = context.watch<HomeCubit>().state;
+    final invoices = homeState.invoices;
     return BlocListener<InvoiceCaptureCubit, InvoiceCaptureState>(
       listenWhen: (previous, current) =>
           current is InvoiceCaptureFailure ||
@@ -127,7 +129,7 @@ class HomeView extends StatelessWidget {
                     Expanded(
                       child: _StatCard(
                         icon: Icons.receipt_long_rounded,
-                        value: '24',
+                        value: invoices.length.toString().padLeft(2, '0'),
                         label: l10n.totalInvoices,
                         color: AppColors.blue,
                       ),
@@ -136,7 +138,10 @@ class HomeView extends StatelessWidget {
                     Expanded(
                       child: _StatCard(
                         icon: Icons.trending_up_rounded,
-                        value: '08',
+                        value: homeState.thisMonthCount.toString().padLeft(
+                          2,
+                          '0',
+                        ),
                         label: l10n.thisMonth,
                         color: AppColors.cyan,
                       ),
@@ -150,21 +155,58 @@ class HomeView extends StatelessWidget {
                   onAction: () => context.go('/search'),
                 ),
                 const SizedBox(height: 10),
-                ...MockData.invoices.map(
-                  (invoice) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: InvoiceCard(
-                      invoice: invoice,
-                      onTap: () => context.push('/details'),
+                if (homeState.status == HomeStatus.loading)
+                  const Center(child: CircularProgressIndicator())
+                else if (invoices.isEmpty)
+                  _EmptyInvoicesCard(
+                    title: l10n.noResults,
+                    body: l10n.noResultsBody,
+                  )
+                else
+                  ...invoices.map(
+                    (invoice) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: InvoiceCard(
+                        invoice: invoice,
+                        onTap: () => context.push('/details/${invoice.id}'),
+                      ),
                     ),
                   ),
-                ),
                 const SizedBox(height: 12),
                 _PrivacyCard(),
               ]),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyInvoicesCard extends StatelessWidget {
+  const _EmptyInvoicesCard({required this.title, required this.body});
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const Icon(Icons.receipt_long_outlined, color: AppColors.blue),
+            const SizedBox(height: 8),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
     );
   }
