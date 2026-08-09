@@ -33,6 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 /tmp/
+/devtools_options.yaml
 
 # Symbolication related
 app.*.symbols
