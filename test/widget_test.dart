@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
+import 'package:wara2a/features/invoice_capture/repositories/invoice_image_repository.dart';
 import 'package:wara2a/main.dart';
 
 void main() {
   testWidgets('renders the Arabic home experience', (tester) async {
-    await tester.pumpWidget(const Wara2aApp());
+    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
     await tester.pumpAndSettle();
 
     expect(find.text('أهلاً بك، تذكّر كل فاتورة.'), findsOneWidget);
@@ -28,7 +30,7 @@ void main() {
   });
 
   testWidgets('navigates through the presentation flow', (tester) async {
-    await tester.pumpWidget(const Wara2aApp());
+    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('البحث').last);
@@ -68,4 +70,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('تفاصيل الفاتورة'), findsOneWidget);
   });
+}
+
+class _TestImageRepository implements InvoiceImageRepository {
+  @override
+  Future<void> discardDraft(InvoiceImageDraft draft) async {}
+
+  @override
+  Future<InvoiceImageDraft?> pickImage(InvoiceImageSource source) async {
+    return InvoiceImageDraft(
+      id: 'test-draft',
+      path: '/missing-test-image.jpg',
+      source: source,
+      mimeType: 'image/jpeg',
+      byteLength: 1024,
+      width: 1000,
+      height: 1500,
+      createdAt: DateTime(2026),
+    );
+  }
+
+  @override
+  Future<InvoiceImageDraft?> recoverLostData() async => null;
 }

@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Wara2a uses the camera to capture an invoice image for on-device processing.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Wara2a lets you choose an invoice image from your photo library for on-device processing.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

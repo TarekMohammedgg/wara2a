@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camera capture is delegated to the system camera through image_picker. -->
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <application
         android:label="wara2a"
         android:name="${applicationName}"

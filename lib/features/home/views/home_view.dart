@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/mock/mock_data.dart';
@@ -7,9 +8,25 @@ import '../../../core/widgets/invoice_card.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoice_capture/models/invoice_image_draft.dart';
+import '../../invoice_capture/view_models/invoice_capture_cubit.dart';
+import '../../invoice_capture/view_models/invoice_capture_state.dart';
+import '../../invoice_capture/widgets/capture_error_message.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
+
+  Future<void> _selectImage(
+    BuildContext context,
+    BuildContext sheetContext,
+    InvoiceImageSource source,
+  ) async {
+    Navigator.pop(sheetContext);
+    final draft = await context.read<InvoiceCaptureCubit>().selectImage(source);
+    if (draft != null && context.mounted) {
+      context.push('/preview');
+    }
+  }
 
   void _showAddInvoiceSheet(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -41,10 +58,11 @@ class HomeView extends StatelessWidget {
                   title: l10n.useCamera,
                   color: AppColors.softBlue,
                   iconColor: AppColors.blue,
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.push('/preview');
-                  },
+                  onTap: () => _selectImage(
+                    context,
+                    sheetContext,
+                    InvoiceImageSource.camera,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 _SourceTile(
@@ -52,10 +70,11 @@ class HomeView extends StatelessWidget {
                   title: l10n.chooseGallery,
                   color: AppColors.softCyan,
                   iconColor: AppColors.cyan,
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.push('/preview');
-                  },
+                  onTap: () => _selectImage(
+                    context,
+                    sheetContext,
+                    InvoiceImageSource.gallery,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 SizedBox(
@@ -77,61 +96,76 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              Text(l10n.greeting, style: textTheme.headlineSmall),
-              const SizedBox(height: 7),
-              Text(l10n.greetingSubtitle, style: textTheme.bodyMedium),
-              const SizedBox(height: 22),
-              _HeroCard(onAdd: () => _showAddInvoiceSheet(context)),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.receipt_long_rounded,
-                      value: '24',
-                      label: l10n.totalInvoices,
-                      color: AppColors.blue,
+    return BlocListener<InvoiceCaptureCubit, InvoiceCaptureState>(
+      listenWhen: (previous, current) =>
+          current is InvoiceCaptureFailure ||
+          current is InvoiceCaptureRecovered,
+      listener: (context, state) {
+        if (state is InvoiceCaptureRecovered) {
+          context.push('/preview');
+          return;
+        }
+        final failure = state as InvoiceCaptureFailure;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(captureErrorMessage(l10n, failure.type))),
+        );
+      },
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Text(l10n.greeting, style: textTheme.headlineSmall),
+                const SizedBox(height: 7),
+                Text(l10n.greetingSubtitle, style: textTheme.bodyMedium),
+                const SizedBox(height: 22),
+                _HeroCard(onAdd: () => _showAddInvoiceSheet(context)),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.receipt_long_rounded,
+                        value: '24',
+                        label: l10n.totalInvoices,
+                        color: AppColors.blue,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.trending_up_rounded,
-                      value: '08',
-                      label: l10n.thisMonth,
-                      color: AppColors.cyan,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.trending_up_rounded,
+                        value: '08',
+                        label: l10n.thisMonth,
+                        color: AppColors.cyan,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              SectionTitle(
-                title: l10n.recentInvoices,
-                action: l10n.viewAll,
-                onAction: () => context.go('/search'),
-              ),
-              const SizedBox(height: 10),
-              ...MockData.invoices.map(
-                (invoice) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: InvoiceCard(
-                    invoice: invoice,
-                    onTap: () => context.push('/details'),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                SectionTitle(
+                  title: l10n.recentInvoices,
+                  action: l10n.viewAll,
+                  onAction: () => context.go('/search'),
+                ),
+                const SizedBox(height: 10),
+                ...MockData.invoices.map(
+                  (invoice) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InvoiceCard(
+                      invoice: invoice,
+                      onTap: () => context.push('/details'),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _PrivacyCard(),
-            ]),
+                const SizedBox(height: 12),
+                _PrivacyCard(),
+              ]),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

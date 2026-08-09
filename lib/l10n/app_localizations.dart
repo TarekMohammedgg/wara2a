@@ -98,6 +98,14 @@ class AppLocalizations {
   String get invoiceImage => _value('invoiceImage');
   String get invoiceSummary => _value('invoiceSummary');
   String get sourceCamera => _value('sourceCamera');
+  String get sourceGallery => _value('sourceGallery');
+  String get chooseAnotherSource => _value('chooseAnotherSource');
+  String get captureUnsupportedImage => _value('captureUnsupportedImage');
+  String get captureImageTooLarge => _value('captureImageTooLarge');
+  String get captureInvalidDimensions => _value('captureInvalidDimensions');
+  String get captureCorruptedImage => _value('captureCorruptedImage');
+  String get capturePickerError => _value('capturePickerError');
+  String get captureRecoveryError => _value('captureRecoveryError');
   String get savedJustNow => _value('savedJustNow');
   String get searchModelNote => _value('searchModelNote');
   String get recentQueryMerchant => _value('recentQueryMerchant');
@@ -198,6 +206,14 @@ class AppLocalizations {
     'invoiceImage': 'صورة الفاتورة',
     'invoiceSummary': 'ملخص الفاتورة',
     'sourceCamera': 'من الكاميرا',
+    'sourceGallery': 'من المعرض',
+    'chooseAnotherSource': 'اختيار مصدر آخر',
+    'captureUnsupportedImage': 'اختر صورة فاتورة بصيغة JPEG أو PNG أو WebP.',
+    'captureImageTooLarge': 'اختر صورة أصغر من 15 ميجابايت.',
+    'captureInvalidDimensions': 'اختر صورة فاتورة واضحة بأبعاد مناسبة.',
+    'captureCorruptedImage': 'تعذر فتح الصورة. اختر صورة أخرى.',
+    'capturePickerError': 'تعذر فتح الكاميرا أو المعرض. حاول مرة أخرى.',
+    'captureRecoveryError': 'تعذر استعادة الصورة. اخترها مرة أخرى.',
     'savedJustNow': 'تم الحفظ منذ لحظات',
     'searchModelNote': 'البحث يعمل محلياً ويحافظ على خصوصيتك.',
     'recentQueryMerchant': 'سامسونج',
@@ -291,6 +307,18 @@ class AppLocalizations {
     'invoiceImage': 'Invoice image',
     'invoiceSummary': 'Invoice summary',
     'sourceCamera': 'From camera',
+    'sourceGallery': 'From gallery',
+    'chooseAnotherSource': 'Choose another source',
+    'captureUnsupportedImage': 'Choose a JPEG, PNG, or WebP invoice image.',
+    'captureImageTooLarge': 'Choose an image smaller than 15 MB.',
+    'captureInvalidDimensions':
+        'Choose a clear invoice image with suitable dimensions.',
+    'captureCorruptedImage':
+        'This image could not be opened. Choose another image.',
+    'capturePickerError':
+        'The camera or gallery could not be opened. Try again.',
+    'captureRecoveryError':
+        'The image could not be recovered. Choose it again.',
     'savedJustNow': 'Saved moments ago',
     'searchModelNote': 'Search runs locally and protects your privacy.',
     'recentQueryMerchant': 'Samsung',
