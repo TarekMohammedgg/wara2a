@@ -37,6 +37,7 @@ migrate_working_dir/
 /android/build/
 /download/
 /lib/objectbox.dll
+/lib/objectbox.lib
 /lib/libobjectbox.so
 
 # Symbolication related

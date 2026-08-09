@@ -487,14 +487,16 @@ class FlutterGemmaEmbeddingEngine implements EmbeddingEngine {
   }
 
   static bool get supportsCurrentPlatform {
-    final abi = Abi.current().toString().toLowerCase();
-    if (Platform.isAndroid) return abi.contains('androidarm64');
-    if (Platform.isIOS) return abi.contains('iosarm64');
-    if (Platform.isWindows) return abi.contains('windowsx64');
-    if (Platform.isMacOS) return abi.contains('macosarm64');
-    if (Platform.isLinux) {
-      return abi.contains('linuxx64') || abi.contains('linuxarm64');
-    }
+    // `Abi.toString()` is an implementation detail and differs between Dart
+    // runtimes (for example, it may include separators). Compare the ABI
+    // constants directly so a valid arm64 Android device is not presented as
+    // unsupported before the license/model and calibration gates run.
+    final abi = Abi.current();
+    if (Platform.isAndroid) return abi == Abi.androidArm64;
+    if (Platform.isIOS) return abi == Abi.iosArm64;
+    if (Platform.isWindows) return abi == Abi.windowsX64;
+    if (Platform.isMacOS) return abi == Abi.macosArm64;
+    if (Platform.isLinux) return abi == Abi.linuxX64 || abi == Abi.linuxArm64;
     return false;
   }
 }

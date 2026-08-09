@@ -1,6 +1,10 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/embedding/embedding_engine.dart';
 import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/flutter_gemma_embedding_engine.dart';
 import 'package:wara2a/core/ai/model_management/model_lifecycle_state.dart';
 
 void main() {
@@ -66,6 +70,19 @@ void main() {
     expect(ready.canEmbed, isTrue);
     expect(loading.canEmbed, isFalse);
     expect(notInstalled.canEmbed, isFalse);
+  });
+
+  test('native support uses ABI constants instead of ABI display text', () {
+    final abi = Abi.current();
+    final expected =
+        (Platform.isAndroid && abi == Abi.androidArm64) ||
+        (Platform.isIOS && abi == Abi.iosArm64) ||
+        (Platform.isWindows && abi == Abi.windowsX64) ||
+        (Platform.isMacOS && abi == Abi.macosArm64) ||
+        (Platform.isLinux &&
+            (abi == Abi.linuxX64 || abi == Abi.linuxArm64));
+
+    expect(FlutterGemmaEmbeddingEngine.supportsCurrentPlatform, expected);
   });
 
   test('unavailable engine exposes a truthful capability gate', () async {
