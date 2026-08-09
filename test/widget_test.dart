@@ -71,10 +71,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('الوضع الداكن'), findsOneWidget);
     expect(find.text('محرك استخراج الفواتير المحلي'), findsOneWidget);
-    expect(
-      find.text('الحجم التقريبي 550–650 ميجابايت (OCR + Qwen)'),
-      findsOneWidget,
-    );
+    expect(find.text('567,541,717 بايت (541.3 MiB)'), findsOneWidget);
 
     await tester.tap(find.text('الرئيسية').last);
     await tester.pumpAndSettle();
@@ -94,7 +91,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('نجهّز مسودة فاتورتك'), findsWidgets);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'عرض المسودة'));
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'المتابعة والمراجعة يدوياً'),
+    );
     await tester.pumpAndSettle();
     expect(find.text('راجع الفاتورة'), findsOneWidget);
 

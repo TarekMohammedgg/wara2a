@@ -39,7 +39,8 @@ internal class OcrMethodChannelHandler(
     private val stateLock = Any()
     private val shutdownStarted = AtomicBoolean(false)
 
-    @Volatile private var disposed = false
+    @Volatile private var detached = false
+    @Volatile private var releaseInProgress = false
     private var activeJob: Job? = null
     private var runtime: PaddleOcrRuntime? = null
 
@@ -154,7 +155,28 @@ internal class OcrMethodChannelHandler(
     }
 
     private fun dispose(result: MethodChannel.Result) {
-        shutdown(result)
+        val operation = synchronized(stateLock) {
+            if (releaseInProgress) {
+                result.error("busy", "The OCR runtime is already releasing resources.", null)
+                return
+            }
+            releaseInProgress = true
+            activeJob?.also { it.cancel(CancellationException("OCR runtime released")) }
+        }
+        scope.launch {
+            try {
+                if (operation != null) joinAll(operation)
+                withContext(worker) {
+                    runtime?.close()
+                    runtime = null
+                }
+                result.success(null)
+            } catch (error: Throwable) {
+                reportError(result, error)
+            } finally {
+                releaseInProgress = false
+            }
+        }
     }
 
     private fun launchExclusive(
@@ -162,11 +184,11 @@ internal class OcrMethodChannelHandler(
         operation: suspend () -> Any?,
     ) {
         val job = synchronized(stateLock) {
-            if (disposed) {
-                result.error("disposed", "The OCR runtime is disposed.", null)
+            if (detached) {
+                result.error("disposed", "The OCR bridge is detached.", null)
                 return
             }
-            if (activeJob?.isActive == true) {
+            if (releaseInProgress || activeJob?.isActive == true) {
                 result.error("busy", "Another OCR operation is already running.", null)
                 return
             }
@@ -195,7 +217,7 @@ internal class OcrMethodChannelHandler(
             return
         }
         val operation = synchronized(stateLock) {
-            disposed = true
+            detached = true
             activeJob?.also { it.cancel(CancellationException("OCR runtime disposed")) }
         }
         scope.launch {

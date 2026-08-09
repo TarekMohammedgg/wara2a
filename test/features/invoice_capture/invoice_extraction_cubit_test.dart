@@ -6,8 +6,8 @@ import 'package:wara2a/core/ai/ai_runtime_error.dart';
 import 'package:wara2a/core/ai/extraction/invoice_draft_validator.dart';
 import 'package:wara2a/core/ai/model_management/model_coordinator.dart';
 import 'package:wara2a/core/ai/model_management/model_lifecycle_state.dart';
-import 'package:wara2a/core/ai/ocr/ocr_engine.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_draft.dart';
+import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
 import 'package:wara2a/features/invoice_capture/repositories/invoice_extraction_repository.dart';
 import 'package:wara2a/features/invoice_capture/view_models/invoice_extraction_cubit.dart';
 
@@ -27,7 +27,7 @@ void main() {
       );
       return InvoiceExtractionCubit(_FakeExtractionRepository(result: result));
     },
-    act: (cubit) => cubit.extract(_request()),
+    act: (cubit) => cubit.extract(_image()),
     expect: () => <Object>[isA<InvoiceExtractionManualReview>()],
     verify: (cubit) {
       final state = cubit.state as InvoiceExtractionManualReview;
@@ -46,21 +46,20 @@ void main() {
         ),
       ),
     ),
-    act: (cubit) => cubit.extract(_request()),
+    act: (cubit) => cubit.extract(_image()),
     expect: () => <Object>[isA<InvoiceExtractionCancelled>()],
   );
 }
 
-InvoiceExtractionRequest _request() => const InvoiceExtractionRequest(
-  imagePath: 'fixture.png',
-  ocrModels: OcrModelFiles(
-    detectorModelPath: 'det.onnx',
-    detectorConfigPath: 'det.yml',
-    arabicModelPath: 'ar.onnx',
-    arabicConfigPath: 'ar.yml',
-    latinModelPath: 'latin.onnx',
-    latinConfigPath: 'latin.yml',
-  ),
+InvoiceImageDraft _image() => InvoiceImageDraft(
+  id: 'fixture',
+  path: 'fixture.png',
+  source: InvoiceImageSource.gallery,
+  mimeType: 'image/png',
+  byteLength: 1,
+  width: 1,
+  height: 1,
+  createdAt: DateTime.utc(2026),
 );
 
 class _FakeExtractionRepository implements InvoiceExtractionRepository {
@@ -75,9 +74,7 @@ class _FakeExtractionRepository implements InvoiceExtractionRepository {
   Stream<ModelLifecycleState> get states => _states.stream;
 
   @override
-  Future<InvoiceExtractionResult> extract(
-    InvoiceExtractionRequest request,
-  ) async {
+  Future<InvoiceExtractionResult> extract(InvoiceImageDraft image) async {
     final failure = error;
     if (failure != null) throw failure;
     return result!;

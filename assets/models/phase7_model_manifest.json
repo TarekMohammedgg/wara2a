@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "researchedAt": "2026-08-09T00:00:00Z",
   "artifacts": [
     {
@@ -93,9 +93,9 @@
       "installable": true
     },
     {
-      "modelId": "qwen2.5-0.5b-q8-current-container",
-      "displayName": "Qwen2.5-0.5B-Instruct Q8 current community container",
-      "runtime": "MediaPipe GenAI task; incompatible with selected LiteRT-LM boundary",
+      "modelId": "qwen2.5-0.5b-instruct-q8-task",
+      "displayName": "Qwen2.5-0.5B-Instruct Q8",
+      "runtime": "MediaPipe LLM Inference 0.10.27 (CPU)",
       "fileName": "Qwen2.5-0.5B-Instruct_multi-prefill-seq_q8_ekv1280.task",
       "revision": "6c237a59eedeb06a821b21f0a59b03d346ac8bc3",
       "byteLength": 546660344,
@@ -105,7 +105,7 @@
       "format": "mediaPipeTask",
       "sourceUri": "https://huggingface.co/litert-community/Qwen2.5-0.5B-Instruct/resolve/6c237a59eedeb06a821b21f0a59b03d346ac8bc3/Qwen2.5-0.5B-Instruct_multi-prefill-seq_q8_ekv1280.task",
       "license": "Apache-2.0",
-      "installable": false
+      "installable": true
     }
   ]
 }

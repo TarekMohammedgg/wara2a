@@ -44,6 +44,7 @@ void main() {
         const InvoiceExtractionRequest(
           imagePath: 'invoice.jpg',
           ocrModels: modelFiles,
+          qwenModelPath: 'qwen.task',
         ),
       );
 
@@ -73,6 +74,7 @@ void main() {
         const InvoiceExtractionRequest(
           imagePath: 'invoice.jpg',
           ocrModels: modelFiles,
+          qwenModelPath: 'qwen.task',
         ),
       );
 
@@ -95,6 +97,7 @@ void main() {
       const InvoiceExtractionRequest(
         imagePath: 'invoice.jpg',
         ocrModels: modelFiles,
+        qwenModelPath: 'qwen.task',
       ),
     );
 
@@ -119,6 +122,7 @@ void main() {
       const InvoiceExtractionRequest(
         imagePath: 'invoice.jpg',
         ocrModels: modelFiles,
+        qwenModelPath: 'qwen.task',
         ocrInferenceTimeout: Duration(milliseconds: 10),
       ),
     );
@@ -148,6 +152,7 @@ void main() {
       const InvoiceExtractionRequest(
         imagePath: 'blank.jpg',
         ocrModels: modelFiles,
+        qwenModelPath: 'qwen.task',
       ),
     );
 
@@ -217,7 +222,10 @@ class _ScriptedInterpreter implements InvoiceTextInterpreter {
   );
 
   @override
-  Future<void> initialize({AiCancellationToken? cancellationToken}) async {
+  Future<void> initialize(
+    String modelPath, {
+    AiCancellationToken? cancellationToken,
+  }) async {
     cancellationToken?.throwIfCancelled();
   }
 

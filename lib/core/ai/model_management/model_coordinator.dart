@@ -15,15 +15,17 @@ class InvoiceExtractionRequest {
   const InvoiceExtractionRequest({
     required this.imagePath,
     required this.ocrModels,
+    required this.qwenModelPath,
     this.capabilityTimeout = const Duration(seconds: 5),
     this.ocrInitializationTimeout = const Duration(seconds: 15),
     this.ocrInferenceTimeout = const Duration(seconds: 30),
-    this.interpreterInitializationTimeout = const Duration(seconds: 20),
-    this.interpretationTimeout = const Duration(seconds: 45),
+    this.interpreterInitializationTimeout = const Duration(seconds: 45),
+    this.interpretationTimeout = const Duration(seconds: 60),
   });
 
   final String imagePath;
   final OcrModelFiles ocrModels;
+  final String qwenModelPath;
   final Duration capabilityTimeout;
   final Duration ocrInitializationTimeout;
   final Duration ocrInferenceTimeout;
@@ -40,6 +42,7 @@ class InvoiceExtractionResult {
     this.evidence,
     this.modelOutput,
     this.error,
+    this.interpretationElapsed,
   });
 
   final InvoiceDraft draft;
@@ -49,6 +52,7 @@ class InvoiceExtractionResult {
   final List<DraftValidationIssue> validationIssues;
   final String? modelOutput;
   final AiRuntimeException? error;
+  final Duration? interpretationElapsed;
 }
 
 class ModelCoordinator {
@@ -171,8 +175,10 @@ class ModelCoordinator {
 
       _emit(ModelLifecycleStatus.loading, ExtractionStage.loadingInterpreter);
       await _runStage<void>(
-        operation: () =>
-            interpreter.initialize(cancellationToken: cancellation),
+        operation: () => interpreter.initialize(
+          request.qwenModelPath,
+          cancellationToken: cancellation,
+        ),
         timeout: request.interpreterInitializationTimeout,
         stage: 'interpreter-initialize',
         cancellation: cancellation,
@@ -205,6 +211,8 @@ class ModelCoordinator {
           validation.draft!,
           evidence,
           initial.json,
+          modelId: initial.modelId,
+          interpretationElapsed: initial.elapsed,
           repaired: false,
         );
       }
@@ -236,6 +244,8 @@ class ModelCoordinator {
           validation.draft!,
           evidence,
           repaired.json,
+          modelId: repaired.modelId,
+          interpretationElapsed: repaired.elapsed,
           repaired: true,
         );
       }
@@ -357,16 +367,19 @@ class ModelCoordinator {
     InvoiceDraft draft,
     OcrEvidence evidence,
     String output, {
+    required String modelId,
+    required Duration interpretationElapsed,
     required bool repaired,
   }) {
     _emit(ModelLifecycleStatus.ready, ExtractionStage.completed);
     return InvoiceExtractionResult(
-      draft: draft,
+      draft: draft.copyWith(extractionModelId: modelId),
       evidence: evidence,
       manualFallback: false,
       repaired: repaired,
       validationIssues: const <DraftValidationIssue>[],
       modelOutput: output,
+      interpretationElapsed: interpretationElapsed,
     );
   }
 

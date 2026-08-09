@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/ai/ai_cancellation_token.dart';
+import '../../../core/ai/model_management/secure_model_installer.dart';
 import '../models/local_ai_status.dart';
 import '../repositories/local_ai_status_repository.dart';
 
@@ -13,6 +15,16 @@ class LocalAiStatusInitial extends LocalAiStatusState {
 
 class LocalAiStatusLoading extends LocalAiStatusState {
   const LocalAiStatusLoading();
+}
+
+class LocalAiStatusInstalling extends LocalAiStatusState {
+  const LocalAiStatusInstalling(this.progress);
+
+  final ModelInstallProgress progress;
+}
+
+class LocalAiStatusRemoving extends LocalAiStatusState {
+  const LocalAiStatusRemoving();
 }
 
 class LocalAiStatusLoaded extends LocalAiStatusState {
@@ -39,5 +51,37 @@ class LocalAiStatusCubit extends Cubit<LocalAiStatusState> {
     } on Object catch (error) {
       emit(LocalAiStatusFailure(error.toString()));
     }
+  }
+
+  Future<void> installRequired() async {
+    emit(const LocalAiStatusLoading());
+    try {
+      await repository.installRequired((progress) {
+        if (!isClosed) emit(LocalAiStatusInstalling(progress));
+      });
+      if (!isClosed) await refresh();
+    } on AiCancelledException {
+      if (!isClosed) await refresh();
+    } on Object catch (error) {
+      if (!isClosed) emit(LocalAiStatusFailure(error.toString()));
+    }
+  }
+
+  Future<void> cancelInstallation() => repository.cancelInstallation();
+
+  Future<void> removeRequired() async {
+    emit(const LocalAiStatusRemoving());
+    try {
+      await repository.removeRequired();
+      if (!isClosed) await refresh();
+    } on Object catch (error) {
+      if (!isClosed) emit(LocalAiStatusFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    await repository.close();
+    return super.close();
   }
 }

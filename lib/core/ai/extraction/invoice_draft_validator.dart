@@ -60,6 +60,7 @@ class InvoiceDraftValidator {
     'merchant',
     'documentType',
     'purchaseDate',
+    'invoiceNumber',
     'total',
     'currency',
     'products',
@@ -148,6 +149,13 @@ class InvoiceDraftValidator {
         );
       }
     }
+
+    final invoiceNumber = _nullableString(
+      decoded['invoiceNumber'],
+      r'$.invoiceNumber',
+      issues,
+      maxLength: 128,
+    );
 
     final currencyValue = _nullableString(
       decoded['currency'],
@@ -293,6 +301,7 @@ class InvoiceDraftValidator {
         merchant: merchant,
         documentType: documentType,
         purchaseDate: purchaseDate,
+        invoiceNumber: invoiceNumber,
         totalMinor: totalMinor,
         currency: currency,
         currencyCode: currencyCode,
@@ -310,6 +319,7 @@ class InvoiceDraftValidator {
         merchant: merchant,
         documentType: documentType,
         purchaseDate: purchaseDate,
+        invoiceNumber: invoiceNumber,
         totalMinor: totalMinor,
         currency: currency,
         products: products,
@@ -428,6 +438,7 @@ class InvoiceDraftValidator {
     required String? merchant,
     required String? documentType,
     required DateTime? purchaseDate,
+    required String? invoiceNumber,
     required int? totalMinor,
     required String? currency,
     required String? currencyCode,
@@ -465,6 +476,7 @@ class InvoiceDraftValidator {
 
     requireTextEvidence(merchant, r'$.merchant');
     requireTextEvidence(documentType, r'$.documentType');
+    requireTextEvidence(invoiceNumber, r'$.invoiceNumber');
     for (var index = 0; index < products.length; index++) {
       final product = products[index];
       final path = '\$.products[$index]';

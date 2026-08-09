@@ -857,6 +857,13 @@ Replace the fake image source with reliable local capture/import while leaving e
 
 Replace simulated extraction with the validated local two-stage OCR-and-text pipeline on Android.
 
+**Evidence-backed status (2026-08-10): implemented; release acceptance incomplete**
+
+- The durable image -> PaddleOCR -> Qwen text-only -> strict Dart validation -> editable Review -> explicit ObjectBox save workflow is connected on Android. Settings provides exact-size/hash model install, status, cancellation, and removal; model weights are not bundled in Git or the APK.
+- The Qwen LiteRT-LM artifact gap is resolved for Android through a documented fallback to pinned MediaPipe LLM Inference `0.10.27` and the official revision-pinned Q8 `.task`. Current LiteRT-LM conversion remains a future migration because no official pinned hosted `.litertlm` with a reproducible URL/size/hash was available for this exact model.
+- One physical realme RMX3636 (Android 15, arm64, about 8 GB RAM) proved model verification, 14-line bilingual OCR in 2,797 ms, and direct Qwen load plus strict JSON generation (352 ms initialization, 6,604 ms generation). Peak sampled PSS/RSS were 1,689,818/1,782,784 kB; thermal details are recorded in `docs/phase7-local-ai-runtime.md`.
+- The final invoice-shaped run did not pass acceptance: Qwen emitted a 1,034-character unterminated/repetitive object, then the one repair attempt timed out at 60 seconds. Validation rejected it and the app returned the intended editable manual fallback without saving. The 50-invoice corpus, 4/6 GB device matrix, airplane-mode product install, and ten sequential runs remain open release gates.
+
 **Features**
 
 - OCR and Qwen model installation/status/removal UI.
@@ -895,10 +902,10 @@ Replace simulated extraction with the validated local two-stage OCR-and-text pip
 
 **Dependencies/packages**
 
-- native Paddle Lite runtime and pinned PP-OCRv5 mobile artifacts
-- `flutter_gemma` for Qwen model management/core APIs, if the Phase 7 spike passes
-- `flutter_gemma_litertlm` for Qwen text inference, if the Phase 7 spike passes
-- no MediaPipe or direct vision-language package unless the architecture changes through an explicit decision record
+- native PaddleOCR Android ONNX bridge, ONNX Runtime Android `1.21.1`, official OpenCV Android `4.13.0`, and revision-pinned PP-OCRv5 mobile artifacts
+- MediaPipe LLM Inference `0.10.27` for the verified Android Qwen `.task` fallback; keep the app-owned interpreter boundary for later LiteRT-LM migration
+- no `flutter_gemma`/`flutter_gemma_litertlm` until a compatible `.litertlm` artifact and wrapper pass the release gates
+- no direct vision-language package; PaddleOCR remains the only image-reading stage
 
 **Acceptance criteria**
 
