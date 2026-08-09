@@ -103,6 +103,7 @@ class ImagePreviewView extends StatelessWidget {
                           child: PrimaryButton(
                             label: l10n.useImage,
                             icon: Icons.arrow_back_rounded,
+                            singleLine: true,
                             onPressed: isSelecting
                                 ? null
                                 : () => context.push('/processing'),

@@ -34,6 +34,9 @@ class AppLocalizations {
   String get noCloud => _value('noCloud');
   String get home => _value('home');
   String get search => _value('search');
+  String get notifications => _value('notifications');
+  String get noNotifications => _value('noNotifications');
+  String get notificationsBody => _value('notificationsBody');
   String get settings => _value('settings');
   String get searchHint => _value('searchHint');
   String get recentSearches => _value('recentSearches');
@@ -141,6 +144,9 @@ class AppLocalizations {
     'noCloud': 'لا توجد سحابة',
     'home': 'الرئيسية',
     'search': 'البحث',
+    'notifications': 'الإشعارات',
+    'noNotifications': 'لا توجد إشعارات جديدة',
+    'notificationsBody': 'سنخبرك هنا إذا احتاجت فاتورة إلى مراجعة.',
     'settings': 'الإعدادات',
     'searchHint': 'ابحث عن متجر، منتج، أو مبلغ...',
     'recentSearches': 'عمليات البحث الأخيرة',
@@ -191,9 +197,9 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'الوضع الداكن',
-    'modelStatus': 'محرك الذكاء المحلي',
-    'modelReady': 'جاهز للاستخدام بدون إنترنت',
-    'modelSize': 'حجم النموذج 2.6 جيجابايت',
+    'modelStatus': 'محرك استخراج الفواتير المحلي',
+    'modelReady': 'تظهر هنا حالة تثبيت PaddleOCR وQwen2.5-0.5B',
+    'modelSize': 'الحجم التقريبي 550–650 ميجابايت (OCR + Qwen)',
     'installModel': 'إدارة النموذج',
     'privacy': 'الخصوصية',
     'privacyBody':
@@ -240,6 +246,10 @@ class AppLocalizations {
     'noCloud': 'No cloud',
     'home': 'Home',
     'search': 'Search',
+    'notifications': 'Notifications',
+    'noNotifications': 'No new notifications',
+    'notificationsBody':
+        'We will let you know here if an invoice needs your attention.',
     'settings': 'Settings',
     'searchHint': 'Search for a store, product, or amount...',
     'recentSearches': 'Recent searches',
@@ -292,9 +302,9 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'Dark mode',
-    'modelStatus': 'Local intelligence engine',
-    'modelReady': 'Ready to use offline',
-    'modelSize': 'Model size 2.6 GB',
+    'modelStatus': 'Local invoice extraction engine',
+    'modelReady': 'PaddleOCR and Qwen2.5-0.5B installation status appears here',
+    'modelSize': 'Approx. 550–650 MB (OCR + Qwen)',
     'installModel': 'Manage model',
     'privacy': 'Privacy',
     'privacyBody':

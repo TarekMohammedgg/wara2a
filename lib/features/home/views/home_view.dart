@@ -419,7 +419,11 @@ class _SourceTile extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  // Source tiles keep a light surface in both themes, so their
+                  // labels need an ink color instead of the dark-theme default.
+                  color: AppColors.ink,
+                ),
               ),
             ),
             Icon(Icons.arrow_back_rounded, color: iconColor),

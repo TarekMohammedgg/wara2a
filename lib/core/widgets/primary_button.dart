@@ -6,6 +6,7 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.expanded = true,
+    this.singleLine = false,
     super.key,
   });
 
@@ -13,16 +14,25 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool expanded;
+  final bool singleLine;
 
   @override
   Widget build(BuildContext context) {
     final button = FilledButton.icon(
       onPressed: onPressed,
       icon: Icon(icon ?? Icons.arrow_back_rounded, size: 19),
-      label: Text(label),
+      label: singleLine
+          ? FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(label, maxLines: 1, softWrap: false),
+            )
+          : Text(label),
       style: FilledButton.styleFrom(
         minimumSize: const Size(0, 54),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: singleLine ? 8 : 20,
+          vertical: 14,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
         textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
       ),

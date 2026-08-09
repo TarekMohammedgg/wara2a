@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wara2a/core/theme/app_colors.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
 import 'package:wara2a/features/invoice_capture/repositories/invoice_image_repository.dart';
 import 'package:wara2a/main.dart';
@@ -29,6 +30,38 @@ void main() {
     expect(find.text('اختيار من المعرض'), findsOneWidget);
   });
 
+  testWidgets('opens notifications without navigating to settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const Wara2aApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text('الإشعارات'), findsOneWidget);
+    expect(find.text('لا توجد إشعارات جديدة'), findsOneWidget);
+  });
+
+  testWidgets('keeps add invoice labels readable in dark mode', (tester) async {
+    await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('الإعدادات').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('الرئيسية').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'إضافة فاتورة'));
+    await tester.pumpAndSettle();
+
+    final cameraLabel = tester.widget<Text>(find.text('تصوير فاتورة'));
+    expect(cameraLabel.style?.color, AppColors.ink);
+  });
+
   testWidgets('navigates through the presentation flow', (tester) async {
     await tester.pumpWidget(Wara2aApp(imageRepository: _TestImageRepository()));
     await tester.pumpAndSettle();
@@ -41,7 +74,11 @@ void main() {
     await tester.tap(find.text('الإعدادات').last);
     await tester.pumpAndSettle();
     expect(find.text('الوضع الداكن'), findsOneWidget);
-    expect(find.text('محرك الذكاء المحلي'), findsOneWidget);
+    expect(find.text('محرك استخراج الفواتير المحلي'), findsOneWidget);
+    expect(
+      find.text('الحجم التقريبي 550–650 ميجابايت (OCR + Qwen)'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('الرئيسية').last);
     await tester.pumpAndSettle();
@@ -52,6 +89,9 @@ void main() {
     expect(find.text('راجع الصورة'), findsOneWidget);
 
     final useImageButton = find.widgetWithText(FilledButton, 'استخدام الصورة');
+    final useImageLabel = tester.widget<Text>(find.text('استخدام الصورة'));
+    expect(useImageLabel.maxLines, 1);
+    expect(useImageLabel.softWrap, isFalse);
     await tester.ensureVisible(useImageButton);
     await tester.tap(useImageButton);
     await tester.pump();
