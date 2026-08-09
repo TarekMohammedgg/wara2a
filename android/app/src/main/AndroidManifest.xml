@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Used only for explicit model installation; invoice inference is local. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Camera capture is delegated to the system camera through image_picker. -->
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <application

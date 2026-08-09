@@ -216,17 +216,66 @@ class _ModelCard extends StatelessWidget {
           const SizedBox(height: 12),
           Align(
             alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              onPressed: presentation.canRefresh
-                  ? () => context.read<LocalAiStatusCubit>().refresh()
-                  : null,
-              style: TextButton.styleFrom(foregroundColor: Colors.white),
-              child: Text(l10n.modelRefresh),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                if (presentation.canCancel)
+                  TextButton(
+                    onPressed: () =>
+                        context.read<LocalAiStatusCubit>().cancelInstallation(),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: Text(l10n.modelCancelInstall),
+                  ),
+                if (presentation.canInstall)
+                  FilledButton.tonal(
+                    onPressed: () =>
+                        context.read<LocalAiStatusCubit>().installRequired(),
+                    child: Text(l10n.modelInstall),
+                  ),
+                if (presentation.canRemove)
+                  TextButton(
+                    onPressed: () => _confirmRemoval(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.softWarning,
+                    ),
+                    child: Text(l10n.modelRemove),
+                  ),
+                if (presentation.canRefresh)
+                  TextButton(
+                    onPressed: () =>
+                        context.read<LocalAiStatusCubit>().refresh(),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: Text(l10n.modelRefresh),
+                  ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmRemoval(BuildContext context) async {
+    final shouldRemove = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.modelRemove),
+        content: Text(l10n.modelRemoveConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.modelRemove),
+          ),
+        ],
+      ),
+    );
+    if (shouldRemove == true && context.mounted) {
+      await context.read<LocalAiStatusCubit>().removeRequired();
+    }
   }
 }
 
@@ -238,6 +287,9 @@ class _ModelStatusPresentation {
     required this.iconColor,
     required this.showProgress,
     required this.canRefresh,
+    required this.canInstall,
+    required this.canRemove,
+    required this.canCancel,
     this.progress,
   });
 
@@ -247,6 +299,9 @@ class _ModelStatusPresentation {
   final Color iconColor;
   final bool showProgress;
   final bool canRefresh;
+  final bool canInstall;
+  final bool canRemove;
+  final bool canCancel;
   final double? progress;
 
   factory _ModelStatusPresentation.fromState(
@@ -261,16 +316,53 @@ class _ModelStatusPresentation {
         iconColor: AppColors.mint,
         showProgress: true,
         canRefresh: false,
+        canInstall: false,
+        canRemove: false,
+        canCancel: false,
+      );
+    }
+    if (state is LocalAiStatusInstalling) {
+      final progress = state.progress;
+      final downloaded = (progress.completedBytes / (1024 * 1024))
+          .toStringAsFixed(1);
+      final total = (progress.totalBytes / (1024 * 1024)).toStringAsFixed(1);
+      return _ModelStatusPresentation(
+        title: l10n.modelInstalling,
+        details: '$downloaded / $total MiB',
+        icon: Icons.downloading_rounded,
+        iconColor: AppColors.mint,
+        showProgress: true,
+        progress: progress.fraction,
+        canRefresh: false,
+        canInstall: false,
+        canRemove: false,
+        canCancel: true,
+      );
+    }
+    if (state is LocalAiStatusRemoving) {
+      return _ModelStatusPresentation(
+        title: l10n.modelRemoving,
+        details: l10n.modelRemoveConfirm,
+        icon: Icons.delete_sweep_outlined,
+        iconColor: AppColors.warning,
+        showProgress: true,
+        canRefresh: false,
+        canInstall: false,
+        canRemove: false,
+        canCancel: false,
       );
     }
     if (state is LocalAiStatusFailure) {
       return _ModelStatusPresentation(
         title: l10n.modelError,
-        details: l10n.modelRequirement,
+        details: l10n.modelInstallFailed,
         icon: Icons.error_outline_rounded,
         iconColor: AppColors.warning,
         showProgress: false,
         canRefresh: true,
+        canInstall: true,
+        canRemove: false,
+        canCancel: false,
       );
     }
     final readiness = (state as LocalAiStatusLoaded).status.readiness;
@@ -283,6 +375,9 @@ class _ModelStatusPresentation {
         showProgress: true,
         progress: 1,
         canRefresh: true,
+        canInstall: false,
+        canRemove: true,
+        canCancel: false,
       ),
       LocalAiReadiness.modelsNotInstalled => _ModelStatusPresentation(
         title: l10n.modelNotInstalled,
@@ -291,6 +386,9 @@ class _ModelStatusPresentation {
         iconColor: AppColors.warning,
         showProgress: false,
         canRefresh: true,
+        canInstall: true,
+        canRemove: false,
+        canCancel: false,
       ),
       LocalAiReadiness.modelVerificationFailed => _ModelStatusPresentation(
         title: l10n.modelVerificationFailed,
@@ -299,6 +397,9 @@ class _ModelStatusPresentation {
         iconColor: AppColors.warning,
         showProgress: false,
         canRefresh: true,
+        canInstall: true,
+        canRemove: false,
+        canCancel: false,
       ),
       LocalAiReadiness.interpreterArtifactIncompatible =>
         _ModelStatusPresentation(
@@ -308,6 +409,9 @@ class _ModelStatusPresentation {
           iconColor: AppColors.warning,
           showProgress: false,
           canRefresh: true,
+          canInstall: false,
+          canRemove: false,
+          canCancel: false,
         ),
       LocalAiReadiness.unsupportedPlatform => _ModelStatusPresentation(
         title: l10n.modelUnsupported,
@@ -316,6 +420,9 @@ class _ModelStatusPresentation {
         iconColor: AppColors.warning,
         showProgress: false,
         canRefresh: true,
+        canInstall: false,
+        canRemove: false,
+        canCancel: false,
       ),
       LocalAiReadiness.runtimeUnavailable => _ModelStatusPresentation(
         title: l10n.modelRuntimeUnavailable,
@@ -324,6 +431,9 @@ class _ModelStatusPresentation {
         iconColor: AppColors.warning,
         showProgress: false,
         canRefresh: true,
+        canInstall: false,
+        canRemove: false,
+        canCancel: false,
       ),
     };
   }

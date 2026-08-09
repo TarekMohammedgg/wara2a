@@ -3,6 +3,7 @@ enum AiErrorCode {
   incompatibleArtifact,
   modelNotInstalled,
   modelVerificationFailed,
+  insufficientStorage,
   invalidImage,
   initializationFailed,
   inferenceFailed,

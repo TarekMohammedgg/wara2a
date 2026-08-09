@@ -21,6 +21,7 @@ void main() {
     expect(result.draft, isNotNull);
     expect(result.draft!.merchant, 'بي تك');
     expect(result.draft!.purchaseDate, DateTime.utc(2026, 8, 9));
+    expect(result.draft!.invoiceNumber, 'BT-2026-0841');
     expect(result.draft!.totalMinor, 2499900);
     expect(result.draft!.currencyCode, 'EGP');
     expect(result.draft!.products.single.lineTotalMinor, 2499900);
@@ -47,8 +48,9 @@ void main() {
       final unknownKey = validator.validate(
         modelOutput:
             '{"merchant":null,"documentType":null,"purchaseDate":null,'
-            '"total":null,"currency":null,"products":[],'
-            '"warrantyMonths":null,"rawText":null,"invoiceNumber":"x"}',
+            '"invoiceNumber":null,"total":null,"currency":null,'
+            '"products":[],"warrantyMonths":null,"rawText":null,'
+            '"unexpected":"x"}',
         evidence: evidence,
         origin: InvoiceDraftOrigin.extracted,
       );
@@ -60,7 +62,8 @@ void main() {
       final hallucination = validator.validate(
         modelOutput:
             '{"merchant":"متجر غير موجود","documentType":null,'
-            '"purchaseDate":null,"total":null,"currency":null,'
+            '"purchaseDate":null,"invoiceNumber":null,"total":null,'
+            '"currency":null,'
             '"products":[],"warrantyMonths":null,"rawText":null}',
         evidence: evidence,
         origin: InvoiceDraftOrigin.extracted,
@@ -73,7 +76,8 @@ void main() {
       final unrelatedNumberAsTotal = validator.validate(
         modelOutput:
             '{"merchant":null,"documentType":null,"purchaseDate":null,'
-            '"total":12,"currency":"EGP","products":[],'
+            '"invoiceNumber":null,"total":12,"currency":"EGP",'
+            '"products":[],'
             '"warrantyMonths":null,"rawText":null}',
         evidence: evidence,
         origin: InvoiceDraftOrigin.extracted,
@@ -88,7 +92,8 @@ void main() {
       final unknownCurrency = validator.validate(
         modelOutput:
             '{"merchant":null,"documentType":null,"purchaseDate":null,'
-            '"total":24999,"currency":"XYZ","products":[],'
+            '"invoiceNumber":null,"total":24999,"currency":"XYZ",'
+            '"products":[],'
             '"warrantyMonths":null,"rawText":null}',
         evidence: evidence,
         origin: InvoiceDraftOrigin.extracted,

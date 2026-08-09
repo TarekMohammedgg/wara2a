@@ -32,6 +32,9 @@ class ModelInstallationLayout {
       latinConfigPath: pathFor(manifest.byId('ppocrv5-mobile-rec-latin-yaml')),
     );
   }
+
+  String qwenModelPath(Phase7ModelManifest manifest) =>
+      pathFor(manifest.byId('qwen2.5-0.5b-instruct-q8-task'));
 }
 
 class ModelInstallationReport {
@@ -52,6 +55,27 @@ class ModelInstallationInspector {
   const ModelInstallationInspector({this.verifier = const ModelFileVerifier()});
 
   final ModelFileVerifier verifier;
+
+  Future<ModelInstallationReport> inspectRequired({
+    required Phase7ModelManifest manifest,
+    required ModelInstallationLayout layout,
+    AiCancellationToken? cancellationToken,
+  }) async {
+    const ids = requiredPhase7ArtifactIds;
+    final results = <ModelFileVerification>[];
+    for (final id in ids) {
+      cancellationToken?.throwIfCancelled();
+      final artifact = manifest.byId(id);
+      results.add(
+        await verifier.verify(
+          artifact: artifact,
+          path: layout.pathFor(artifact),
+          cancellationToken: cancellationToken,
+        ),
+      );
+    }
+    return ModelInstallationReport(List.unmodifiable(results));
+  }
 
   Future<ModelInstallationReport> inspectOcr({
     required Phase7ModelManifest manifest,
@@ -81,3 +105,13 @@ class ModelInstallationInspector {
     return ModelInstallationReport(List.unmodifiable(results));
   }
 }
+
+const List<String> requiredPhase7ArtifactIds = <String>[
+  'ppocrv5-mobile-det-onnx',
+  'ppocrv5-mobile-det-yaml',
+  'ppocrv5-mobile-rec-arabic-onnx',
+  'ppocrv5-mobile-rec-arabic-yaml',
+  'ppocrv5-mobile-rec-latin-onnx',
+  'ppocrv5-mobile-rec-latin-yaml',
+  'qwen2.5-0.5b-instruct-q8-task',
+];

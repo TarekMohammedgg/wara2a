@@ -7,7 +7,7 @@ class InvoiceInterpretationRequest {
   const InvoiceInterpretationRequest({
     required this.prompt,
     required this.attempt,
-    this.maximumOutputTokens = 768,
+    this.maximumOutputTokens = 384,
   });
 
   final String prompt;
@@ -29,7 +29,10 @@ class InvoiceInterpretationOutput {
 
 abstract interface class InvoiceTextInterpreter {
   Future<ModelCapability> capability();
-  Future<void> initialize({AiCancellationToken? cancellationToken});
+  Future<void> initialize(
+    String modelPath, {
+    AiCancellationToken? cancellationToken,
+  });
 
   /// Each call must use a fresh or reset generation session. Implementations
   /// must not retain a rejected response in history for the repair attempt.
@@ -63,7 +66,10 @@ class IncompatibleQwenLiteRtInterpreter implements InvoiceTextInterpreter {
   );
 
   @override
-  Future<void> initialize({AiCancellationToken? cancellationToken}) async {
+  Future<void> initialize(
+    String modelPath, {
+    AiCancellationToken? cancellationToken,
+  }) async {
     cancellationToken?.throwIfCancelled();
     throw const AiRuntimeException(
       code: AiErrorCode.incompatibleArtifact,

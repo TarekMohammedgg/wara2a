@@ -15,15 +15,27 @@ class LocalAiStatus {
     required this.readiness,
     required this.ocrCapability,
     required this.interpreterCapability,
-    this.ocrFiles = const <ModelFileVerification>[],
+    this.modelFiles = const <ModelFileVerification>[],
   });
 
   final LocalAiReadiness readiness;
   final ModelCapability ocrCapability;
   final ModelCapability interpreterCapability;
-  final List<ModelFileVerification> ocrFiles;
+  final List<ModelFileVerification> modelFiles;
 
-  int get installedOcrBytes => ocrFiles
+  List<ModelFileVerification> get ocrFiles => modelFiles
+      .where(
+        (file) =>
+            file.artifact.capabilities.any((value) => value.startsWith('ocr-')),
+      )
+      .toList(growable: false);
+
+  int get installedBytes => modelFiles
       .where((file) => file.isVerified)
       .fold<int>(0, (total, file) => total + (file.actualByteLength ?? 0));
+
+  int get requiredBytes => modelFiles.fold<int>(
+    0,
+    (total, file) => total + file.artifact.byteLength,
+  );
 }

@@ -6,6 +6,7 @@ import '../../../core/ai/ai_runtime_error.dart';
 import '../../../core/ai/model_management/model_coordinator.dart';
 import '../../../core/ai/model_management/model_lifecycle_state.dart';
 import '../repositories/invoice_extraction_repository.dart';
+import '../models/invoice_image_draft.dart';
 
 sealed class InvoiceExtractionState {
   const InvoiceExtractionState();
@@ -60,9 +61,9 @@ class InvoiceExtractionCubit extends Cubit<InvoiceExtractionState> {
   final InvoiceExtractionRepository repository;
   late final StreamSubscription<ModelLifecycleState> _lifecycleSubscription;
 
-  Future<void> extract(InvoiceExtractionRequest request) async {
+  Future<void> extract(InvoiceImageDraft image) async {
     try {
-      final result = await repository.extract(request);
+      final result = await repository.extract(image);
       if (isClosed) return;
       emit(
         result.manualFallback

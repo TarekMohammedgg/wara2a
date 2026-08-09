@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app_dependencies.dart';
-import '../mock/mock_data.dart';
 import '../widgets/app_shell.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/home/views/home_view.dart';
@@ -15,6 +14,10 @@ import '../../features/invoice_capture/views/review_view.dart';
 import '../../features/invoice_details/views/invoice_details_view.dart';
 import '../../features/home/view_models/home_cubit.dart';
 import '../../features/invoice_capture/view_models/review_cubit.dart';
+import '../../features/invoice_capture/view_models/invoice_capture_cubit.dart';
+import '../../features/invoice_capture/view_models/invoice_extraction_cubit.dart';
+import '../../features/invoice_capture/models/invoice_draft.dart';
+import '../../features/invoice_capture/models/review_route_args.dart';
 import '../../features/invoice_details/view_models/invoice_details_cubit.dart';
 
 GoRouter buildAppRouter(AppDependencies dependencies) {
@@ -48,7 +51,16 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
       ),
       GoRoute(
         path: '/processing',
-        builder: (context, state) => const ProcessingView(),
+        builder: (context, state) {
+          final image = context.read<InvoiceCaptureCubit>().state.draft;
+          if (image == null) return const _UnknownRouteView();
+          return BlocProvider(
+            create: (_) => InvoiceExtractionCubit(
+              dependencies.createInvoiceExtractionRepository(),
+            )..extract(image),
+            child: ProcessingView(image: image),
+          );
+        },
       ),
       GoRoute(
         path: '/review',
@@ -56,11 +68,16 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
           final invoiceId = int.tryParse(
             state.uri.queryParameters['invoiceId'] ?? '',
           );
+          final routeArgs = state.extra is ReviewRouteArgs
+              ? state.extra! as ReviewRouteArgs
+              : null;
           return BlocProvider(
             create: (_) {
               final cubit = ReviewCubit(
                 dependencies.invoiceCapture,
-                initialDraft: MockData.draft,
+                initialDraft:
+                    routeArgs?.draft ??
+                    InvoiceDraft.manualFallback(rawText: ''),
               );
               if (invoiceId != null && invoiceId > 0) {
                 cubit.loadForEditing(invoiceId);

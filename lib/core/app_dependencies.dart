@@ -2,10 +2,14 @@ import 'package:path_provider/path_provider.dart';
 
 import '../features/home/repositories/home_invoice_repository.dart';
 import '../features/invoice_capture/repositories/invoice_capture_repository.dart';
+import '../features/invoice_capture/repositories/invoice_extraction_repository.dart';
 import '../features/invoice_details/repositories/invoice_repository.dart';
 import '../features/invoice_details/repositories/objectbox_invoice_repository.dart';
 import '../features/settings/repositories/settings_repository.dart';
 import 'database/objectbox_database.dart';
+import 'ai/extraction/method_channel_qwen_interpreter.dart';
+import 'ai/model_management/model_coordinator.dart';
+import 'ai/ocr/method_channel_ocr_engine.dart';
 import 'storage/invoice_file_cleaner.dart';
 
 class AppDependencies {
@@ -52,6 +56,14 @@ class AppDependencies {
       invoiceCapture: LocalInvoiceCaptureRepository(invoices),
     );
   }
+
+  InvoiceExtractionRepository createInvoiceExtractionRepository() =>
+      LocalInvoiceExtractionRepository(
+        ModelCoordinator(
+          ocrEngineFactory: PlatformOcrEngine.new,
+          interpreterFactory: PlatformQwenTextInterpreter.new,
+        ),
+      );
 
   void dispose() => database.close();
 }

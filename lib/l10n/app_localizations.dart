@@ -64,6 +64,12 @@ class AppLocalizations {
   String get processingStepOne => _value('processingStepOne');
   String get processingStepTwo => _value('processingStepTwo');
   String get processingStepThree => _value('processingStepThree');
+  String get processingManualTitle => _value('processingManualTitle');
+  String get processingManualBody => _value('processingManualBody');
+  String get processingFailureTitle => _value('processingFailureTitle');
+  String get processingFailureBody => _value('processingFailureBody');
+  String get continueManualReview => _value('continueManualReview');
+  String get retry => _value('retry');
   String get showDraft => _value('showDraft');
   String get reviewTitle => _value('reviewTitle');
   String get reviewSubtitle => _value('reviewSubtitle');
@@ -75,6 +81,15 @@ class AppLocalizations {
   String get warranty => _value('warranty');
   String get products => _value('products');
   String get addProduct => _value('addProduct');
+  String get product => _value('product');
+  String get productName => _value('productName');
+  String get quantity => _value('quantity');
+  String get unitPrice => _value('unitPrice');
+  String get lineTotal => _value('lineTotal');
+  String get invalidValue => _value('invalidValue');
+  String get currencyCodeHint => _value('currencyCodeHint');
+  String get manualReviewNotice => _value('manualReviewNotice');
+  String get rawOcrText => _value('rawOcrText');
   String get saveInvoice => _value('saveInvoice');
   String get fieldRequired => _value('fieldRequired');
   String get detailsTitle => _value('detailsTitle');
@@ -99,6 +114,13 @@ class AppLocalizations {
   String get modelError => _value('modelError');
   String get modelRequirement => _value('modelRequirement');
   String get modelRefresh => _value('modelRefresh');
+  String get modelInstall => _value('modelInstall');
+  String get modelInstalling => _value('modelInstalling');
+  String get modelCancelInstall => _value('modelCancelInstall');
+  String get modelRemove => _value('modelRemove');
+  String get modelRemoving => _value('modelRemoving');
+  String get modelRemoveConfirm => _value('modelRemoveConfirm');
+  String get modelInstallFailed => _value('modelInstallFailed');
   String get privacy => _value('privacy');
   String get privacyBody => _value('privacyBody');
   String get localStorage => _value('localStorage');
@@ -182,6 +204,13 @@ class AppLocalizations {
     'processingStepOne': 'تجهيز الصورة',
     'processingStepTwo': 'قراءة النص العربي والإنجليزي',
     'processingStepThree': 'تحضير المسودة للمراجعة',
+    'processingManualTitle': 'تعذر إكمال الاستخراج المحلي',
+    'processingManualBody':
+        'يمكنك متابعة المراجعة يدوياً. لن يتم حفظ أي شيء قبل تأكيدك.',
+    'processingFailureTitle': 'توقف الاستخراج المحلي بأمان',
+    'processingFailureBody': 'حاول مرة أخرى أو ارجع لاختيار صورة أوضح.',
+    'continueManualReview': 'المتابعة بالمراجعة اليدوية',
+    'retry': 'إعادة المحاولة',
     'showDraft': 'عرض المسودة',
     'reviewTitle': 'راجع الفاتورة',
     'reviewSubtitle': 'هذه مسودة قابلة للتعديل. لن يتم الحفظ إلا بعد تأكيدك.',
@@ -193,6 +222,16 @@ class AppLocalizations {
     'warranty': 'الضمان',
     'products': 'المنتجات',
     'addProduct': 'إضافة منتج',
+    'product': 'المنتج',
+    'productName': 'اسم المنتج',
+    'quantity': 'الكمية',
+    'unitPrice': 'سعر الوحدة',
+    'lineTotal': 'إجمالي البند',
+    'invalidValue': 'أدخل قيمة صحيحة أو اترك الحقل فارغاً.',
+    'currencyCodeHint': 'استخدم رمز عملة من 3 أحرف مثل EGP.',
+    'manualReviewNotice':
+        'لم يكتمل الاستخراج الآلي. أدخل أو صحح الحقول يدوياً ثم راجعها قبل الحفظ.',
+    'rawOcrText': 'النص المقروء من الصورة',
     'saveInvoice': 'تأكيد وحفظ الفاتورة',
     'fieldRequired': 'هذا الحقل مطلوب',
     'detailsTitle': 'تفاصيل الفاتورة',
@@ -208,19 +247,28 @@ class AppLocalizations {
     'modelStatus': 'محرك استخراج الفواتير المحلي',
     'modelReady': 'جاهز للاستخدام بدون إنترنت',
     'modelReadyDetails':
-        'تم التحقق من ملفات OCR وأبلغ مفسّر النص المحلي أنه متاح.',
+        'تم التحقق من ملفات PaddleOCR وQwen. يعمل الاستخراج محلياً بدون إنترنت.',
     'modelChecking': 'جارٍ التحقق من المحرك المحلي',
     'modelNotInstalled': 'نماذج قراءة الفواتير غير مثبتة',
-    'modelArtifactBlocked': 'ملف Qwen المتوافق مع LiteRT-LM غير متاح بعد',
+    'modelArtifactBlocked': 'ملف Qwen غير متوافق مع المحرك المحلي',
     'modelUnsupported': 'الاستخراج المحلي غير مدعوم على هذا الجهاز حالياً',
     'modelVerificationFailed': 'فشل التحقق من ملفات النماذج',
     'modelRuntimeUnavailable': 'محرك قراءة الفواتير غير متاح',
     'modelError': 'تعذر فحص حالة النماذج',
     'modelRequirement':
-        'يتطلب نحو 21 م.ب لملفات OCR وملف Qwen بصيغة .litertlm تم اختباره والتحقق منه.',
+        'تنزيل واحد بحجم 567,541,717 بايت (541.3 MiB): ملفات PaddleOCR وQwen Q8. يتم التحقق من SHA-256 قبل التفعيل.',
     'modelRefresh': 'إعادة التحقق',
-    'modelSize': 'الحجم يعتمد على ملفات OCR ونموذج Qwen المثبت',
-    'installModel': 'إدارة النموذج',
+    'modelInstall': 'تثبيت الذكاء المحلي',
+    'modelInstalling': 'جارٍ تثبيت النماذج والتحقق منها',
+    'modelCancelInstall': 'إلغاء التنزيل',
+    'modelRemove': 'حذف النماذج',
+    'modelRemoving': 'جارٍ حذف النماذج',
+    'modelRemoveConfirm':
+        'سيتم حذف نماذج الذكاء فقط، ولن تُحذف الفواتير أو الصور.',
+    'modelInstallFailed':
+        'تعذر تثبيت النماذج بأمان. لم يتم تفعيل أي ملف غير موثوق.',
+    'modelSize': '567,541,717 بايت (541.3 MiB)',
+    'installModel': 'تثبيت الذكاء المحلي',
     'privacy': 'الخصوصية',
     'privacyBody':
         'الصور والبيانات لا تغادر جهازك. لا حسابات ولا تحليلات ولا خوادم خارجية.',
@@ -298,6 +346,13 @@ class AppLocalizations {
     'processingStepOne': 'Preparing image',
     'processingStepTwo': 'Reading Arabic and English text',
     'processingStepThree': 'Preparing the review draft',
+    'processingManualTitle': 'Local extraction could not finish',
+    'processingManualBody':
+        'You can continue with manual review. Nothing is saved before you confirm.',
+    'processingFailureTitle': 'Local extraction stopped safely',
+    'processingFailureBody': 'Try again or go back and choose a clearer image.',
+    'continueManualReview': 'Continue with manual review',
+    'retry': 'Try again',
     'showDraft': 'View draft',
     'reviewTitle': 'Review invoice',
     'reviewSubtitle':
@@ -310,6 +365,16 @@ class AppLocalizations {
     'warranty': 'Warranty',
     'products': 'Products',
     'addProduct': 'Add product',
+    'product': 'Product',
+    'productName': 'Product name',
+    'quantity': 'Quantity',
+    'unitPrice': 'Unit price',
+    'lineTotal': 'Line total',
+    'invalidValue': 'Enter a valid value or leave the field blank.',
+    'currencyCodeHint': 'Use a 3-letter currency code such as EGP.',
+    'manualReviewNotice':
+        'Automatic extraction did not finish. Enter or correct fields manually and review them before saving.',
+    'rawOcrText': 'Text read from the image',
     'saveInvoice': 'Confirm and save invoice',
     'fieldRequired': 'This field is required',
     'detailsTitle': 'Invoice details',
@@ -325,20 +390,29 @@ class AppLocalizations {
     'modelStatus': 'Local invoice extraction engine',
     'modelReady': 'Ready to use offline',
     'modelReadyDetails':
-        'OCR files are verified and the local text interpreter reports ready.',
+        'PaddleOCR and Qwen files are verified. Extraction now works locally offline.',
     'modelChecking': 'Checking the local engine',
     'modelNotInstalled': 'Invoice-reading models are not installed',
     'modelArtifactBlocked':
-        'A LiteRT-LM-compatible Qwen file is not available yet',
+        'The Qwen file is incompatible with the local runtime',
     'modelUnsupported': 'Local extraction is not supported on this device yet',
     'modelVerificationFailed': 'Model file verification failed',
     'modelRuntimeUnavailable': 'The invoice-reading runtime is unavailable',
     'modelError': 'Could not inspect local model status',
     'modelRequirement':
-        'Requires about 21 MB of OCR files and a tested, verified Qwen .litertlm file.',
+        'One 567,541,717-byte (541.3 MiB) download installs PaddleOCR and Qwen Q8. SHA-256 is checked before activation.',
     'modelRefresh': 'Check again',
-    'modelSize': 'Size depends on the installed OCR files and Qwen model',
-    'installModel': 'Manage model',
+    'modelInstall': 'Install offline AI',
+    'modelInstalling': 'Installing and verifying models',
+    'modelCancelInstall': 'Cancel download',
+    'modelRemove': 'Remove models',
+    'modelRemoving': 'Removing models',
+    'modelRemoveConfirm':
+        'Only AI model files will be removed. Invoices and images stay intact.',
+    'modelInstallFailed':
+        'The models could not be installed safely. No unverified file was activated.',
+    'modelSize': '567,541,717 bytes (541.3 MiB)',
+    'installModel': 'Install offline AI',
     'privacy': 'Privacy',
     'privacyBody':
         'Images and data never leave your device. No accounts, analytics, or external servers.',

@@ -49,7 +49,9 @@ android {
 
 dependencies {
     implementation(project(":ppocr-sdk"))
+    implementation("com.google.mediapipe:tasks-genai:0.10.27")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    testImplementation("junit:junit:4.13.2")
 }
 
 kotlin {

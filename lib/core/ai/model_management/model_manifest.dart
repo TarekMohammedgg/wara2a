@@ -42,6 +42,19 @@ class ModelArtifactManifest {
       return value;
     }
 
+    final modelId = requireValue<String>('modelId');
+    final fileName = requireValue<String>('fileName');
+    final safePathComponent = RegExp(r'^[a-zA-Z0-9._-]+$');
+    if (!safePathComponent.hasMatch(modelId) ||
+        !safePathComponent.hasMatch(fileName) ||
+        modelId == '.' ||
+        modelId == '..' ||
+        fileName == '.' ||
+        fileName == '..') {
+      throw const FormatException(
+        'Manifest modelId and fileName must be safe path components.',
+      );
+    }
     final sha256 = requireValue<String>('sha256').toLowerCase();
     if (!RegExp(r'^[a-f0-9]{64}$').hasMatch(sha256)) {
       throw const FormatException(
@@ -65,10 +78,10 @@ class ModelArtifactManifest {
     }
 
     return ModelArtifactManifest(
-      modelId: requireValue<String>('modelId'),
+      modelId: modelId,
       displayName: requireValue<String>('displayName'),
       runtime: requireValue<String>('runtime'),
-      fileName: requireValue<String>('fileName'),
+      fileName: fileName,
       revision: requireValue<String>('revision'),
       byteLength: byteLength,
       sha256: sha256,

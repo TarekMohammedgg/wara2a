@@ -35,7 +35,11 @@ internal object OpenCvLoader {
             System.loadLibrary("opencv_java4")
             loaded = true
         } catch (error: Throwable) {
-            throw PaddleOcrException.InitializationFailed("OpenCV 4.5.3 is unavailable", error)
+            val detail = error.message?.take(240) ?: error::class.java.simpleName
+            throw PaddleOcrException.InitializationFailed(
+                "OpenCV 4.13.0 is unavailable: $detail",
+                error,
+            )
         }
     }
 }

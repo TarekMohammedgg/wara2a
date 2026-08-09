@@ -34,7 +34,7 @@ class PaddleOcrRuntime private constructor(
 
     companion object {
         const val RUNTIME_DESCRIPTION =
-            "PaddleOCR@2661c7c0 / ONNX Runtime 1.21.1 / OpenCV 4.5.3 (CPU)"
+            "PaddleOCR@2661c7c0 / ONNX Runtime 1.21.1 / OpenCV 4.13.0 (CPU)"
 
         fun create(
             modelFiles: OcrModelFiles,
