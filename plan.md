@@ -1,8 +1,10 @@
 # Wara2a — Offline Invoice Intelligence Implementation Plan
 
-> Status: architecture and implementation plan only. No application implementation is included.
+> Status: Android-first implementation is integrated and release-QA tested, but the MVP is **not complete**. Deterministic tests, Android native unit tests, and arm64 APK builds are passing; release acceptance remains blocked by the physical extraction-quality, semantic-retrieval, device-matrix, offline-install, and Apple-platform gates listed below.
 >
 > Research snapshot: 2026-08-09. Mobile AI packages and runtimes are changing quickly; Phase 1 must re-check all pinned versions before installation.
+
+> QA snapshot: 2026-08-10. A physical RMX3636 (Android 15, arm64) launched the fresh debug APK and confirmed Arabic RTL, English LTR, light/dark preference persistence, local model-status messaging, and the license/access gate for absent EmbeddingGemma artifacts. It did not have approved OCR/Qwen or EmbeddingGemma files provisioned during this QA pass, so it is not fresh extraction or semantic-quality evidence.
 
 ## 1. Product definition and boundaries
 
@@ -554,6 +556,11 @@ The manifest and verified installation record are critical state and must be sto
 
 ### Phase 1 — Foundation verification and dependency baseline
 
+**Evidence-backed status (2026-08-10): implemented; deterministic baseline verified.**
+
+- `flutter pub get`, code generation, formatting, and `flutter analyze` are part of the current release-QA matrix. Android is arm64-only with application ID `com.tarek.wara2a`; native debug unit checks and fresh arm64 APK builds are also exercised.
+- The Flutter/AGP dependency set still emits future built-in-Kotlin migration warnings for `flutter_gemma`, `objectbox_flutter_libs`, and `ppocr-sdk`. They are warnings, not a current compile or test failure.
+
 **Goal**
 
 Lock the existing MVVM/feature-based conventions, verify build targets, and install only the foundational UI/state packages.
@@ -607,6 +614,11 @@ Lock the existing MVVM/feature-based conventions, verify build targets, and inst
 
 ### Phase 2 — Arabic design system and navigation
 
+**Evidence-backed status (2026-08-10): implemented; physical smoke verified, full widget gate incomplete.**
+
+- RMX3636 smoke evidence confirms Arabic RTL defaults, English LTR after switching language, light/dark switching, and persistence across a relaunch. Home, Search, and Settings opened with accessible labels.
+- Preview, Processing, Review, and Details were not physically traversed in this no-model/no-image QA pass. The legacy widget runner still produces no output and times out under current Windows process contention, so it is not counted as passing evidence.
+
 **Goal**
 
 Create the main visual language, RTL behavior, and complete navigation skeleton before business logic.
@@ -654,6 +666,11 @@ Create the main visual language, RTL behavior, and complete navigation skeleton 
 - Keep extraction progress truthful; do not show fake percentages that the future runtime cannot supply.
 
 ### Phase 3 — Home and invoice flow with mock data
+
+**Evidence-backed status (2026-08-10): implemented; non-widget flow tests pass; physical save/review evidence remains limited.**
+
+- Capture, extraction-state, draft mapping, review-save, cancellation, and manual-fallback Cubit tests pass.
+- This QA pass did not select a physical camera/gallery image or reach a model-backed Review screen, so the end-to-end device flow is not newly accepted here.
 
 **Goal**
 
@@ -706,6 +723,11 @@ Finish the complete capture-to-details user experience using fake repositories a
 
 ### Phase 4 — Search UI with mock routing and results
 
+**Evidence-backed status (2026-08-10): implemented; deterministic routing verified.**
+
+- The Search route opens on RMX3636. Search Cubit and intent-router tests cover exact identifiers, Arabic/Persian digits, amount/date/warranty filters, and safe semantic routing.
+- Device data was intentionally empty, so real saved-invoice result navigation was not physically demonstrated in this QA pass.
+
 **Goal**
 
 Finalize the search experience before embeddings or vector storage exist.
@@ -748,6 +770,11 @@ Finalize the search experience before embeddings or vector storage exist.
 - Do not expose a similarity threshold until retrieval evaluation establishes one.
 
 ### Phase 5 — ObjectBox local data layer
+
+**Evidence-backed status (2026-08-10): implemented; host persistence checks pass; device persistence gate remains open.**
+
+- ObjectBox CRUD, atomic rollback, migration, stale-embedding, HNSW, and managed-file deletion tests pass after installing ObjectBox's official local test DLL. That DLL and the accompanying import library remain ignored from Git.
+- An invoice create/edit/delete/restart sequence was not run on the physical device during this pass.
 
 **Goal**
 
@@ -804,6 +831,11 @@ Replace fake persistence with reliable local invoice storage while keeping mocke
 
 ### Phase 6 — Real camera/gallery input and local image management
 
+**Evidence-backed status (2026-08-10): implemented in code and unit-tested; physical acceptance remains incomplete.**
+
+- Image validation and capture Cubit tests cover unsupported/corrupt/oversized images, cancelled reselect, lost-data recovery, and cleanup of replaced drafts.
+- Camera and gallery selection plus durable-image restart behavior were not physically retested in this pass; do not treat the unit suite as substitute device evidence.
+
 **Goal**
 
 Replace the fake image source with reliable local capture/import while leaving extraction mocked.
@@ -857,12 +889,13 @@ Replace the fake image source with reliable local capture/import while leaving e
 
 Replace simulated extraction with the validated local two-stage OCR-and-text pipeline on Android.
 
-**Evidence-backed status (2026-08-10): implemented; release acceptance incomplete**
+**Evidence-backed status (2026-08-10): implemented; release acceptance incomplete.**
 
 - The durable image -> PaddleOCR -> Qwen text-only -> strict Dart validation -> editable Review -> explicit ObjectBox save workflow is connected on Android. Settings provides exact-size/hash model install, status, cancellation, and removal; model weights are not bundled in Git or the APK.
 - The Qwen LiteRT-LM artifact gap is resolved for Android through a documented fallback to pinned MediaPipe LLM Inference `0.10.27` and the official revision-pinned Q8 `.task`. Current LiteRT-LM conversion remains a future migration because no official pinned hosted `.litertlm` with a reproducible URL/size/hash was available for this exact model.
 - One physical realme RMX3636 (Android 15, arm64, about 8 GB RAM) proved model verification, 14-line bilingual OCR in 2,797 ms, and direct Qwen load plus strict JSON generation (352 ms initialization, 6,604 ms generation). Peak sampled PSS/RSS were 1,689,818/1,782,784 kB; thermal details are recorded in `docs/phase7-local-ai-runtime.md`.
 - The final invoice-shaped run did not pass acceptance: Qwen emitted a 1,034-character unterminated/repetitive object, then the one repair attempt timed out at 60 seconds. Validation rejected it and the app returned the intended editable manual fallback without saving. The 50-invoice corpus, 4/6 GB device matrix, airplane-mode product install, and ten sequential runs remain open release gates.
+- Current release QA also fixed the arm64 release R8 configuration for the pinned MediaPipe artifact and corrected an ABI-display bug that falsely called a real arm64 device unsupported for EmbeddingGemma. The fresh QA device had no verified Phase 7 models, so no new full invoice-shaped extraction result replaces the unresolved manual-fallback evidence above.
 
 **Features**
 
@@ -927,6 +960,11 @@ Replace simulated extraction with the validated local two-stage OCR-and-text pip
 
 ### Phase 8 — EmbeddingGemma integration
 
+**Evidence-backed status (2026-08-10): integration code present; model/runtime acceptance blocked.**
+
+- The app owns an EmbeddingGemma adapter, fixed 768-dimensional vector validation, and pending-index handling. On the physical arm64 device, absent artifacts correctly present the Gemma-license/approved-access requirement; no token is embedded.
+- The model and tokenizer are license-gated and absent. There is no verified model load, document/query generation, or airplane-mode embedding evidence, so semantic indexing remains disabled.
+
 **Goal**
 
 Generate and persist one local retrieval embedding from each reviewed invoice.
@@ -977,6 +1015,11 @@ Generate and persist one local retrieval embedding from each reviewed invoice.
 
 ### Phase 9 — Local semantic search
 
+**Evidence-backed status (2026-08-10): implementation and contract fixtures present; release gate blocked.**
+
+- The repository enforces `SemanticSearchCalibration.blocked()` by default and returns no fabricated semantic result. The checked-in 100-query fixture is a labeled contract/evaluation set, not a measured EmbeddingGemma quality result.
+- No approved model, real 100-query calibration, Recall@K/MRR result, device latency result, or offline semantic run exists. Semantic search must remain disabled.
+
 **Goal**
 
 Replace mock semantic results with EmbeddingGemma plus ObjectBox cosine HNSW retrieval.
@@ -1022,6 +1065,11 @@ Replace mock semantic results with EmbeddingGemma plus ObjectBox cosine HNSW ret
 - HNSW is approximate; tune for recall before optimizing speed.
 
 ### Phase 10 — Keyword, structured, and limited hybrid search
+
+**Evidence-backed status (2026-08-10): exact/structured functionality verified; semantic branch intentionally gated.**
+
+- ObjectBox search, Search Cubit, and intent-router tests pass for exact model/merchant terms and Arabic/Persian numeric, date, currency, document-type, and warranty filters.
+- Hybrid behavior falls back only to explicit identifiers while semantic calibration is blocked; conversational claims are not silently presented as exact matches.
 
 **Goal**
 
@@ -1070,6 +1118,11 @@ Route queries to the simplest correct search mechanism and combine filters only 
 - Metadata-filtered ANN behavior needs recall testing with selective filters.
 
 ### Phase 11 — Performance, lifecycle, storage, and privacy hardening
+
+**Evidence-backed status (2026-08-10): partially implemented; release hardening gates remain open.**
+
+- Secure model-install tests cover HTTPS, exact length/SHA-256 verification, atomic activation, and failed-download non-activation. Source review found no cloud/auth/analytics SDK and no bundled secrets/models.
+- The final Android APK includes transitive `background_downloader` permissions (`WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`) in addition to `INTERNET`; no app source schedules an unrelated transfer, but final privacy/permission approval remains required. Airplane-mode product install/relaunch, low storage, lifecycle, thermal, battery, and deletion-recovery acceptance are still open.
 
 **Goal**
 
@@ -1123,6 +1176,12 @@ Make model installation, repeated inference, memory lifecycle, and local storage
 - GPU drivers differ significantly; stability wins over benchmark speed.
 
 ### Phase 12 — Testing, offline validation, and release readiness
+
+**Evidence-backed status (2026-08-10): partial release QA completed; MVP release is blocked.**
+
+- Split non-widget tests, ObjectBox host-native checks, Android native unit tests, and arm64 debug/release build checks are part of the current QA evidence. The physical RMX3636 smoke launch is successful.
+- The legacy widget suite remains a no-output timeout under current Windows runner contention. iOS/macOS, 4 GB/6 GB Android coverage, normal on-device model download, airplane-mode end-to-end behavior, 50-invoice extraction accuracy, ten sequential extractions, and real 100-query semantic calibration remain incomplete.
+- The current `release` variant deliberately uses Android's debug signing configuration. It is a QA APK, not a production-distributable signed release, until a protected production signing workflow is configured and verified.
 
 **Goal**
 
@@ -1180,6 +1239,8 @@ Prove the MVP works offline, is recoverable, and meets agreed Arabic extraction/
 - Do not call iOS complete until a signed physical-device release build passes.
 
 ## 12. MVP-wide Definition of Done
+
+**Current status (2026-08-10): not met.** The implemented app is a credible Android-first MVP candidate, but no completion claim is valid until the unverified physical-model, quality, semantic, device-matrix, offline, and Apple-platform gates above are closed.
 
 The MVP is complete only when all of the following are true:
 
