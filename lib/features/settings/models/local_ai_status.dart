@@ -16,12 +16,14 @@ class LocalAiStatus {
     required this.ocrCapability,
     required this.interpreterCapability,
     this.modelFiles = const <ModelFileVerification>[],
+    this.embeddingReady = false,
   });
 
   final LocalAiReadiness readiness;
   final ModelCapability ocrCapability;
   final ModelCapability interpreterCapability;
   final List<ModelFileVerification> modelFiles;
+  final bool embeddingReady;
 
   List<ModelFileVerification> get ocrFiles => modelFiles
       .where(

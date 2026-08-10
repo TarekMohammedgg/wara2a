@@ -293,19 +293,19 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'الوضع الداكن',
-    'modelStatus': 'محرك استخراج الفواتير المحلي',
+    'modelStatus': 'محرك الذكاء المحلي',
     'modelReady': 'جاهز للاستخدام بدون إنترنت',
     'modelReadyDetails':
-        'تم التحقق من ملفات PaddleOCR وQwen. يعمل الاستخراج محلياً بدون إنترنت.',
+        'تم التحقق من PP-OCRv5 mobile وQwen2.5-0.5B-Instruct Q8 وmultilingual-e5-small qint8. يعمل الاستخراج والبحث بالمعنى محلياً.',
     'modelChecking': 'جارٍ التحقق من المحرك المحلي',
-    'modelNotInstalled': 'نماذج قراءة الفواتير غير مثبتة',
-    'modelArtifactBlocked': 'ملف Qwen غير متوافق مع المحرك المحلي',
-    'modelUnsupported': 'الاستخراج المحلي غير مدعوم على هذا الجهاز حالياً',
+    'modelNotInstalled': 'نماذج الذكاء المحلي غير مثبتة',
+    'modelArtifactBlocked': 'ملف Qwen2.5-0.5B-Instruct Q8 غير متوافق مع المحرك المحلي',
+    'modelUnsupported': 'الذكاء المحلي غير مدعوم على هذا الجهاز حالياً',
     'modelVerificationFailed': 'فشل التحقق من ملفات النماذج',
-    'modelRuntimeUnavailable': 'محرك قراءة الفواتير غير متاح',
+    'modelRuntimeUnavailable': 'محرك الذكاء المحلي غير متاح',
     'modelError': 'تعذر فحص حالة النماذج',
     'modelRequirement':
-        'تنزيل واحد بحجم 567,541,717 بايت (541.3 MiB): ملفات PaddleOCR وQwen Q8. يتم التحقق من SHA-256 قبل التفعيل.',
+        'تنزيل واحد بحجم 685,888,541 بايت (654.1 MiB): PP-OCRv5 mobile (كشف + عربي + لاتيني)، Qwen2.5-0.5B-Instruct Q8، وmultilingual-e5-small qint8. يتم التحقق من SHA-256 قبل التفعيل.',
     'modelRefresh': 'إعادة التحقق',
     'modelInstall': 'تثبيت الذكاء المحلي',
     'modelInstalling': 'جارٍ تثبيت النماذج والتحقق منها',
@@ -316,7 +316,7 @@ class AppLocalizations {
         'سيتم حذف نماذج الذكاء فقط، ولن تُحذف الفواتير أو الصور.',
     'modelInstallFailed':
         'تعذر تثبيت النماذج بأمان. لم يتم تفعيل أي ملف غير موثوق.',
-    'modelSize': '567,541,717 بايت (541.3 MiB)',
+    'modelSize': '685,888,541 بايت (654.1 MiB)',
     'installModel': 'تثبيت الذكاء المحلي',
     'privacy': 'الخصوصية',
     'privacyBody':
@@ -352,7 +352,7 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'البحث بالمعنى متوقف حتى يعتمد حد المسافة على مجموعة تقييم من 100 استعلام على الأقل.',
     'semanticModelUnavailable':
-        'نموذج E5 المحلي غير مثبت أو غير متاح على هذا الجهاز.',
+        'نموذج multilingual-e5-small المحلي غير مثبت أو غير متاح على هذا الجهاز.',
     'semanticQueryTooLong': 'الاستعلام أطول من الحد الآمن للنموذج المحلي.',
     'semanticRuntimeFailure': 'تعذر تشغيل محرك البحث بالمعنى محلياً.',
     'keywordFallback': 'تم عرض التطابقات المباشرة التي تحقق الفلاتر فقط.',
@@ -366,16 +366,16 @@ class AppLocalizations {
     'creditNote': 'إشعار دائن',
     'warrantyCertificate': 'شهادة ضمان',
     'embeddingSearchModel': 'محرك البحث بالمعنى',
-    'embeddingReady': 'نموذج E5 جاهز محلياً',
+    'embeddingReady': 'multilingual-e5-small جاهز محلياً',
     'embeddingAccessRequired': 'ملف النموذج العام غير متاح للتثبيت',
-    'embeddingNotInstalled': 'نموذج E5 غير مثبت',
+    'embeddingNotInstalled': 'multilingual-e5-small غير مثبت',
     'embeddingUnsupported': 'البحث بالمعنى غير مدعوم على هذا الجهاز',
-    'embeddingRuntimeFailure': 'تعذر تهيئة محرك E5 المحلي',
+    'embeddingRuntimeFailure': 'تعذر تهيئة محرك multilingual-e5-small المحلي',
     'embeddingWorking': 'جارٍ تجهيز محرك البحث بالمعنى',
     'embeddingInstallRequirement':
-        'تنزيل صريح لمرة واحدة لملف ONNX العام المثبت بطول 118,346,824 بايت وSHA-256 محدد. ترخيص النموذج MIT ولا يلزم حساب أو رمز API.',
+        'يُثبَّت مع حزمة الذكاء المحلي أعلاه: intfloat/multilingual-e5-small qint8 (model_qint8_avx512_vnni.onnx، 118,346,824 بايت، MIT).',
     'embeddingModelDetails':
-        'يعمل multilingual-e5-small محلياً على CPU وينتج متجهات من 384 بُعداً لاسترجاع العربية والإنجليزية والنص المختلط. يتطلب Android API 30 ومعمارية arm64.',
+        'يعمل multilingual-e5-small qint8 محلياً على CPU وينتج متجهات من 384 بُعداً لاسترجاع العربية والإنجليزية والنص المختلط. يتطلب Android API 30 ومعمارية arm64.',
     'installEmbeddingModel': 'تثبيت النموذج',
     'reindexInvoices': 'فهرسة الفواتير المعلقة',
   };
@@ -472,20 +472,20 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'Dark mode',
-    'modelStatus': 'Local invoice extraction engine',
+    'modelStatus': 'Local offline AI engine',
     'modelReady': 'Ready to use offline',
     'modelReadyDetails':
-        'PaddleOCR and Qwen files are verified. Extraction now works locally offline.',
+        'PP-OCRv5 mobile, Qwen2.5-0.5B-Instruct Q8, and multilingual-e5-small qint8 are verified. Extraction and semantic search run locally.',
     'modelChecking': 'Checking the local engine',
-    'modelNotInstalled': 'Invoice-reading models are not installed',
+    'modelNotInstalled': 'Offline AI models are not installed',
     'modelArtifactBlocked':
-        'The Qwen file is incompatible with the local runtime',
-    'modelUnsupported': 'Local extraction is not supported on this device yet',
+        'The Qwen2.5-0.5B-Instruct Q8 file is incompatible with the local runtime',
+    'modelUnsupported': 'Local offline AI is not supported on this device yet',
     'modelVerificationFailed': 'Model file verification failed',
-    'modelRuntimeUnavailable': 'The invoice-reading runtime is unavailable',
+    'modelRuntimeUnavailable': 'The local offline AI runtime is unavailable',
     'modelError': 'Could not inspect local model status',
     'modelRequirement':
-        'One 567,541,717-byte (541.3 MiB) download installs PaddleOCR and Qwen Q8. SHA-256 is checked before activation.',
+        'One 685,888,541-byte (654.1 MiB) download installs PP-OCRv5 mobile (det + Arabic + Latin), Qwen2.5-0.5B-Instruct Q8, and multilingual-e5-small qint8. SHA-256 is checked before activation.',
     'modelRefresh': 'Check again',
     'modelInstall': 'Install offline AI',
     'modelInstalling': 'Installing and verifying models',
@@ -496,7 +496,7 @@ class AppLocalizations {
         'Only AI model files will be removed. Invoices and images stay intact.',
     'modelInstallFailed':
         'The models could not be installed safely. No unverified file was activated.',
-    'modelSize': '567,541,717 bytes (541.3 MiB)',
+    'modelSize': '685,888,541 bytes (654.1 MiB)',
     'installModel': 'Install offline AI',
     'privacy': 'Privacy',
     'privacyBody':
@@ -536,7 +536,7 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'Semantic search stays disabled until its distance threshold is approved on at least 100 labeled queries.',
     'semanticModelUnavailable':
-        'The local E5 model is not installed or unavailable on this device.',
+        'The local multilingual-e5-small model is not installed or unavailable on this device.',
     'semanticQueryTooLong': 'The query exceeds the local model safety limit.',
     'semanticRuntimeFailure': 'The local semantic-search runtime failed.',
     'keywordFallback':
@@ -551,17 +551,18 @@ class AppLocalizations {
     'creditNote': 'Credit note',
     'warrantyCertificate': 'Warranty certificate',
     'embeddingSearchModel': 'Semantic search engine',
-    'embeddingReady': 'E5 is ready locally',
+    'embeddingReady': 'multilingual-e5-small is ready locally',
     'embeddingAccessRequired':
         'The public model artifact is unavailable for installation',
-    'embeddingNotInstalled': 'E5 is not installed',
+    'embeddingNotInstalled': 'multilingual-e5-small is not installed',
     'embeddingUnsupported': 'Semantic search is unsupported on this device',
-    'embeddingRuntimeFailure': 'The local E5 runtime could not be initialized',
+    'embeddingRuntimeFailure':
+        'The local multilingual-e5-small runtime could not be initialized',
     'embeddingWorking': 'Preparing the semantic-search engine',
     'embeddingInstallRequirement':
-        'An explicit one-time install downloads the public 118,346,824-byte ONNX file pinned by SHA-256. The model is MIT licensed; no account or API key is needed.',
+        'Installed with the offline AI package above: intfloat/multilingual-e5-small qint8 (model_qint8_avx512_vnni.onnx, 118,346,824 bytes, MIT).',
     'embeddingModelDetails':
-        'multilingual-e5-small runs locally on CPU and produces 384-dimensional vectors for Arabic, English, and mixed-text retrieval. Android requires API 30 and arm64.',
+        'multilingual-e5-small qint8 runs locally on CPU and produces 384-dimensional vectors for Arabic, English, and mixed-text retrieval. Android requires API 30 and arm64.',
     'installEmbeddingModel': 'Install model',
     'reindexInvoices': 'Index pending invoices',
   };

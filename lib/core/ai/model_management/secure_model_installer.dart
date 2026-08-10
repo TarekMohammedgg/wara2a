@@ -82,12 +82,42 @@ abstract interface class ModelArtifactTransfer {
 
 class HttpsModelArtifactTransfer implements ModelArtifactTransfer {
   const HttpsModelArtifactTransfer({
-    this.connectionTimeout = const Duration(seconds: 20),
-    this.idleTimeout = const Duration(seconds: 30),
+    this.connectionTimeout = const Duration(seconds: 30),
+    this.idleTimeout = const Duration(seconds: 120),
+    this.maxAttempts = 3,
   });
 
   final Duration connectionTimeout;
   final Duration idleTimeout;
+  final int maxAttempts;
+
+  /// Hugging Face often returns relative `/api/resolve-cache/...` redirects for
+  /// small non-LFS files. Resolve them against the previous URI before judging
+  /// the scheme so relative HTTPS hops are accepted and non-HTTPS hops are not.
+  static bool redirectsStayOnHttps(
+    Uri origin,
+    List<RedirectInfo> redirects,
+  ) {
+    var current = origin;
+    for (final redirect in redirects) {
+      final next = current.resolveUri(redirect.location);
+      if (!next.isScheme('https')) return false;
+      current = next;
+    }
+    return true;
+  }
+
+  Duration _idleTimeoutFor(ModelArtifactManifest artifact) {
+    // Large mobile models need a longer per-chunk idle window than small YAML
+    // configs; keep a floor so flaky Wi-Fi does not abort immediately.
+    if (artifact.byteLength >= 100 * 1024 * 1024) {
+      return const Duration(minutes: 5);
+    }
+    if (artifact.byteLength >= 5 * 1024 * 1024) {
+      return const Duration(minutes: 2);
+    }
+    return idleTimeout;
+  }
 
   @override
   Future<void> download({
@@ -103,6 +133,49 @@ class HttpsModelArtifactTransfer implements ModelArtifactTransfer {
         message: 'Model downloads require HTTPS.',
       );
     }
+
+    Object? lastError;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      cancellationToken?.throwIfCancelled();
+      if (await destination.exists()) await destination.delete();
+      try {
+        await _downloadOnce(
+          artifact: artifact,
+          destination: destination,
+          onProgress: onProgress,
+          cancellationToken: cancellationToken,
+        );
+        return;
+      } on AiCancelledException {
+        rethrow;
+      } on AiRuntimeException catch (error) {
+        lastError = error;
+        final retryable =
+            error.code == AiErrorCode.timeout ||
+            error.code == AiErrorCode.modelNotInstalled;
+        if (!retryable || attempt >= maxAttempts) rethrow;
+        await Future<void>.delayed(Duration(seconds: attempt * 2));
+      } on Object catch (error) {
+        lastError = error;
+        if (attempt >= maxAttempts) rethrow;
+        await Future<void>.delayed(Duration(seconds: attempt * 2));
+      }
+    }
+    throw AiRuntimeException(
+      code: AiErrorCode.modelNotInstalled,
+      stage: 'model-download',
+      message:
+          'The model download failed after $maxAttempts attempts for ${artifact.modelId}.',
+      cause: lastError,
+    );
+  }
+
+  Future<void> _downloadOnce({
+    required ModelArtifactManifest artifact,
+    required File destination,
+    required void Function(int receivedBytes) onProgress,
+    AiCancellationToken? cancellationToken,
+  }) async {
     final client = HttpClient()
       ..connectionTimeout = connectionTimeout
       ..userAgent = 'Wara2a/1.0 offline-model-installer';
@@ -111,7 +184,9 @@ class HttpsModelArtifactTransfer implements ModelArtifactTransfer {
       cancellationToken?.throwIfCancelled();
       final request = await client.getUrl(artifact.sourceUri);
       request.followRedirects = true;
-      request.maxRedirects = 5;
+      request.maxRedirects = 8;
+      // Prefer identity encoding so Content-Length matches the pinned bytes.
+      request.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
       final response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
         throw AiRuntimeException(
@@ -121,9 +196,7 @@ class HttpsModelArtifactTransfer implements ModelArtifactTransfer {
               'Model host returned HTTP ${response.statusCode} for ${artifact.modelId}.',
         );
       }
-      if (response.redirects.any(
-        (redirect) => !redirect.location.isScheme('https'),
-      )) {
+      if (!redirectsStayOnHttps(artifact.sourceUri, response.redirects)) {
         throw const AiRuntimeException(
           code: AiErrorCode.modelVerificationFailed,
           stage: 'model-download',
@@ -142,7 +215,7 @@ class HttpsModelArtifactTransfer implements ModelArtifactTransfer {
 
       sink = destination.openWrite(mode: FileMode.writeOnly);
       var received = 0;
-      await for (final chunk in response.timeout(idleTimeout)) {
+      await for (final chunk in response.timeout(_idleTimeoutFor(artifact))) {
         cancellationToken?.throwIfCancelled();
         received += chunk.length;
         if (received > artifact.byteLength) {

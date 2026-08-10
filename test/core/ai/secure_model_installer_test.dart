@@ -120,6 +120,61 @@ void main() {
     expect(record['schemaVersion'], 3);
     expect((record['artifacts'] as List<Object?>), hasLength(1));
   });
+
+  test('accepts Hugging Face relative HTTPS resolve-cache redirects', () {
+    final origin = Uri.parse(
+      'https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det_onnx/'
+      'resolve/e6f4fa85/inference.yml',
+    );
+    final redirects = <RedirectInfo>[
+      _RedirectInfo(
+        statusCode: HttpStatus.temporaryRedirect,
+        method: 'GET',
+        location: Uri.parse(
+          '/api/resolve-cache/models/PaddlePaddle/PP-OCRv5_mobile_det_onnx/'
+          'e6f4fa85/inference.yml',
+        ),
+      ),
+    ];
+
+    expect(
+      HttpsModelArtifactTransfer.redirectsStayOnHttps(origin, redirects),
+      isTrue,
+    );
+  });
+
+  test('rejects a redirect chain that leaves HTTPS', () {
+    final origin = Uri.parse('https://huggingface.co/example/resolve/main/a.bin');
+    final redirects = <RedirectInfo>[
+      _RedirectInfo(
+        statusCode: HttpStatus.found,
+        method: 'GET',
+        location: Uri.parse('http://cdn.example.test/a.bin'),
+      ),
+    ];
+
+    expect(
+      HttpsModelArtifactTransfer.redirectsStayOnHttps(origin, redirects),
+      isFalse,
+    );
+  });
+}
+
+class _RedirectInfo implements RedirectInfo {
+  _RedirectInfo({
+    required this.statusCode,
+    required this.method,
+    required this.location,
+  });
+
+  @override
+  final int statusCode;
+
+  @override
+  final String method;
+
+  @override
+  final Uri location;
 }
 
 class _ManifestFixture {

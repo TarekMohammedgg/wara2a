@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/ai/ai_cancellation_token.dart';
+import '../../../core/ai/ai_runtime_error.dart';
 import '../../../core/ai/model_management/secure_model_installer.dart';
 import '../models/local_ai_status.dart';
 import '../repositories/local_ai_status_repository.dart';
@@ -49,7 +50,7 @@ class LocalAiStatusCubit extends Cubit<LocalAiStatusState> {
     try {
       emit(LocalAiStatusLoaded(await repository.inspect()));
     } on Object catch (error) {
-      emit(LocalAiStatusFailure(error.toString()));
+      emit(LocalAiStatusFailure(_describe(error)));
     }
   }
 
@@ -63,7 +64,7 @@ class LocalAiStatusCubit extends Cubit<LocalAiStatusState> {
     } on AiCancelledException {
       if (!isClosed) await refresh();
     } on Object catch (error) {
-      if (!isClosed) emit(LocalAiStatusFailure(error.toString()));
+      if (!isClosed) emit(LocalAiStatusFailure(_describe(error)));
     }
   }
 
@@ -75,8 +76,13 @@ class LocalAiStatusCubit extends Cubit<LocalAiStatusState> {
       await repository.removeRequired();
       if (!isClosed) await refresh();
     } on Object catch (error) {
-      if (!isClosed) emit(LocalAiStatusFailure(error.toString()));
+      if (!isClosed) emit(LocalAiStatusFailure(_describe(error)));
     }
+  }
+
+  static String _describe(Object error) {
+    if (error is AiRuntimeException) return error.message;
+    return error.toString();
   }
 
   @override

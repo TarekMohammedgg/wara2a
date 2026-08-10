@@ -21,124 +21,135 @@ class SettingsView extends StatelessWidget {
     final controller = context.read<SettingsCubit>();
     final isDark = settings.themeMode == ThemeMode.dark;
     final isArabic = settings.localeCode == 'ar';
+    final embeddingEngine = context.read<EmbeddingStatusCubit>().engine;
     return BlocProvider<LocalAiStatusCubit>(
-      create: (_) =>
-          LocalAiStatusCubit(DeviceLocalAiStatusRepository())..refresh(),
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
-        children: [
-          Text(
-            l10n.settingsTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 22),
-          Text(l10n.appearance, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          Card(
-            child: Column(
-              children: [
-                SwitchListTile.adaptive(
-                  value: isDark,
-                  onChanged: (value) => controller.setThemeMode(
-                    value ? ThemeMode.dark : ThemeMode.light,
-                  ),
-                  secondary: _SettingsIcon(
-                    icon: Icons.dark_mode_outlined,
-                    color: AppColors.blue,
-                  ),
-                  title: Text(l10n.darkMode),
-                ),
-                Divider(
-                  height: 1,
-                  indent: 72,
-                  endIndent: 18,
-                  color: Theme.of(context).dividerColor,
-                ),
-                ListTile(
-                  leading: _SettingsIcon(
-                    icon: Icons.translate_rounded,
-                    color: AppColors.cyan,
-                  ),
-                  title: Text(l10n.language),
-                  trailing: SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment<bool>(
-                        value: true,
-                        label: Text(l10n.arabic),
-                      ),
-                      ButtonSegment<bool>(
-                        value: false,
-                        label: Text(l10n.english),
-                      ),
-                    ],
-                    selected: {isArabic},
-                    onSelectionChanged: (selection) => controller.setLocale(
-                      Locale(selection.first ? 'ar' : 'en'),
-                    ),
-                    style: ButtonStyle(
-                      visualDensity: VisualDensity.compact,
-                      textStyle: const WidgetStatePropertyAll(
-                        TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      create: (_) => LocalAiStatusCubit(
+        DeviceLocalAiStatusRepository(embeddingEngine: embeddingEngine),
+      )..refresh(),
+      child: BlocListener<LocalAiStatusCubit, LocalAiStatusState>(
+        listenWhen: (previous, current) =>
+            (previous is LocalAiStatusInstalling ||
+                previous is LocalAiStatusRemoving) &&
+            (current is LocalAiStatusLoaded || current is LocalAiStatusFailure),
+        listener: (context, state) {
+          context.read<EmbeddingStatusCubit>().refresh();
+        },
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+          children: [
+            Text(
+              l10n.settingsTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
-          const SizedBox(height: 26),
-          Text(
-            l10n.modelStatus,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          _ModelCard(l10n: l10n),
-          const SizedBox(height: 14),
-          const _EmbeddingModelCard(),
-          const SizedBox(height: 26),
-          Text(l10n.privacy, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(17),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 22),
+            Text(l10n.appearance, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 10),
+            Card(
+              child: Column(
                 children: [
-                  const _SettingsIcon(
-                    icon: Icons.shield_outlined,
-                    color: Color(0xFF169C75),
+                  SwitchListTile.adaptive(
+                    value: isDark,
+                    onChanged: (value) => controller.setThemeMode(
+                      value ? ThemeMode.dark : ThemeMode.light,
+                    ),
+                    secondary: _SettingsIcon(
+                      icon: Icons.dark_mode_outlined,
+                      color: AppColors.blue,
+                    ),
+                    title: Text(l10n.darkMode),
                   ),
-                  const SizedBox(width: 13),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.privacy,
-                          style: Theme.of(context).textTheme.titleMedium,
+                  Divider(
+                    height: 1,
+                    indent: 72,
+                    endIndent: 18,
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  ListTile(
+                    leading: _SettingsIcon(
+                      icon: Icons.translate_rounded,
+                      color: AppColors.cyan,
+                    ),
+                    title: Text(l10n.language),
+                    trailing: SegmentedButton<bool>(
+                      segments: [
+                        ButtonSegment<bool>(
+                          value: true,
+                          label: Text(l10n.arabic),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.privacyBody,
-                          style: Theme.of(context).textTheme.bodySmall,
+                        ButtonSegment<bool>(
+                          value: false,
+                          label: Text(l10n.english),
                         ),
                       ],
+                      selected: {isArabic},
+                      onSelectionChanged: (selection) => controller.setLocale(
+                        Locale(selection.first ? 'ar' : 'en'),
+                      ),
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                        textStyle: const WidgetStatePropertyAll(
+                          TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 26),
-          Text(l10n.about, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 6),
-            leading: const Icon(Icons.info_outline_rounded),
-            title: Text(l10n.appName),
-            subtitle: Text(l10n.version),
-          ),
-        ],
+            const SizedBox(height: 26),
+            Text(
+              l10n.modelStatus,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 10),
+            _ModelCard(l10n: l10n),
+            const SizedBox(height: 14),
+            const _EmbeddingModelCard(),
+            const SizedBox(height: 26),
+            Text(l10n.privacy, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 10),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(17),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _SettingsIcon(
+                      icon: Icons.shield_outlined,
+                      color: Color(0xFF169C75),
+                    ),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.privacy,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.privacyBody,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 26),
+            Text(l10n.about, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 6),
+              leading: const Icon(Icons.info_outline_rounded),
+              title: Text(l10n.appName),
+              subtitle: Text(l10n.version),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -167,11 +178,12 @@ class _EmbeddingModelCard extends StatelessWidget {
             ? l10n.embeddingInstallRequirement
             : l10n.embeddingModelDetails;
         final showProgress =
-            state.busy ||
-            snapshot.status == ModelLifecycleStatus.downloading ||
-            snapshot.status == ModelLifecycleStatus.verifying ||
-            snapshot.status == ModelLifecycleStatus.loading ||
-            snapshot.status == ModelLifecycleStatus.running;
+            snapshot.progress != null &&
+            (snapshot.status == ModelLifecycleStatus.downloading ||
+                snapshot.status == ModelLifecycleStatus.verifying ||
+                snapshot.status == ModelLifecycleStatus.loading ||
+                snapshot.status == ModelLifecycleStatus.running ||
+                snapshot.status == ModelLifecycleStatus.cancelling);
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(17),
@@ -245,16 +257,6 @@ class _EmbeddingModelCard extends StatelessWidget {
                           : context.read<EmbeddingStatusCubit>().refresh,
                       child: Text(l10n.modelRefresh),
                     ),
-                    if (snapshot.capability ==
-                            EmbeddingCapability.modelNotInstalled ||
-                        snapshot.capability ==
-                            EmbeddingCapability.runtimeFailure)
-                      FilledButton.tonal(
-                        onPressed: state.busy
-                            ? null
-                            : context.read<EmbeddingStatusCubit>().install,
-                        child: Text(l10n.installEmbeddingModel),
-                      ),
                     if (snapshot.canEmbed && state.pendingInvoiceCount > 0)
                       FilledButton.tonal(
                         onPressed: state.busy
@@ -487,9 +489,12 @@ class _ModelStatusPresentation {
       );
     }
     if (state is LocalAiStatusFailure) {
+      final detail = state.message.trim();
       return _ModelStatusPresentation(
         title: l10n.modelError,
-        details: l10n.modelInstallFailed,
+        details: detail.isEmpty
+            ? l10n.modelInstallFailed
+            : '${l10n.modelInstallFailed}\n$detail',
         icon: Icons.error_outline_rounded,
         iconColor: AppColors.warning,
         showProgress: false,
