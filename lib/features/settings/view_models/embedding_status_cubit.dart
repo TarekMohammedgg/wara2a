@@ -122,6 +122,19 @@ class EmbeddingStatusCubit extends Cubit<EmbeddingStatusState> {
     }
   }
 
+  Future<void> cancel() async {
+    await indexer.cancelReindex();
+    if (!isClosed) {
+      emit(
+        EmbeddingStatusState(
+          snapshot: engine.snapshot,
+          pendingInvoiceCount: state.pendingInvoiceCount,
+          busy: false,
+        ),
+      );
+    }
+  }
+
   @override
   Future<void> close() async {
     await _subscription?.cancel();

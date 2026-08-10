@@ -15,8 +15,9 @@ import 'ai/extraction/method_channel_qwen_interpreter.dart';
 import 'ai/model_management/model_coordinator.dart';
 import 'ai/ocr/method_channel_ocr_engine.dart';
 import 'ai/embedding/embedding_engine.dart';
-import 'ai/embedding/embedding_gemma_artifact.dart';
-import 'ai/embedding/flutter_gemma_embedding_engine.dart';
+import 'ai/embedding/method_channel_e5_embedding_engine.dart';
+import 'ai/embedding/multilingual_e5_artifact.dart';
+import 'ai/embedding/multilingual_e5_calibration.dart';
 import 'ai/model_management/model_lifecycle_state.dart';
 import 'storage/invoice_file_cleaner.dart';
 
@@ -65,9 +66,9 @@ class AppDependencies {
     final resolvedEmbeddingEngine =
         embeddingEngine ??
         UnavailableEmbeddingEngine(
-          modelId: EmbeddingGemmaArtifact.modelId,
+          modelId: MultilingualE5Artifact.modelId,
           reason: 'Embedding runtime is not configured for this app scope.',
-          capability: EmbeddingCapability.modelAccessRequired,
+          capability: EmbeddingCapability.modelNotInstalled,
         );
     final invoices = ObjectBoxInvoiceRepository(
       store: database.invoices,
@@ -82,6 +83,9 @@ class AppDependencies {
       engine: resolvedEmbeddingEngine,
       indexer: embeddingIndexer,
       intentRouter: SearchIntentRouter(),
+      // Host Recall@K is not Android approval. Keep semantic results gated
+      // until RMX3636 offline evidence binds a threshold to this contract.
+      calibration: MultilingualE5Calibration.production,
     );
     return AppDependencies(
       database: database,
@@ -118,18 +122,18 @@ class AppDependencies {
   }
 
   static Future<EmbeddingEngine> _productionEmbeddingEngine() async {
-    if (!FlutterGemmaEmbeddingEngine.supportsCurrentPlatform) {
+    if (!MethodChannelE5EmbeddingEngine.supportsCurrentPlatform) {
       return UnavailableEmbeddingEngine(
-        modelId: EmbeddingGemmaArtifact.modelId,
-        reason: 'EmbeddingGemma is unsupported on this CPU architecture.',
+        modelId: MultilingualE5Artifact.modelId,
+        reason: 'The offline E5 runtime is available on Android arm64 only.',
       );
     }
     try {
-      return await FlutterGemmaEmbeddingEngine.create();
+      return await MethodChannelE5EmbeddingEngine.create();
     } on Object {
       return UnavailableEmbeddingEngine(
-        modelId: EmbeddingGemmaArtifact.modelId,
-        reason: 'The local EmbeddingGemma runtime could not be initialized.',
+        modelId: MultilingualE5Artifact.modelId,
+        reason: 'The local E5 embedding runtime could not be initialized.',
         capability: EmbeddingCapability.runtimeFailure,
         status: ModelLifecycleStatus.failed,
       );

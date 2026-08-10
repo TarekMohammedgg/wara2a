@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
 import 'package:wara2a/core/ai/embedding/embedding_vector_validator.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 
 void main() {
-  const dimensions = EmbeddingGemmaArtifact.dimensions;
+  const dimensions = MultilingualE5Artifact.dimensions;
 
   group('normalizeAndValidate', () {
-    test('returns an immutable finite 768-dimensional unit vector', () {
+    test('returns an immutable finite 384-dimensional unit vector', () {
       final input = List<double>.filled(dimensions, 0)..setRange(0, 2, [3, 4]);
 
       final normalized = EmbeddingVectorValidator.normalizeAndValidate(
@@ -34,7 +34,7 @@ void main() {
           isA<InvalidEmbeddingVector>().having(
             (error) => error.message,
             'message',
-            'Expected 768 dimensions, got 767.',
+            'Expected 384 dimensions, got 383.',
           ),
         ),
       );

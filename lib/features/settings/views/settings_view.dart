@@ -155,18 +155,16 @@ class _EmbeddingModelCard extends StatelessWidget {
         final snapshot = state.snapshot;
         final title = switch (snapshot.capability) {
           EmbeddingCapability.ready => l10n.embeddingReady,
-          EmbeddingCapability.modelAccessRequired =>
-            l10n.embeddingAccessRequired,
           EmbeddingCapability.modelNotInstalled => l10n.embeddingNotInstalled,
           EmbeddingCapability.unsupportedPlatform => l10n.embeddingUnsupported,
           EmbeddingCapability.runtimeFailure => l10n.embeddingRuntimeFailure,
-          EmbeddingCapability.supported => l10n.embeddingWorking,
+          EmbeddingCapability.supported ||
+          EmbeddingCapability.modelAccessRequired => l10n.embeddingWorking,
         };
-        final details =
-            snapshot.capability == EmbeddingCapability.modelAccessRequired
-            ? l10n.embeddingInstallRequirement
-            : snapshot.capability == EmbeddingCapability.ready
+        final details = snapshot.capability == EmbeddingCapability.ready
             ? l10n.embeddingReadyDetails(state.pendingInvoiceCount)
+            : snapshot.capability == EmbeddingCapability.modelNotInstalled
+            ? l10n.embeddingInstallRequirement
             : l10n.embeddingModelDetails;
         final showProgress =
             state.busy ||
@@ -235,6 +233,12 @@ class _EmbeddingModelCard extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   children: [
+                    if (state.busy &&
+                        snapshot.status != ModelLifecycleStatus.cancelling)
+                      TextButton(
+                        onPressed: context.read<EmbeddingStatusCubit>().cancel,
+                        child: Text(l10n.modelCancelInstall),
+                      ),
                     TextButton(
                       onPressed: state.busy
                           ? null
@@ -242,7 +246,9 @@ class _EmbeddingModelCard extends StatelessWidget {
                       child: Text(l10n.modelRefresh),
                     ),
                     if (snapshot.capability ==
-                        EmbeddingCapability.modelNotInstalled)
+                            EmbeddingCapability.modelNotInstalled ||
+                        snapshot.capability ==
+                            EmbeddingCapability.runtimeFailure)
                       FilledButton.tonal(
                         onPressed: state.busy
                             ? null

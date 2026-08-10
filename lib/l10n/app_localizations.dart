@@ -197,10 +197,10 @@ class AppLocalizations {
   String embeddingReadyDetails(int pendingCount) {
     if (isArabic) {
       return 'ملفات النموذج اجتازت فحص الحجم وSHA-256، ويتحقق المشغل من '
-          'الأبعاد الـ768 عند التحميل. $pendingCount فاتورة تنتظر الفهرسة.';
+          'الأبعاد الـ384 عند التحميل. $pendingCount فاتورة تنتظر الفهرسة.';
     }
     return 'The model files passed byte-length and SHA-256 checks; the runtime '
-        'enforces 768 dimensions when loaded. $pendingCount invoices await '
+        'enforces 384 dimensions when loaded. $pendingCount invoices await '
         'indexing.';
   }
 
@@ -352,7 +352,7 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'البحث بالمعنى متوقف حتى يعتمد حد المسافة على مجموعة تقييم من 100 استعلام على الأقل.',
     'semanticModelUnavailable':
-        'نموذج EmbeddingGemma المحلي غير مثبت أو غير متاح على هذا الجهاز.',
+        'نموذج E5 المحلي غير مثبت أو غير متاح على هذا الجهاز.',
     'semanticQueryTooLong': 'الاستعلام أطول من الحد الآمن للنموذج المحلي.',
     'semanticRuntimeFailure': 'تعذر تشغيل محرك البحث بالمعنى محلياً.',
     'keywordFallback': 'تم عرض التطابقات المباشرة التي تحقق الفلاتر فقط.',
@@ -366,16 +366,16 @@ class AppLocalizations {
     'creditNote': 'إشعار دائن',
     'warrantyCertificate': 'شهادة ضمان',
     'embeddingSearchModel': 'محرك البحث بالمعنى',
-    'embeddingReady': 'EmbeddingGemma جاهز محلياً',
-    'embeddingAccessRequired': 'يلزم قبول ترخيص النموذج وتوفير مصدر معتمد',
-    'embeddingNotInstalled': 'EmbeddingGemma غير مثبت',
+    'embeddingReady': 'نموذج E5 جاهز محلياً',
+    'embeddingAccessRequired': 'ملف النموذج العام غير متاح للتثبيت',
+    'embeddingNotInstalled': 'نموذج E5 غير مثبت',
     'embeddingUnsupported': 'البحث بالمعنى غير مدعوم على هذا الجهاز',
-    'embeddingRuntimeFailure': 'تعذر تهيئة محرك EmbeddingGemma',
+    'embeddingRuntimeFailure': 'تعذر تهيئة محرك E5 المحلي',
     'embeddingWorking': 'جارٍ تجهيز محرك البحث بالمعنى',
     'embeddingInstallRequirement':
-        'يتطلب قبول شروط Gemma ووصولاً مرخصاً معتمداً لملف TFLite بحجم 179,131,736 بايت وملف SentencePiece بحجم 4,683,319 بايت. لا يحتوي التطبيق على رمز وصول.',
+        'تنزيل صريح لمرة واحدة لملف ONNX العام المثبت بطول 118,346,824 بايت وSHA-256 محدد. ترخيص النموذج MIT ولا يلزم حساب أو رمز API.',
     'embeddingModelDetails':
-        'يستخدم النموذج المحلي CPU فقط وينتج متجهات من 768 بُعداً. الحد الأدنى لأندرويد هو API 30 ومعمارية arm64.',
+        'يعمل multilingual-e5-small محلياً على CPU وينتج متجهات من 384 بُعداً لاسترجاع العربية والإنجليزية والنص المختلط. يتطلب Android API 30 ومعمارية arm64.',
     'installEmbeddingModel': 'تثبيت النموذج',
     'reindexInvoices': 'فهرسة الفواتير المعلقة',
   };
@@ -536,7 +536,7 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'Semantic search stays disabled until its distance threshold is approved on at least 100 labeled queries.',
     'semanticModelUnavailable':
-        'The local EmbeddingGemma model is not installed or unavailable on this device.',
+        'The local E5 model is not installed or unavailable on this device.',
     'semanticQueryTooLong': 'The query exceeds the local model safety limit.',
     'semanticRuntimeFailure': 'The local semantic-search runtime failed.',
     'keywordFallback':
@@ -551,17 +551,17 @@ class AppLocalizations {
     'creditNote': 'Credit note',
     'warrantyCertificate': 'Warranty certificate',
     'embeddingSearchModel': 'Semantic search engine',
-    'embeddingReady': 'EmbeddingGemma is ready locally',
+    'embeddingReady': 'E5 is ready locally',
     'embeddingAccessRequired':
-        'License acceptance and an approved model source are required',
-    'embeddingNotInstalled': 'EmbeddingGemma is not installed',
+        'The public model artifact is unavailable for installation',
+    'embeddingNotInstalled': 'E5 is not installed',
     'embeddingUnsupported': 'Semantic search is unsupported on this device',
-    'embeddingRuntimeFailure': 'EmbeddingGemma could not be initialized',
+    'embeddingRuntimeFailure': 'The local E5 runtime could not be initialized',
     'embeddingWorking': 'Preparing the semantic-search engine',
     'embeddingInstallRequirement':
-        'Requires accepted Gemma terms and approved licensed access to the 179,131,736-byte TFLite file and 4,683,319-byte SentencePiece file. No access token is embedded.',
+        'An explicit one-time install downloads the public 118,346,824-byte ONNX file pinned by SHA-256. The model is MIT licensed; no account or API key is needed.',
     'embeddingModelDetails':
-        'The local model is CPU-only and produces 768-dimensional vectors. Android requires API 30 and arm64.',
+        'multilingual-e5-small runs locally on CPU and produces 384-dimensional vectors for Arabic, English, and mixed-text retrieval. Android requires API 30 and arm64.',
     'installEmbeddingModel': 'Install model',
     'reindexInvoices': 'Index pending invoices',
   };

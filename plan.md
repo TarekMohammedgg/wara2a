@@ -1,10 +1,10 @@
 # Wara2a — Offline Invoice Intelligence Implementation Plan
 
-> Status: Android-first implementation is integrated and release-QA tested, but the MVP is **not complete**. Deterministic tests, Android native unit tests, and arm64 APK builds are passing; release acceptance remains blocked by the physical extraction-quality, semantic-retrieval, device-matrix, offline-install, and Apple-platform gates listed below.
+> Status: Android-first implementation is integrated and release-QA tested, but the MVP is **not complete**. Deterministic tests, Android native unit tests, and arm64 APK builds are passing for the non-embedding stack; offline multilingual semantic search now targets `intfloat/multilingual-e5-small` qint8 through ONNX Runtime Android + Extensions, but release acceptance remains blocked by physical E5 load/query proof, Android-approved calibration, extraction-quality, device-matrix, offline-install, and Apple-platform gates listed below.
 >
 > Research snapshot: 2026-08-09. Mobile AI packages and runtimes are changing quickly; Phase 1 must re-check all pinned versions before installation.
 
-> QA snapshot: 2026-08-10. A physical RMX3636 (Android 15, arm64) launched the fresh debug APK and confirmed Arabic RTL, English LTR, light/dark preference persistence, local model-status messaging, and the license/access gate for absent EmbeddingGemma artifacts. It did not have approved OCR/Qwen or EmbeddingGemma files provisioned during this QA pass, so it is not fresh extraction or semantic-quality evidence.
+> QA snapshot: 2026-08-10. Host-only multilingual embedding evidence selected MIT-licensed `intfloat/multilingual-e5-small` qint8 over MiniLM; EmbeddingGemma was abandoned because it is license-gated and absent. The Android ORT + Extensions MethodChannel, ObjectBox 384-d migration, Settings/Search E5 UI, and arm64 debug/release APKs are implemented and host-validated. Physical RMX3636 E5 install/inference, airplane-mode retrieval, and release calibration remain open because the reference device was unavailable for the final smoke after the APKs were produced.
 
 ## 1. Product definition and boundaries
 
@@ -55,7 +55,7 @@ Stage 2 — text understanding:
 - Qwen2.5 supports Arabic and English, improved structured-data understanding, and JSON generation. Wara2a limits prompts and evaluation to Arabic and English invoices even though the model supports additional languages.
 - Qwen never receives or interprets the image directly. PaddleOCR is the only image-reading stage in this MVP.
 
-The expected extraction stack is approximately **550–650 MB** before EmbeddingGemma, depending on the selected OCR detector/runtime and packaged dictionaries. Record the actual APK/AAB and installed-model sizes during the Phase 7 device spike.
+The expected extraction stack is approximately **550–650 MB** before the E5 encoder, depending on the selected OCR detector/runtime and packaged dictionaries. Record the actual APK/AAB and installed-model sizes during the Phase 7/8 device spikes.
 
 Do not add a direct vision-language fallback to the MVP. If the pipeline fails the approved quality gates, first improve OCR preprocessing, mixed-script routing, normalization, and deterministic parsing; reconsider a direct VLM only through a separate architecture decision.
 
@@ -158,41 +158,40 @@ Structured syntax reliability and extraction correctness are different. Constrai
 
 ### 2.5 Embedding model
 
-Use **EmbeddingGemma**, exact model family `google/embeddinggemma-300M`, through the LiteRT community mobile artifacts.
+Use **`intfloat/multilingual-e5-small`** through ONNX Runtime Android and the official ONNX Runtime Extensions tokenizer. EmbeddingGemma is rejected for this MVP: it is license-gated, unavailable without approved access, and was never loaded on the reference device.
 
-- 307,581,696 parameters (documented as 308M).
-- Trained across 100+ spoken languages.
-- Maximum upstream context: 2K tokens.
-- Native output: 768 dimensions.
-- Supported Matryoshka reductions: 512, 256, or 128 dimensions, followed by re-normalization.
-- Official documentation states under 200 MB RAM with quantization.
-- QAT variants include mixed precision, Q8_0, and Q4_0.
+Pinned deployable contract:
 
-Initial mobile artifact:
+- Repository: `intfloat/multilingual-e5-small`
+- Revision: `614241f622f53c4eeff9890bdc4f31cfecc418b3`
+- File: `onnx/model_qint8_avx512_vnni.onnx` (118,346,824 bytes)
+- SHA-256: `dd476dd0c2514e9b9be83aeb3853fac0763e0bdf4a71645407587d77c48a2d88`
+- License: MIT
+- Dimensions: 384
+- Schema version: 3
+- Runtime: ONNX Runtime Android `1.21.1` + ONNX Runtime Extensions Android `0.13.0`
+- Tokenizer: bundled ORT Extensions SentencePiece preprocessing graph only; no encoder weights in Git
+- Official retrieval prefixes: `query: ` and `passage: `, combined with Wara2a's existing `task: search result | query:` / `title: ... | text: ...` formatting
 
-- Repository: `litert-community/embeddinggemma-300m`.
-- Generic model: `embeddinggemma-300M_seq256_mixed-precision.tflite`, approximately 179 MB.
-- Tokenizer: `sentencepiece.model`, approximately 4.68 MB.
-- `seq256` is sufficient for Wara2a's intentionally short normalized invoice representation. If real searchable text exceeds it, move to the generic `seq512` artifact rather than silently truncating important fields.
+Host-only evidence (not Android approval):
 
-Use 768-dimensional, L2-normalized vectors for the first MVP. Storage is only about 3 KB of raw float data per invoice, so retrieval quality is more important than premature dimension reduction. Evaluate 256 dimensions later; change only if Arabic retrieval quality stays within the agreed tolerance.
+- Semantic and hybrid Recall@1/3/5 and MRR: **1.0**
+- MiniLM rejected: semantic Recall@1/3/5 = 0.36/0.56/0.68, MRR = 0.498
+- Structured queries are excluded when judging semantic-model quality
+- A separate English-only positive/no-result cohort is checked in; Arabic and mixed coverage comes from the primary corpus
+- The qint8 filename is x86-oriented even though the inspected graph uses standard ONNX ops; Android acceptance requires the exact file to load and query on RMX3636
 
-Use the official asymmetric retrieval prompts exactly:
-
-- Query: `task: search result | query: {normalized query}`
-- Document: `title: {merchant or "none"} | text: {normalized searchable text}`
-
-Arabic is included in the broad multilingual intent, but no official Arabic invoice-search score is published. A Wara2a-specific Arabic and mixed-language retrieval set is a release requirement.
+ObjectBox stores L2-normalized 384-d vectors on a new HNSW property. The previous 768-d property is retained as `legacyEmbedding768` with its original UID so upgrades clear and reindex instead of reusing an incompatible HNSW definition.
 
 ### 2.6 Model lifecycle
 
 Create a single `ModelCoordinator` abstraction. It serializes access to native inference and prevents accidental simultaneous heavy workloads.
 
 - Extraction flow: release the embedding session if needed, initialize PaddleOCR, recognize ordered text, release OCR resources when memory pressure requires it, load Qwen2.5-0.5B, generate one JSON draft, close the Qwen session, validate in Dart, then open Review/Edit.
-- Save/search flow: load EmbeddingGemma, generate the document/query vector, and retain it while the search experience is active. Release it on app background or after an idle timeout.
+- Save/search flow: load multilingual-e5-small, generate the document/query vector, and retain it while the search experience is active. Release it on app background or after an idle timeout.
 - Never initialize multiple extraction engines concurrently.
 - Do not assume every runtime must always be unloaded between calls. Measure OCR/Qwen/embedding load cost and memory on real devices, then choose separate idle policies.
-- On low-memory devices, do not retain PaddleOCR, Qwen, and EmbeddingGemma concurrently. Release Qwen before loading EmbeddingGemma.
+- On low-memory devices, do not retain PaddleOCR, Qwen, and E5 concurrently. Release Qwen before loading E5.
 
 The model coordinator must expose states suitable for Cubit: unavailable, notInstalled, downloading, verifying, ready, loading, running, cancelling, failed, and disposed.
 
@@ -214,7 +213,8 @@ Reasons:
 Configuration:
 
 - `@Property(type: PropertyType.floatVector)` on the invoice embedding.
-- `@HnswIndex(dimensions: 768, distanceType: VectorDistanceType.cosine)`.
+- `@HnswIndex(dimensions: 384, distanceType: VectorDistanceType.cosine)`.
+- Keep the retired 768-d vector property (`legacyEmbedding768`) and its original UID until every installed store has migrated; never reuse that UID for a different HNSW dimensionality.
 - Store only L2-normalized vectors created by the chosen embedding model/version.
 - Treat ObjectBox scores as distances; lower is closer.
 - Start with default HNSW values. Tune `neighborsPerNode` or `indexingSearchCount` only after measuring recall and latency with a realistic local dataset.
@@ -380,7 +380,7 @@ Keep three distinct representations:
 
 1. Display values: exactly what the user reviewed.
 2. `keywordText`: deterministic normalized tokens for exact/substring search.
-3. `searchableText`: short, natural, retrieval-oriented text sent to EmbeddingGemma.
+3. `searchableText`: short, natural, retrieval-oriented text sent to multilingual-e5-small.
 
 Suggested Arabic-first document representation:
 
@@ -492,7 +492,7 @@ Versions below are the verified 2026-08-09 snapshot. Re-resolve and pin the test
 | PaddleOCR runtime bridge | native Paddle Lite + PP-OCRv5 artifacts | pin after device spike | Add only in Phase 7 |
 | Qwen/LiteRT-LM Flutter core | `flutter_gemma` | 1.4.0 snapshot | Verify Qwen2.5-0.5B, then pin in Phase 7 |
 | Qwen LiteRT-LM engine | `flutter_gemma_litertlm` | 1.3.1 snapshot | Verify Qwen2.5-0.5B, then pin in Phase 7 |
-| EmbeddingGemma backend | `flutter_gemma_embeddings` | 1.0.4 | Add only in Phase 8 |
+| Embedding backend | native ORT Android + Extensions MethodChannel | 1.21.1 / 0.13.0 | Selected for Phase 8; no `flutter_gemma_embeddings` |
 | Cubit tests | `bloc_test` | compatible stable | Dev dependency when ViewModels begin |
 
 Explicitly avoid for the first MVP:
@@ -507,7 +507,7 @@ Explicitly avoid for the first MVP:
 
 ## 9. Model distribution and offline behavior
 
-Bundle only the small, redistribution-approved PaddleOCR assets when APK/AAB measurements remain acceptable. Do not bundle the approximately 521 MB Qwen model or the approximately 184 MB EmbeddingGemma model/tokenizer in the base application; install them through the verified offline-model workflow to keep app updates small and allow atomic model replacement.
+Bundle only the small, redistribution-approved PaddleOCR assets when APK/AAB measurements remain acceptable. Do not bundle the approximately 521 MB Qwen model or the approximately 118 MB E5 encoder weights in the base application; install them through the verified offline-model workflow to keep app updates small and allow atomic model replacement. The E5 tokenizer preprocessing graph may be bundled because it contains no encoder weights.
 
 Recommended workflow:
 
@@ -959,12 +959,14 @@ Replace simulated extraction with the validated local two-stage OCR-and-text pip
 - Community LiteRT-LM Flutter integration can regress rapidly; pin versions and keep the app-owned Qwen interface narrow.
 - If Qwen JSON reliability fails, improve prompting/constrained decoding and deterministic parsing before considering a larger model. Do not silently replace the two-stage architecture.
 
-### Phase 8 — EmbeddingGemma integration
+### Phase 8 — multilingual-e5-small integration
 
-**Evidence-backed status (2026-08-10): integration code present; model/runtime acceptance blocked.**
+**Evidence-backed status (2026-08-10): Dart/native bridge and ObjectBox 384-d migration are implemented; Android physical inference remains open.**
 
-- The app owns an EmbeddingGemma adapter, fixed 768-dimensional vector validation, and pending-index handling. On the physical arm64 device, absent artifacts correctly present the Gemma-license/approved-access requirement; no token is embedded.
-- The model and tokenizer are license-gated and absent. There is no verified model load, document/query generation, or airplane-mode embedding evidence, so semantic indexing remains disabled.
+- Host benchmark selected MIT `intfloat/multilingual-e5-small` qint8 and rejected MiniLM. EmbeddingGemma and `flutter_gemma_embeddings` were removed from the embedding path.
+- The app owns an immutable E5 artifact contract, MethodChannel engine, ORT Extensions SentencePiece tokenizer asset, secure atomic installer, 384-d validation, query/document prefixes, cancellation/unload lifecycle, Settings install/status UI, and a dual-property ObjectBox migration that preserves invoice rows while clearing legacy 768-d vectors for reindex.
+- Production semantic search remains `SemanticSearchCalibration.blocked()` / `MultilingualE5Calibration.production` until Android arm64 offline evidence approves a threshold bound to the pinned model ID/hash/schema/corpus.
+- No claim of device load, airplane-mode embedding, release calibration, or APK-size acceptance is valid until RMX3636 records those results.
 
 **Goal**
 
@@ -979,78 +981,55 @@ Generate and persist one local retrieval embedding from each reviewed invoice.
 
 **Technical work**
 
-- Add `flutter_gemma_embeddings` and register `LiteRtEmbeddingBackend`.
-- Install the generic seq256 mixed-precision TFLite model plus SentencePiece tokenizer.
-- Implement `EmbeddingEngine` behind an app-owned interface.
-- Format documents using `title: ... | text: ...`.
-- Validate output length 768, finite values, and L2 normalization.
-- Save invoice, items, searchable text, vector, model ID, dimensions, and schema version transactionally where practical.
+- Install the pinned E5 ONNX encoder through the verified offline installer; keep weights out of Git.
+- Bundle only the tokenizer preprocessing graph under `android/app/src/main/assets/embedding/`.
+- Implement `EmbeddingEngine` behind the Android MethodChannel ORT + Extensions runtime.
+- Format documents/queries with the official E5 prefixes plus Wara2a retrieval formatting.
+- Validate output length 384, finite values, and L2 normalization.
+- Migrate ObjectBox from the legacy 768-d HNSW property to a new 384-d property without UID reuse.
 - If embedding fails after invoice confirmation, save the invoice with a visible “search indexing pending” state and retry locally; never lose reviewed data.
-- Implement sequential model lifecycle and memory-pressure behavior.
-
-**Files/modules affected**
-
-- `lib/core/ai/embedding/`
-- `lib/core/utils/text_normalization/`
-- invoice repositories and entities
-- Settings model management UI
-- normalization and embedding tests
 
 **Dependencies/packages**
 
-- `flutter_gemma_embeddings`
-- existing LiteRT-LM package transitively provides native LiteRT libraries
+- `com.microsoft.onnxruntime:onnxruntime-android:1.21.1`
+- `com.microsoft.onnxruntime:onnxruntime-extensions-android:0.13.0`
+- no `flutter_gemma_embeddings`
 
 **Acceptance criteria**
 
-- Embedding generation works in airplane mode.
-- Every vector has exactly 768 finite, normalized values.
+- Embedding generation works in airplane mode after model installation.
+- Every vector has exactly 384 finite, normalized values.
 - Searchable text is deterministic for the same reviewed data.
 - Editing a searchable field marks/rebuilds the vector; editing a non-searchable UI field does not.
 - Extraction and embedding models are not simultaneously retained on the minimum-memory device unless measurements approve it.
-
-**Risks / notes**
-
-- The seq256 artifact limits formatted input length. Reject or deterministically shorten low-value fields; never truncate merchant/products/amount/date silently.
-- The model and tokenizer are gated assets; distribution terms must be resolved.
+- Legacy 768-d stores open, preserve invoice/item rows, clear incompatible vectors, and queue reindex.
 
 ### Phase 9 — Local semantic search
 
-**Evidence-backed status (2026-08-10): implementation and contract fixtures present; release gate blocked.**
+**Evidence-backed status (2026-08-10): implementation and host benchmarks present; Android release gate blocked.**
 
-- The repository enforces `SemanticSearchCalibration.blocked()` by default and returns no fabricated semantic result. The checked-in 100-query fixture is a labeled contract/evaluation set, not a measured EmbeddingGemma quality result.
-- No approved model, real 100-query calibration, Recall@K/MRR result, device latency result, or offline semantic run exists. Semantic search must remain disabled.
+- The repository enforces `MultilingualE5Calibration.production` / `SemanticSearchCalibration.blocked()` by default and returns no fabricated semantic result.
+- Host E5 semantic/hybrid Recall@1/3/5 and MRR are 1.0; MiniLM is rejected. Structured labels are excluded from semantic-quality judgment. English-only positives/no-result cases are checked in separately.
+- No Android-approved threshold, device latency/RAM/thermal record, or airplane-mode semantic run exists yet. Semantic search must remain disabled in production until that evidence binds to the pinned model ID/hash/schema/corpus.
 
 **Goal**
 
-Replace mock semantic results with EmbeddingGemma plus ObjectBox cosine HNSW retrieval.
+Replace mock semantic results with multilingual-e5-small plus ObjectBox cosine HNSW retrieval.
 
 **Features**
 
-- Arabic/mixed-language natural query embedding.
+- Arabic/English/mixed natural query embedding.
 - Top-K local vector retrieval.
 - Similarity-distance threshold and empty results.
 - Search result navigation to Invoice Details.
 
 **Technical work**
 
-- Format queries using `task: search result | query:`.
+- Format queries using E5 `query: ` plus Wara2a retrieval formatting.
 - Query `nearestNeighborsF32()` and retrieve ordered results with distances.
 - Start with top 20 candidates and tune top-K/threshold from evaluation, not intuition.
 - Handle invoices with pending/missing embeddings.
-- Build a retrieval evaluation set with at least 100 labeled Arabic/mixed queries covering paraphrases, merchant/product intent, dates, and warranty concepts.
-- Measure Recall@1, Recall@5, MRR, false-positive rate, warm latency, and cold model-load latency.
-
-**Files/modules affected**
-
-- `lib/features/search/repositories/`
-- Search Cubit/ViewModel
-- ObjectBox query helpers
-- retrieval evaluation tests/fixtures
-
-**Dependencies/packages**
-
-- no new runtime package
+- Approve a threshold only against labeled ar/en/mixed queries with honest no-result cases, bound to the pinned E5 contract.
 
 **Acceptance criteria**
 
@@ -1059,11 +1038,6 @@ Replace mock semantic results with EmbeddingGemma plus ObjectBox cosine HNSW ret
 - Warm query embedding plus database retrieval meets the 750 ms p95 planning target on the reference device, or the UX/loading target is revised transparently.
 - No-result behavior is based on an evaluated threshold.
 - Search never returns an invoice whose image/data was deleted.
-
-**Risks / notes**
-
-- Generic multilingual benchmarks are not an Arabic Wara2a benchmark.
-- HNSW is approximate; tune for recall before optimizing speed.
 
 ### Phase 10 — Keyword, structured, and limited hybrid search
 
@@ -1249,7 +1223,7 @@ The MVP is complete only when all of the following are true:
 - PaddleOCR extracts Arabic/English invoice text and Qwen2.5-0.5B converts it into a validated draft without a network after model installation.
 - Every AI result enters a mandatory editable review step.
 - Reviewed invoices and images survive restart.
-- EmbeddingGemma generates local document/query vectors.
+- multilingual-e5-small generates local document/query vectors after explicit offline install.
 - ObjectBox persists vectors and returns semantic results locally.
 - Keyword and structured examples route without unnecessary embedding.
 - Arabic and mixed-language quality passes the project evaluation corpus.

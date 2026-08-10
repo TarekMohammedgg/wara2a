@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:wara2a/core/ai/embedding/embedding_engine.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
 import 'package:wara2a/core/ai/embedding/embedding_vector_validator.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 import 'package:wara2a/core/ai/embedding/reviewed_invoice_indexer.dart';
 
 typedef ContractRetriever =
@@ -69,10 +69,10 @@ class EmbeddingContractEvaluationFixture {
         'Contract fixtures cannot claim production semantic quality.',
       );
     }
-    if (modelId != EmbeddingGemmaArtifact.modelId ||
-        dimensions != EmbeddingGemmaArtifact.dimensions ||
+    if (modelId != MultilingualE5Artifact.modelId ||
+        dimensions != MultilingualE5Artifact.dimensions ||
         embeddingSchemaVersion !=
-            EmbeddingGemmaArtifact.embeddingSchemaVersion) {
+            MultilingualE5Artifact.embeddingSchemaVersion) {
       throw const FormatException(
         'Evaluation fixture does not match the pinned embedding contract.',
       );

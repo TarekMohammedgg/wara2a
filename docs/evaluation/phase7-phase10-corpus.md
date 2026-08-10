@@ -13,6 +13,13 @@ Corpus version: `wara2a-eval-2026-08-09-v1`
   invoice cases.
 - `test/fixtures/evaluation/search_queries.jsonl` contains exactly 100 Arabic
   or Arabic/Latin mixed labeled queries.
+- `test/fixtures/evaluation/semantic_search_calibration_queries.jsonl`
+  contains separate, balanced Arabic-only, English-only, and mixed
+  Arabic/English semantic calibration cohorts. Each language has family-level
+  positive labels and honest no-result negatives. It exists to measure
+  candidate-model retrieval and rejection distances; it does not change the
+  100-query route corpus or approve a threshold unless one raw global distance
+  cutoff separates all three languages.
 - `tool/evaluation/generate_corpus.dart` is the deterministic generator. Run
   `dart run tool/evaluation/generate_corpus.dart` from the repository root to
   reproduce both JSONL files.
@@ -122,6 +129,11 @@ Required retrieval/router metrics:
 The plan's `Recall@5 >= 0.90` and warm `<= 750 ms p95` values are release gates,
 not results from this fixture suite. No quality threshold is considered passed
 until the corpus is run with the approved on-device models and device matrix.
+
+The host-only E5/MiniLM run and multilingual calibration are recorded in
+`docs/evaluation/phase8-multilingual-embedding-host-benchmark.md`. Any measured
+host threshold in that report remains provisional until the exact Android
+runtime is evaluated.
 
 ## Fast validation
 

@@ -1,16 +1,98 @@
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/database/database_migration_runner.dart';
 import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/entities/database_metadata_entity.dart';
 import 'package:wara2a/core/database/entities/invoice_entity.dart';
+import 'package:wara2a/core/database/entities/invoice_item_entity.dart';
 import 'package:wara2a/core/database/invoice_embedding_status.dart';
-import 'package:wara2a/core/database/database_migration_runner.dart';
 import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/objectbox.g.dart';
 
 void main() {
+  test(
+    'opens a real v2 768-dimensional store and preserves rows for E5 reindex',
+    () async {
+      final source = Directory(
+        'test/fixtures/database/legacy_embedding_768_v2',
+      );
+      final legacyData = File('${source.path}/data.mdb');
+      expect(await legacyData.length(), 40960);
+      expect(
+        sha256.convert(await legacyData.readAsBytes()).toString(),
+        '741f43019369c16796d75c4a106fb89bdf020ef2443872b2d8e26883b06eed31',
+      );
+      final directory = await Directory.systemTemp.createTemp(
+        'wara2a_legacy_768_migrate_',
+      );
+      await _copyDirectory(source, directory);
+
+      final database = await ObjectBoxDatabase.open(directory: directory.path);
+      try {
+        final invoices = database.store.box<InvoiceEntity>().getAll();
+        expect(invoices, hasLength(1));
+        final migrated = invoices.single;
+        expect(migrated.merchant, 'Legacy merchant');
+        expect(migrated.invoiceNumber, 'LEGACY-768');
+        expect(migrated.imagePath, 'legacy/legacy.png');
+        expect(migrated.legacyEmbedding768, isNull);
+        expect(migrated.embedding, isNull);
+        expect(migrated.embeddingModelId, isNull);
+        expect(migrated.embeddingDimensions, isNull);
+        expect(migrated.embeddingStatus, InvoiceEmbeddingStatus.pending.name);
+        expect(
+          migrated.embeddingSchemaVersion,
+          DatabaseVersions.embeddingSchema,
+        );
+        expect(
+          migrated.searchTextSchemaVersion,
+          DatabaseVersions.searchTextSchema,
+        );
+        expect(migrated.searchableText, contains('legacy merchant'));
+        expect(migrated.searchableText, contains('legacy item'));
+
+        final items = database.store.box<InvoiceItemEntity>().getAll();
+        expect(items, hasLength(1));
+        expect(items.single.invoiceId, migrated.id);
+        expect(items.single.name, 'Legacy item');
+        expect(items.single.quantity, 2);
+
+        final metadata = {
+          for (final entry
+              in database.store.box<DatabaseMetadataEntity>().getAll())
+            entry.key: entry.value,
+        };
+        expect(
+          metadata[DatabaseVersions.databaseSchemaKey],
+          DatabaseVersions.databaseSchema.toString(),
+        );
+        expect(
+          metadata[DatabaseVersions.searchTextSchemaKey],
+          DatabaseVersions.searchTextSchema.toString(),
+        );
+        expect(
+          metadata[DatabaseVersions.embeddingSchemaKey],
+          DatabaseVersions.embeddingSchema.toString(),
+        );
+
+        final pending = await database.invoices.getPendingEmbeddings(
+          modelId: MultilingualE5Artifact.modelId,
+          searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
+          embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
+        );
+        expect(pending.map((record) => record.invoice.id), [migrated.id]);
+      } finally {
+        database.close();
+        if (await directory.exists()) {
+          await directory.delete(recursive: true);
+        }
+      }
+    },
+  );
+
   test('reopens previous app metadata and invalidates stale vectors', () async {
     final directory = await Directory.systemTemp.createTemp('wara2a_migrate_');
     var database = await ObjectBoxDatabase.open(directory: directory.path);
@@ -20,9 +102,10 @@ void main() {
       keywordText: 'old',
       imagePath: 'invoice.jpg',
       sourceType: 'gallery',
-      embedding: List<double>.filled(768, 0)..[0] = 1,
+      embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+        ..[0] = 1,
       embeddingModelId: 'old-model',
-      embeddingDimensions: 768,
+      embeddingDimensions: MultilingualE5Artifact.dimensions,
       searchTextSchemaVersion: 0,
       createdAt: now,
       updatedAt: now,
@@ -70,9 +153,10 @@ void main() {
         keywordText: ' future ',
         imagePath: 'future.jpg',
         sourceType: 'gallery',
-        embedding: List<double>.filled(768, 0)..[0] = 1,
-        embeddingModelId: EmbeddingGemmaArtifact.modelId,
-        embeddingDimensions: 768,
+        embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+          ..[0] = 1,
+        embeddingModelId: MultilingualE5Artifact.modelId,
+        embeddingDimensions: MultilingualE5Artifact.dimensions,
         embeddingStatus: InvoiceEmbeddingStatus.ready.name,
         embeddingSchemaVersion: 999,
         embeddingAttemptId: 'future-attempt',
@@ -128,4 +212,20 @@ void main() {
 
     if (await directory.exists()) await directory.delete(recursive: true);
   });
+}
+
+Future<void> _copyDirectory(Directory source, Directory target) async {
+  if (!await source.exists()) {
+    throw StateError('Missing legacy ObjectBox fixture at ${source.path}.');
+  }
+  await target.create(recursive: true);
+  await for (final entity in source.list(followLinks: false)) {
+    final destination =
+        '${target.path}${Platform.pathSeparator}${entity.uri.pathSegments.last}';
+    if (entity is File) {
+      await entity.copy(destination);
+    } else if (entity is Directory) {
+      await _copyDirectory(entity, Directory(destination));
+    }
+  }
 }

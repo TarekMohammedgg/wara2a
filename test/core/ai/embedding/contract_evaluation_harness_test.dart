@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/embedding/embedding_engine.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 import 'package:wara2a/core/ai/embedding/reviewed_invoice_indexer.dart';
 import 'package:wara2a/core/ai/model_management/model_lifecycle_state.dart';
 
@@ -80,7 +80,7 @@ class _FixtureEmbeddingEngine implements EmbeddingEngine {
   EmbeddingEngineSnapshot get snapshot => const EmbeddingEngineSnapshot(
     status: ModelLifecycleStatus.ready,
     capability: EmbeddingCapability.ready,
-    modelId: EmbeddingGemmaArtifact.modelId,
+    modelId: MultilingualE5Artifact.modelId,
   );
 
   @override
@@ -93,8 +93,10 @@ class _FixtureEmbeddingEngine implements EmbeddingEngine {
   Future<void> dispose() => _controller.close();
 
   @override
-  Future<EmbeddingOutput> embedDocument(String searchableText) =>
-      _output(searchableText);
+  Future<EmbeddingOutput> embedDocument(
+    String searchableText, {
+    String? title,
+  }) => _output(searchableText);
 
   @override
   Future<EmbeddingOutput> embedQuery(String normalizedQuery) {
@@ -103,13 +105,13 @@ class _FixtureEmbeddingEngine implements EmbeddingEngine {
   }
 
   Future<EmbeddingOutput> _output(String _) async {
-    final vector = List<double>.filled(EmbeddingGemmaArtifact.dimensions, 0)
+    final vector = List<double>.filled(MultilingualE5Artifact.dimensions, 0)
       ..[0] = 1;
     return EmbeddingOutput(
       vector: List<double>.unmodifiable(vector),
-      modelId: EmbeddingGemmaArtifact.modelId,
-      dimensions: EmbeddingGemmaArtifact.dimensions,
-      schemaVersion: EmbeddingGemmaArtifact.embeddingSchemaVersion,
+      modelId: MultilingualE5Artifact.modelId,
+      dimensions: MultilingualE5Artifact.dimensions,
+      schemaVersion: MultilingualE5Artifact.embeddingSchemaVersion,
     );
   }
 

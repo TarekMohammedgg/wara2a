@@ -6,3 +6,8 @@
 -dontwarn com.google.auto.value.AutoValue$Builder
 -dontwarn com.google.protobuf.Internal$ProtoNonnullApi
 -dontwarn com.google.protobuf.ProtoPresenceBits
+
+# Both ONNX Runtime artifacts load their JNI entry points and custom-op package
+# through named Java classes. Keep that boundary stable in optimized releases.
+-keep class ai.onnxruntime.** { *; }
+-keep class ai.onnxruntime.extensions.** { *; }

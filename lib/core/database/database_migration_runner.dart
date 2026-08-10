@@ -1,6 +1,6 @@
 import '../../objectbox.g.dart';
-import '../ai/embedding/embedding_gemma_artifact.dart';
 import '../ai/embedding/embedding_vector_validator.dart';
+import '../ai/embedding/multilingual_e5_artifact.dart';
 import '../utils/invoice_search_text_builder.dart';
 import '../utils/document_type_normalization.dart';
 import 'database_versions.dart';
@@ -103,12 +103,13 @@ class DatabaseMigrationRunner {
             embeddingVersion < DatabaseVersions.embeddingSchema ||
             invoice.embeddingSchemaVersion !=
                 DatabaseVersions.embeddingSchema ||
-            invoice.embeddingModelId != EmbeddingGemmaArtifact.modelId ||
-            invoice.embeddingDimensions != EmbeddingGemmaArtifact.dimensions ||
+            invoice.embeddingModelId != MultilingualE5Artifact.modelId ||
+            invoice.embeddingDimensions != MultilingualE5Artifact.dimensions ||
             invoice.embeddingStatus != InvoiceEmbeddingStatus.ready.name ||
             !_isValidVector(invoice.embedding);
         if (embeddingStale) {
           invoice
+            ..legacyEmbedding768 = null
             ..embedding = null
             ..embeddingModelId = null
             ..embeddingDimensions = null
@@ -159,7 +160,7 @@ class DatabaseMigrationRunner {
     try {
       EmbeddingVectorValidator.validateNormalized(
         vector,
-        dimensions: EmbeddingGemmaArtifact.dimensions,
+        dimensions: MultilingualE5Artifact.dimensions,
       );
       return true;
     } on InvalidEmbeddingVector {

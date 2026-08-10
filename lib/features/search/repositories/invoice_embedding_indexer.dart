@@ -1,6 +1,7 @@
 import '../../../core/ai/embedding/embedding_engine.dart';
-import '../../../core/ai/embedding/embedding_gemma_artifact.dart';
+import '../../../core/ai/embedding/multilingual_e5_artifact.dart';
 import '../../../core/ai/embedding/reviewed_invoice_indexer.dart';
+import '../../../core/ai/ai_cancellation_token.dart';
 import '../../../core/database/database_versions.dart';
 import '../../../core/database/invoice_embedding_status.dart';
 import '../../../core/database/invoice_record.dart';
@@ -13,6 +14,7 @@ enum InvoiceIndexingOutcome {
   modelUnavailable,
   inputTooLong,
   failed,
+  cancelled,
 }
 
 class ReindexReport {
@@ -22,6 +24,7 @@ class ReindexReport {
     required this.stale,
     required this.unavailable,
     required this.failed,
+    required this.cancelled,
   });
 
   final int total;
@@ -29,6 +32,7 @@ class ReindexReport {
   final int stale;
   final int unavailable;
   final int failed;
+  final int cancelled;
 }
 
 class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
@@ -43,6 +47,7 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
   final DateTime Function() _now;
   final Set<Future<void>> _inFlight = {};
   int _attemptSequence = 0;
+  int _reindexGeneration = 0;
 
   Future<int> pendingCount() async => (await _pending()).length;
 
@@ -107,7 +112,10 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
     }
 
     try {
-      final output = await engine.embedDocument(searchableText);
+      final output = await engine.embedDocument(
+        searchableText,
+        title: record.invoice.merchantNormalized,
+      );
       final committed = await store.commitEmbedding(
         InvoiceEmbeddingCommit(
           invoiceId: invoiceId,
@@ -125,6 +133,17 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
       return committed
           ? InvoiceIndexingOutcome.indexed
           : InvoiceIndexingOutcome.stale;
+    } on AiCancelledException {
+      await store.updateEmbeddingStatus(
+        InvoiceEmbeddingStatusUpdate(
+          invoiceId: invoiceId,
+          status: InvoiceEmbeddingStatus.pending,
+          expectedSearchableText: searchableText,
+          expectedCurrentStatus: InvoiceEmbeddingStatus.indexing,
+          expectedAttemptId: attemptId,
+        ),
+      );
+      return InvoiceIndexingOutcome.cancelled;
     } on EmbeddingInputTooLongException {
       await store.updateEmbeddingStatus(
         InvoiceEmbeddingStatusUpdate(
@@ -163,12 +182,17 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
   Future<ReindexReport> reindexPending({
     void Function(int completed, int total)? onProgress,
   }) {
-    final operation = _reindexPending(onProgress: onProgress);
+    final generation = ++_reindexGeneration;
+    final operation = _reindexPending(
+      generation: generation,
+      onProgress: onProgress,
+    );
     _track(operation);
     return operation;
   }
 
   Future<ReindexReport> _reindexPending({
+    required int generation,
     void Function(int completed, int total)? onProgress,
   }) async {
     final pending = await _pending();
@@ -176,7 +200,13 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
     var stale = 0;
     var unavailable = 0;
     var failed = 0;
+    var cancelled = 0;
+    indexing:
     for (var index = 0; index < pending.length; index++) {
+      if (generation != _reindexGeneration) {
+        cancelled += pending.length - index;
+        break;
+      }
       final outcome = await indexInvoice(pending[index].invoice.id);
       switch (outcome) {
         case InvoiceIndexingOutcome.indexed:
@@ -192,6 +222,9 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
         case InvoiceIndexingOutcome.failed:
           failed++;
           break;
+        case InvoiceIndexingOutcome.cancelled:
+          cancelled += pending.length - index;
+          break indexing;
         case InvoiceIndexingOutcome.missing:
           stale++;
           break;
@@ -208,11 +241,17 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
       stale: stale,
       unavailable: unavailable,
       failed: failed,
+      cancelled: cancelled,
     );
   }
 
+  Future<void> cancelReindex() async {
+    _reindexGeneration++;
+    await engine.cancel();
+  }
+
   Future<List<InvoiceRecord>> _pending() => store.getPendingEmbeddings(
-    modelId: EmbeddingGemmaArtifact.modelId,
+    modelId: MultilingualE5Artifact.modelId,
     searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
     embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
   );

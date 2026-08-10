@@ -217,6 +217,29 @@ class SecureModelInstaller {
     final artifacts = requiredPhase7ArtifactIds
         .map(manifest.byId)
         .toList(growable: false);
+    await installArtifacts(
+      artifacts: artifacts,
+      schemaVersion: manifest.schemaVersion,
+      layout: layout,
+      onProgress: onProgress,
+      cancellationToken: cancellationToken,
+    );
+  }
+
+  Future<void> installArtifacts({
+    required List<ModelArtifactManifest> artifacts,
+    required int schemaVersion,
+    required ModelInstallationLayout layout,
+    required ModelInstallProgressCallback onProgress,
+    AiCancellationToken? cancellationToken,
+  }) async {
+    if (artifacts.isEmpty) {
+      throw const AiRuntimeException(
+        code: AiErrorCode.incompatibleArtifact,
+        stage: 'model-install',
+        message: 'The requested model artifact set is empty.',
+      );
+    }
     if (artifacts.any((artifact) => !artifact.installable)) {
       throw const AiRuntimeException(
         code: AiErrorCode.incompatibleArtifact,
@@ -330,7 +353,7 @@ class SecureModelInstaller {
         await _deleteIfExists(temporary);
       }
     }
-    await _writeInstallationRecord(manifest, layout, artifacts);
+    await _writeInstallationRecord(schemaVersion, layout, artifacts);
     onProgress(
       ModelInstallProgress(
         stage: ModelInstallStage.completed,
@@ -344,8 +367,20 @@ class SecureModelInstaller {
     required Phase7ModelManifest manifest,
     required ModelInstallationLayout layout,
   }) async {
-    for (final id in requiredPhase7ArtifactIds) {
-      final target = File(layout.pathFor(manifest.byId(id)));
+    await removeArtifacts(
+      artifacts: requiredPhase7ArtifactIds
+          .map(manifest.byId)
+          .toList(growable: false),
+      layout: layout,
+    );
+  }
+
+  Future<void> removeArtifacts({
+    required List<ModelArtifactManifest> artifacts,
+    required ModelInstallationLayout layout,
+  }) async {
+    for (final artifact in artifacts) {
+      final target = File(layout.pathFor(artifact));
       await _deleteIfExists(File('${target.path}.part'));
       await _deleteIfExists(File('${target.path}.previous'));
       await _deleteIfExists(target);
@@ -360,7 +395,7 @@ class SecureModelInstaller {
   }
 
   Future<void> _writeInstallationRecord(
-    Phase7ModelManifest manifest,
+    int schemaVersion,
     ModelInstallationLayout layout,
     List<ModelArtifactManifest> artifacts,
   ) async {
@@ -368,7 +403,7 @@ class SecureModelInstaller {
     final temporary = File('${target.path}.part');
     await temporary.writeAsString(
       jsonEncode(<String, Object?>{
-        'schemaVersion': manifest.schemaVersion,
+        'schemaVersion': schemaVersion,
         'installedAt': DateTime.now().toUtc().toIso8601String(),
         'artifacts': artifacts
             .map(

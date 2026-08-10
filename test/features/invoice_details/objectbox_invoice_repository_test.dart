@@ -5,7 +5,7 @@ import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/invoice_embedding_status.dart';
 import 'package:wara2a/core/database/invoice_record.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 import 'package:wara2a/core/storage/invoice_file_cleaner.dart';
 import 'package:wara2a/features/invoice_details/models/invoice.dart';
 import 'package:wara2a/features/invoice_details/repositories/objectbox_invoice_repository.dart';
@@ -73,8 +73,8 @@ void main() {
 
     final updated = (await repository.get(id))!;
     expect(updated.embeddingStatus, InvoiceEmbeddingStatus.ready);
-    expect(updated.embeddingModelId, EmbeddingGemmaArtifact.modelId);
-    expect(updated.embedding, hasLength(768));
+    expect(updated.embeddingModelId, MultilingualE5Artifact.modelId);
+    expect(updated.embedding, hasLength(MultilingualE5Artifact.dimensions));
   });
 
   test(
@@ -137,9 +137,10 @@ Future<void> _markReady(ObjectBoxDatabase database, Invoice invoice) async {
       expectedSearchableText: invoice.searchableText,
       expectedSearchTextSchemaVersion: invoice.searchTextSchemaVersion,
       expectedAttemptId: attemptId,
-      vector: List<double>.filled(768, 0)..[0] = 1,
-      modelId: EmbeddingGemmaArtifact.modelId,
-      dimensions: 768,
+      vector: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+        ..[0] = 1,
+      modelId: MultilingualE5Artifact.modelId,
+      dimensions: MultilingualE5Artifact.dimensions,
       embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
       indexedAt: DateTime.utc(2026, 8, 9, 1),
     ),
@@ -160,9 +161,10 @@ Invoice _invoice({String? imagePath, String? thumbnailPath}) {
     imagePath: imagePath ?? 'invoice.jpg',
     thumbnailPath: thumbnailPath,
     sourceType: InvoiceSourceType.camera,
-    embedding: List<double>.filled(768, 0)..[0] = 1,
-    embeddingModelId: 'test-embedding',
-    embeddingDimensions: 768,
+    embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+      ..[0] = 1,
+    embeddingModelId: MultilingualE5Artifact.modelId,
+    embeddingDimensions: MultilingualE5Artifact.dimensions,
     searchTextSchemaVersion: 1,
     createdAt: now,
     updatedAt: now,

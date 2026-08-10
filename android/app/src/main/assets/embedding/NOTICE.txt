@@ -1,0 +1,32 @@
+Wara2a multilingual E5 tokenizer asset
+=======================================
+
+Bundled asset:
+  embedding/multilingual_e5_small_tokenizer.onnx
+  Bytes: 5,069,598
+  SHA-256: 9f063c3b86fb5e336b5560b240e49204671bf59766e61ea68bb5462001b5c06b
+
+This is a tokenizer/pre-processing graph only. It contains no embedding model
+weights. It was generated reproducibly by:
+  tool/embedding/generate_e5_tokenizer_graph.py
+
+The graph uses ONNX Runtime Extensions 0.13.0's official Hugging Face
+converter and ai.onnx.contrib::SentencepieceTokenizer implementation. Its
+`model` attribute embeds the exact SentencePiece artifact below:
+
+  Repository: intfloat/multilingual-e5-small
+  Revision: 614241f622f53c4eeff9890bdc4f31cfecc418b3
+  Source: https://huggingface.co/intfloat/multilingual-e5-small/blob/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/sentencepiece.bpe.model
+  Bytes: 5,069,051
+  SHA-256: cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865
+  Model-card license: MIT
+  License metadata: https://huggingface.co/intfloat/multilingual-e5-small/blob/614241f622f53c4eeff9890bdc4f31cfecc418b3/README.md
+
+Runtime projects:
+  ONNX Runtime Android 1.21.1 (MIT)
+  https://github.com/microsoft/onnxruntime/tree/v1.21.1
+  ONNX Runtime Extensions Android 0.13.0 (MIT)
+  https://github.com/microsoft/onnxruntime-extensions/tree/v0.13.0
+
+Embedding weights are not bundled. The app installs and verifies the pinned
+external ONNX artifact explicitly before this graph or the encoder is loaded.

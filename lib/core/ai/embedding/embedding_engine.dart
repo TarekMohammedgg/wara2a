@@ -53,7 +53,7 @@ abstract interface class EmbeddingEngine {
   Future<void> install();
   Future<void> cancel();
   Future<void> unload();
-  Future<EmbeddingOutput> embedDocument(String searchableText);
+  Future<EmbeddingOutput> embedDocument(String searchableText, {String? title});
   Future<EmbeddingOutput> embedQuery(String normalizedQuery);
   Future<void> dispose();
 }
@@ -71,15 +71,26 @@ class EmbeddingInputTooLongException implements Exception {
   const EmbeddingInputTooLongException({
     required this.actualCharacters,
     required this.maximumCharacters,
-  });
+  }) : actualTokens = null,
+       maximumTokens = null;
 
-  final int actualCharacters;
-  final int maximumCharacters;
+  const EmbeddingInputTooLongException.tokens({
+    required this.actualTokens,
+    required this.maximumTokens,
+  }) : actualCharacters = null,
+       maximumCharacters = null;
+
+  final int? actualCharacters;
+  final int? maximumCharacters;
+  final int? actualTokens;
+  final int? maximumTokens;
 
   @override
-  String toString() =>
-      'Embedding input has $actualCharacters characters; the conservative '
-      'limit is $maximumCharacters.';
+  String toString() => actualTokens == null
+      ? 'Embedding input has $actualCharacters characters; the conservative '
+            'limit is $maximumCharacters.'
+      : 'Embedding input has $actualTokens tokens; the model limit is '
+            '$maximumTokens.';
 }
 
 class UnavailableEmbeddingEngine implements EmbeddingEngine {
@@ -110,7 +121,10 @@ class UnavailableEmbeddingEngine implements EmbeddingEngine {
   Future<void> dispose() async {}
 
   @override
-  Future<EmbeddingOutput> embedDocument(String searchableText) => Future.error(
+  Future<EmbeddingOutput> embedDocument(
+    String searchableText, {
+    String? title,
+  }) => Future.error(
     EmbeddingUnavailableException(
       _snapshot.message ?? 'Embedding is unavailable.',
     ),
