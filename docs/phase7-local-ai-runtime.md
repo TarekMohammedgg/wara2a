@@ -226,7 +226,10 @@ validator; an LLM may later select candidate IDs but must not invent values.
 Alternative-runtime work is deliberately separate from this patch. Any such
 runtime must work fully offline after an explicit verified model install, have
 a free/open license suitable for app use, prove Android arm64 support, and
-enforce complete JSON before it can enter Wara2a's acceptance path. Upstream
+enforce complete JSON before it can enter Wara2a's acceptance path. It must
+also physically pass Arabic-only, English-only, and mixed Arabic/English
+invoice extraction on Android; tokenizer coverage or sample generation alone
+is not acceptance evidence. Upstream
 `llama.cpp` is eligible for that separate spike because it is MIT-licensed,
 documents an Android build, and provides GBNF/JSON-Schema grammars; official
 Qwen GGUF weights are Apache-2.0. Eligibility is not a reliability result, and
