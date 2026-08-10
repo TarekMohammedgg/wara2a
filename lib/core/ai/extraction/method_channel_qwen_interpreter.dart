@@ -83,11 +83,14 @@ class PlatformQwenTextInterpreter implements InvoiceTextInterpreter {
     final text = response['text'];
     final modelId = response['modelId'];
     final elapsedMs = response['elapsedMs'];
+    final inputTokens = response['inputTokens'];
     if (text is! String ||
         text.trim().isEmpty ||
         modelId is! String ||
         elapsedMs is! int ||
-        elapsedMs < 0) {
+        elapsedMs < 0 ||
+        inputTokens is! int ||
+        inputTokens <= 0) {
       throw const AiRuntimeException(
         code: AiErrorCode.invalidRuntimeResponse,
         stage: 'interpreter',
@@ -98,6 +101,7 @@ class PlatformQwenTextInterpreter implements InvoiceTextInterpreter {
       json: text.trim(),
       modelId: modelId,
       elapsed: Duration(milliseconds: elapsedMs),
+      inputTokens: inputTokens,
     );
   }
 

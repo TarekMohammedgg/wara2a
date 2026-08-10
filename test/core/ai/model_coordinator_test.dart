@@ -83,9 +83,38 @@ void main() {
       expect(result.error!.code, AiErrorCode.invalidModelOutput);
       expect(result.validationIssues, isNotEmpty);
       expect(result.draft.rawText, contains('Samsung Galaxy A56'));
+      expect(result.interpretationElapsed, const Duration(milliseconds: 2));
+      expect(result.interpretationInputTokens, 102);
       await coordinator.dispose();
     },
   );
+
+  test('preserves initial diagnostics when the repair times out', () async {
+    final interpreter = _ScriptedInterpreter(
+      <String>['{}', '{}'],
+      delays: const <Duration>[Duration.zero, Duration(milliseconds: 100)],
+    );
+    final coordinator = ModelCoordinator(
+      ocrEngineFactory: () => _FakeOcrEngine(evidence),
+      interpreterFactory: () => interpreter,
+    );
+
+    final result = await coordinator.extract(
+      const InvoiceExtractionRequest(
+        imagePath: 'invoice.jpg',
+        ocrModels: modelFiles,
+        qwenModelPath: 'qwen.task',
+        interpretationTimeout: Duration(milliseconds: 10),
+      ),
+    );
+
+    expect(result.manualFallback, isTrue);
+    expect(result.error!.code, AiErrorCode.timeout);
+    expect(result.error!.stage, 'interpretation-repair');
+    expect(result.interpretationElapsed, const Duration(milliseconds: 1));
+    expect(result.interpretationInputTokens, 101);
+    await coordinator.dispose();
+  });
 
   test('keeps OCR evidence when the Qwen artifact is incompatible', () async {
     final coordinator = ModelCoordinator(
@@ -209,9 +238,10 @@ class _FakeOcrEngine implements OcrEngine {
 }
 
 class _ScriptedInterpreter implements InvoiceTextInterpreter {
-  _ScriptedInterpreter(this.outputs);
+  _ScriptedInterpreter(this.outputs, {this.delays = const <Duration>[]});
 
   final List<String> outputs;
+  final List<Duration> delays;
   final List<InterpretationAttempt> attempts = <InterpretationAttempt>[];
   bool disposed = false;
 
@@ -237,10 +267,15 @@ class _ScriptedInterpreter implements InvoiceTextInterpreter {
     cancellationToken?.throwIfCancelled();
     attempts.add(request.attempt);
     final index = attempts.length - 1;
+    if (index < delays.length && delays[index] > Duration.zero) {
+      await Future<void>.delayed(delays[index]);
+      cancellationToken?.throwIfCancelled();
+    }
     return InvoiceInterpretationOutput(
       json: outputs[index],
       modelId: 'fixture',
-      elapsed: Duration.zero,
+      elapsed: Duration(milliseconds: index + 1),
+      inputTokens: 101 + index,
     );
   }
 

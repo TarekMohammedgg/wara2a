@@ -43,6 +43,7 @@ class InvoiceExtractionResult {
     this.modelOutput,
     this.error,
     this.interpretationElapsed,
+    this.interpretationInputTokens,
   });
 
   final InvoiceDraft draft;
@@ -52,7 +53,11 @@ class InvoiceExtractionResult {
   final List<DraftValidationIssue> validationIssues;
   final String? modelOutput;
   final AiRuntimeException? error;
+
+  /// Diagnostics for the most recent interpreter attempt that completed.
+  /// These remain available when validation or a later repair fails safely.
   final Duration? interpretationElapsed;
+  final int? interpretationInputTokens;
 }
 
 class ModelCoordinator {
@@ -103,6 +108,8 @@ class ModelCoordinator {
     OcrEvidence? evidence;
     var validationIssues = const <DraftValidationIssue>[];
     String? modelOutput;
+    Duration? interpretationElapsed;
+    int? interpretationInputTokens;
     try {
       _emit(ModelLifecycleStatus.loading, ExtractionStage.checkingCapability);
       final ocr = _activeOcr = ocrEngineFactory();
@@ -200,6 +207,8 @@ class ModelCoordinator {
         cancelRuntime: interpreter.cancel,
       );
       modelOutput = initial.json;
+      interpretationElapsed = initial.elapsed;
+      interpretationInputTokens = initial.inputTokens;
       _emit(ModelLifecycleStatus.running, ExtractionStage.validating);
       var validation = validator.validate(
         modelOutput: initial.json,
@@ -213,6 +222,7 @@ class ModelCoordinator {
           initial.json,
           modelId: initial.modelId,
           interpretationElapsed: initial.elapsed,
+          interpretationInputTokens: initial.inputTokens,
           repaired: false,
         );
       }
@@ -233,6 +243,8 @@ class ModelCoordinator {
         cancelRuntime: interpreter.cancel,
       );
       modelOutput = repaired.json;
+      interpretationElapsed = repaired.elapsed;
+      interpretationInputTokens = repaired.inputTokens;
       _emit(ModelLifecycleStatus.running, ExtractionStage.validating);
       validation = validator.validate(
         modelOutput: repaired.json,
@@ -246,6 +258,7 @@ class ModelCoordinator {
           repaired.json,
           modelId: repaired.modelId,
           interpretationElapsed: repaired.elapsed,
+          interpretationInputTokens: repaired.inputTokens,
           repaired: true,
         );
       }
@@ -254,6 +267,8 @@ class ModelCoordinator {
         evidence: evidence,
         validationIssues: validation.issues,
         modelOutput: repaired.json,
+        interpretationElapsed: repaired.elapsed,
+        interpretationInputTokens: repaired.inputTokens,
         error: const AiRuntimeException(
           code: AiErrorCode.invalidModelOutput,
           stage: 'validation',
@@ -278,6 +293,8 @@ class ModelCoordinator {
         evidence: evidence,
         validationIssues: validationIssues,
         modelOutput: modelOutput,
+        interpretationElapsed: interpretationElapsed,
+        interpretationInputTokens: interpretationInputTokens,
         error: error,
       );
     } on Object catch (error) {
@@ -285,6 +302,8 @@ class ModelCoordinator {
         evidence: evidence,
         validationIssues: validationIssues,
         modelOutput: modelOutput,
+        interpretationElapsed: interpretationElapsed,
+        interpretationInputTokens: interpretationInputTokens,
         error: AiRuntimeException(
           code: AiErrorCode.inferenceFailed,
           stage: 'coordinator',
@@ -369,6 +388,7 @@ class ModelCoordinator {
     String output, {
     required String modelId,
     required Duration interpretationElapsed,
+    required int interpretationInputTokens,
     required bool repaired,
   }) {
     _emit(ModelLifecycleStatus.ready, ExtractionStage.completed);
@@ -380,6 +400,7 @@ class ModelCoordinator {
       validationIssues: const <DraftValidationIssue>[],
       modelOutput: output,
       interpretationElapsed: interpretationElapsed,
+      interpretationInputTokens: interpretationInputTokens,
     );
   }
 
@@ -389,6 +410,8 @@ class ModelCoordinator {
     List<DraftValidationIssue> validationIssues =
         const <DraftValidationIssue>[],
     String? modelOutput,
+    Duration? interpretationElapsed,
+    int? interpretationInputTokens,
   }) {
     _emit(
       ModelLifecycleStatus.failed,
@@ -405,6 +428,8 @@ class ModelCoordinator {
       validationIssues: List.unmodifiable(validationIssues),
       modelOutput: modelOutput,
       error: error,
+      interpretationElapsed: interpretationElapsed,
+      interpretationInputTokens: interpretationInputTokens,
     );
   }
 
