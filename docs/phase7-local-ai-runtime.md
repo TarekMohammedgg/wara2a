@@ -4,9 +4,10 @@ Research and device-evidence snapshot: 2026-08-10
 
 Status: the Android production workflow is implemented, but Phase 7 release
 acceptance is not complete. A physical arm64 device proved real bilingual OCR
-and real Qwen generation. The final invoice-shaped run failed strict JSON
-validation and safely opened the manual-review path; it did not produce an
-accepted extracted draft.
+and real Qwen generation. Every bounded invoice-shaped qualification attempt
+failed the strict acceptance gate and safely opened the manual-review path; no
+model-generated draft was accepted or saved. Further 0.5B retries were stopped
+after the targeted reliability follow-up described below.
 
 ```text
 durable captured/imported image
@@ -82,6 +83,16 @@ JSON object. Leading prose/markdown remains invalid, and Dart still rejects
 unknown keys, wrong types, unsupported evidence, inconsistent arithmetic, and
 malformed JSON. One repair attempt is allowed before manual review.
 
+Inspection of the exact `0.10.27` Android AAR confirmed the available controls.
+`LlmInferenceOptions.Builder.setMaxTokens` configures the engine's total
+context; `LlmInferenceSessionOptions.Builder` exposes `setTopK`, `setTopP`,
+`setTemperature`, `setRandomSeed`, and `setConstraintHandle`; and a session
+exposes `sizeInTokens` and `cancelGenerateResponseAsync`. There is no public
+per-generation output-token setter. The AAR exposes no public creator for the
+opaque constraint handle, so constrained decoding was not claimed or invented.
+Wara2a's `maximumOutputTokens` remains a prompt preflight reserve (384 tokens in
+the released baseline), not a native generation cap.
+
 Primary sources:
 
 - [LiteRT-LM overview](https://developers.google.com/edge/litert-lm/overview)
@@ -143,7 +154,8 @@ The opt-in test generated a durable 1080x1600 bilingual invoice containing:
 12345, date 2026-08-10, two English product rows, totals in English and Arabic,
 and `Thank you / شكراً`.
 
-The device could not resolve the Hugging Face host during the run. The product
+During the original qualification run the device could not resolve the Hugging
+Face host. The product
 installer correctly failed with `modelNotInstalled` at `model-download` and
 activated zero unverified bytes. For runtime qualification only, engineering
 downloaded the same seven pinned URLs on the host, verified every length/hash,
@@ -173,6 +185,61 @@ Final bounded invoice run after the strict streaming boundary:
   product output is a remaining 0.5B model-quality/prompt gate, not a parser
   crash.
 
+A targeted reliability follow-up reused or re-downloaded those exact pinned
+artifacts, verified all 567,541,717 bytes on the host, in device staging, and in
+app-private storage, and used only the opt-in debug harness for sideloading. A
+network ping resolved during the follow-up, but the secure product downloader
+was not exercised and remains unproven. Three deliberately bounded trials ran:
+
+- A compact-schema trial completed 14-line OCR in 3,128 ms, but its measured
+  prompt used 781 tokens. The experimental 512-token reserve would exceed the
+  artifact's 1,280-token context, so generation was correctly rejected before
+  inference. The inspector took 25,699 ms. A separate minimal probe still
+  initialized in 278 ms and generated 183 bytes of parseable JSON in 7,360 ms.
+- After shortening duplicated instructions, the inspector took 23,198 ms and
+  OCR completed in 4,001 ms with 14 lines. Qwen returned 966 characters that
+  failed strict JSON parsing with `Unexpected character`; the repair prompt
+  measured 795 tokens and could not fit beside the experimental 512-token
+  reserve. Total extraction time was 84,884 ms and manual fallback remained
+  active. The minimal probe initialized in 566 ms and generated 171 parseable
+  bytes in 6,219 ms.
+- A final compact ordered-text trial passed preflight; the inspector took
+  23,533 ms and OCR completed in 2,850 ms with 14 lines. The initial Qwen stage
+  timed out at its 60-second bound before a complete output was available.
+  Total extraction time was 88,479 ms and the result was manual fallback. The
+  minimal probe initialized in 269 ms and generated 171 parseable bytes in
+  6,279 ms.
+
+The two strategies that reached invoice generation did not improve the strict
+acceptance result, so their prompt and 512-token reserve experiments were not
+retained. The released prompt, 384-token reserve, unchanged validator, and safe
+manual fallback remain in place. The debug harness now records measured input
+tokens and, on a successful future run, requires the exact typed non-manual
+`InvoiceDraft` and `ReviewRouteArgs`; no follow-up run reached those assertions.
+Given these failures together with the earlier unterminated and trailing-junk
+outputs, further physical retries of this 0.5B configuration were stopped.
+
+The next bounded app-side experiment should be a deterministic Dart parser that
+turns only explicit OCR evidence into candidates, leaves ambiguous or absent
+values null, and sends the resulting complete object through the unchanged
+validator; an LLM may later select candidate IDs but must not invent values.
+Alternative-runtime work is deliberately separate from this patch. Any such
+runtime must work fully offline after an explicit verified model install, have
+a free/open license suitable for app use, prove Android arm64 support, and
+enforce complete JSON before it can enter Wara2a's acceptance path. It must
+also physically pass Arabic-only, English-only, and mixed Arabic/English
+invoice extraction on Android; tokenizer coverage or sample generation alone
+is not acceptance evidence. Upstream
+`llama.cpp` is eligible for that separate spike because it is MIT-licensed,
+documents an Android build, and provides GBNF/JSON-Schema grammars; official
+Qwen GGUF weights are Apache-2.0. Eligibility is not a reliability result, and
+no replacement runtime is selected or credited here.
+
+Next-path sources: [llama.cpp](https://github.com/ggml-org/llama.cpp),
+[Android build](https://github.com/ggml-org/llama.cpp/blob/master/docs/android.md),
+[grammar support](https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md),
+and [official Qwen2.5-0.5B-Instruct GGUF](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF).
+
 Memory sampling across a combined physical run captured 95 samples: peak total
 PSS 1,689,818 kB and peak total RSS 1,782,784 kB. During inference, thermal
 status was 1 with CPU/GPU 58.097 C, NPU 57.791 C, skin 44.733 C, and battery
@@ -180,21 +247,37 @@ status was 1 with CPU/GPU 58.097 C, NPU 57.791 C, skin 44.733 C, and battery
 43.314 C, NPU 43.161 C, skin 39.944 C, and battery 36.9 C at 100%. These are
 single-run engineering readings, not p95 or battery-consumption claims.
 
+Follow-up sampling did not establish a new release threshold. The second trial
+captured 120 samples over 146,961 ms with peak PSS/RSS of
+1,634,295/1,750,300 kB; sampled temperatures reached about 60.0 C CPU/GPU,
+60.19 C NPU, 45.812 C skin, and 37.2 C battery at 100% (thermal status 1). The
+final trial captured 120 samples over 149,256 ms with peak PSS/RSS of
+1,567,386/1,689,520 kB; its inference sample was about 58.7 C CPU/GPU,
+58.57 C NPU, 44.533 C skin, and 37.3 C battery at 100%, then cooled to about
+46.2/46.36/42.375/37.2 C respectively. These are engineering samples, not
+ten-run, p95, battery-delta, or lower-memory-tier evidence.
+
 ## Final host verification
 
-On 2026-08-10, `flutter analyze` completed with no issues. Explicit non-widget
-test splits passed 21 AI runtime/contract tests, 8 capture/review/settings tests,
-and 10 ObjectBox/storage tests. Android
+On 2026-08-10, `flutter analyze --no-pub` completed with no issues. Focused
+splits passed 26 Phase 7/model-installation/validation/capture-review tests and
+16 semantic-search/embedding contract tests. Android
 `:app:testDebugUnitTest :ppocr-sdk:testDebugUnitTest` passed, including the
-strict streaming JSON boundary tests. The exact widget runner was not repeated
-after multiple no-output timeouts were established as environment contention.
+balanced-object boundary and explicit truncated-object rejection regressions.
 
-`flutter build apk --debug --target-platform android-arm64` produced an
-arm64-only debug APK of 191,304,089 bytes with SHA-256
-`e26a9ae4882ae31d2415c539e9b4a57757337efa5e74cbed57cc52d38a41d413`.
-It contains the runtime libraries but no external model files. Gradle reports
-the existing future AGP built-in-Kotlin migration warning for
-`objectbox_flutter_libs` and `ppocr-sdk`; it is not a current build failure.
+`flutter build apk --release --target-platform android-arm64 --no-pub` passed
+R8 and produced an arm64-only APK of 176,138,863 bytes with SHA-256
+`7f8f3cdfc09ff51ae1db7342769393b40b730dd8350ad385fd8fbf17456d4649`.
+Archive inspection found the pinned Phase 7 manifest and zero `.task`, `.onnx`,
+`.litertlm`, `.tflite`, or `.gguf` weights. R8 emitted non-empty mapping and
+configuration outputs containing the four narrow MediaPipe `-dontwarn` rules
+and the existing PaddleOCR/ONNX keep rules. Gradle reports the existing future
+built-in-Kotlin migration warning for `flutter_gemma`,
+`objectbox_flutter_libs`, and `ppocr-sdk`; it is not a current build failure.
+After testing, the exact engineering staging directory was removed from the
+RMX3636 and the release APK above was restored without model files. Its
+device-side base-APK SHA-256 matched the host, and `run-as` confirmed that the
+installed package is not debuggable.
 
 ## Remaining Phase 7 release gates
 

@@ -19,6 +19,7 @@ void main() {
               'text': '{"merchantName":"متجر"}',
               'modelId': 'qwen-device-fixture',
               'elapsedMs': 1234,
+              'inputTokens': 321,
             },
             'dispose' => null,
             _ => throw PlatformException(code: 'unexpected_method'),
@@ -44,7 +45,7 @@ void main() {
       'modelPath': '/verified/model.task',
     });
     final arguments = calls[1].arguments as Map<Object?, Object?>;
-    expect(arguments['maximumOutputTokens'], 384);
+    expect(arguments['maximumOutputTokens'], defaultInvoiceMaximumOutputTokens);
     expect(
       arguments['prompt'],
       '<|im_start|>system\n'
@@ -56,5 +57,6 @@ void main() {
     );
     expect(output.modelId, 'qwen-device-fixture');
     expect(output.elapsed, const Duration(milliseconds: 1234));
+    expect(output.inputTokens, 321);
   });
 }

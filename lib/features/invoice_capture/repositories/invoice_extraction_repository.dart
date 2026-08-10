@@ -109,6 +109,7 @@ class LocalInvoiceExtractionRepository implements InvoiceExtractionRepository {
       modelOutput: result.modelOutput,
       error: result.error,
       interpretationElapsed: result.interpretationElapsed,
+      interpretationInputTokens: result.interpretationInputTokens,
     );
   }
 }

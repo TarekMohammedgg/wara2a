@@ -33,4 +33,18 @@ class StrictJsonObjectAccumulatorTest {
             StrictJsonObjectAccumulator.extract("$json trailing"),
         )
     }
+
+    @Test
+    fun `never treats a truncated object as complete`() {
+        val accumulator = StrictJsonObjectAccumulator()
+
+        assertNull(accumulator.add("{\"merchant\":\"Al Noor\","))
+        assertNull(accumulator.add("\"products\":[{\"name\":\"Coffee\"}]"))
+        assertNull(accumulator.completeJson)
+        assertNull(
+            StrictJsonObjectAccumulator.extract(
+                "{\"merchant\":null,\"rawText\":\"unterminated",
+            ),
+        )
+    }
 }

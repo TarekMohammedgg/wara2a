@@ -15,7 +15,9 @@ import 'package:wara2a/core/ai/model_management/bundled_model_manifest.dart';
 import 'package:wara2a/core/ai/model_management/model_coordinator.dart';
 import 'package:wara2a/core/ai/model_management/model_installation.dart';
 import 'package:wara2a/core/ai/ocr/method_channel_ocr_engine.dart';
+import 'package:wara2a/features/invoice_capture/models/invoice_draft.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
+import 'package:wara2a/features/invoice_capture/models/review_route_args.dart';
 import 'package:wara2a/features/invoice_capture/repositories/invoice_extraction_repository.dart';
 import 'package:wara2a/features/settings/models/local_ai_status.dart';
 import 'package:wara2a/features/settings/repositories/local_ai_status_repository.dart';
@@ -103,6 +105,7 @@ void main() {
           'totalElapsedMs=${extractionWatch.elapsedMilliseconds} '
           'ocrElapsedMs=${evidence?.timings.total.inMilliseconds ?? -1} '
           'qwenElapsedMs=${result.interpretationElapsed?.inMilliseconds ?? -1} '
+          'inputTokens=${result.interpretationInputTokens ?? -1} '
           'ocrLines=${evidence?.lines.length ?? 0} '
           'arabicLines=$arabicLines latinLines=$latinLines '
           'model=${result.draft.extractionModelId ?? '-'} '
@@ -123,6 +126,34 @@ void main() {
         expect(latinLines, greaterThan(0));
         expect(result.modelOutput, isNotNull);
         expect(result.manualFallback, isFalse);
+        final reviewArgs = ReviewRouteArgs(draft: result.draft);
+        expect(reviewArgs.draft, same(result.draft));
+        expect(
+          reviewArgs.draft.origin,
+          isNot(InvoiceDraftOrigin.manualFallback),
+        );
+        expect(reviewArgs.draft.requiresManualReview, isTrue);
+        expect(reviewArgs.draft.merchant, isNotNull);
+        expect(reviewArgs.draft.invoiceNumber, '12345');
+        expect(reviewArgs.draft.purchaseDate, DateTime.utc(2026, 8, 10));
+        expect(reviewArgs.draft.totalMinor, 12550);
+        expect(reviewArgs.draft.currencyCode, 'EGP');
+        expect(reviewArgs.draft.products, hasLength(2));
+        expect(
+          reviewArgs.draft.products.map((product) => product.name),
+          orderedEquals(<String>['Coffee', 'Notebook']),
+        );
+        expect(reviewArgs.draft.products[0].quantity, 2);
+        expect(reviewArgs.draft.products[0].unitPriceMinor, 2500);
+        expect(reviewArgs.draft.products[0].lineTotalMinor, 5000);
+        expect(reviewArgs.draft.products[1].quantity, 1);
+        expect(reviewArgs.draft.products[1].unitPriceMinor, 7550);
+        expect(reviewArgs.draft.products[1].lineTotalMinor, 7550);
+        expect(result.interpretationInputTokens, isNotNull);
+        expect(
+          result.interpretationInputTokens! + defaultInvoiceMaximumOutputTokens,
+          lessThanOrEqualTo(1280),
+        );
         expect(
           result.draft.extractionModelId,
           contains('Qwen2.5-0.5B-Instruct'),

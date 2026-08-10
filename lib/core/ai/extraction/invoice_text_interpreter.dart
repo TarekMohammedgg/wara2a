@@ -3,11 +3,13 @@ import '../ai_runtime_error.dart';
 import '../model_management/model_capability.dart';
 import 'invoice_extraction_prompt.dart';
 
+const int defaultInvoiceMaximumOutputTokens = 384;
+
 class InvoiceInterpretationRequest {
   const InvoiceInterpretationRequest({
     required this.prompt,
     required this.attempt,
-    this.maximumOutputTokens = 384,
+    this.maximumOutputTokens = defaultInvoiceMaximumOutputTokens,
   });
 
   final String prompt;
@@ -20,11 +22,13 @@ class InvoiceInterpretationOutput {
     required this.json,
     required this.modelId,
     required this.elapsed,
+    required this.inputTokens,
   });
 
   final String json;
   final String modelId;
   final Duration elapsed;
+  final int inputTokens;
 }
 
 abstract interface class InvoiceTextInterpreter {
