@@ -36,7 +36,7 @@
     },
     {
       "id": "2:2710519800567843983",
-      "lastPropertyId": "30:6884250741628774964",
+      "lastPropertyId": "31:5286991857557893889",
       "name": "InvoiceEntity",
       "properties": [
         {
@@ -136,7 +136,7 @@
         },
         {
           "id": "17:3475944700035130751",
-          "name": "embedding",
+          "name": "legacyEmbedding768",
           "indexId": "5:5674699518843013707",
           "type": 28,
           "flags": 8
@@ -213,6 +213,13 @@
           "id": "30:6884250741628774964",
           "name": "embeddingAttemptId",
           "type": 9
+        },
+        {
+          "id": "31:5286991857557893889",
+          "name": "embedding",
+          "indexId": "15:8049682333177546105",
+          "type": 28,
+          "flags": 8
         }
       ],
       "relations": []
@@ -265,7 +272,7 @@
     }
   ],
   "lastEntityId": "3:7266021108998744756",
-  "lastIndexId": "14:3409279870630035987",
+  "lastIndexId": "15:8049682333177546105",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

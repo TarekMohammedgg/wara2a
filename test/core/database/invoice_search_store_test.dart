@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/entities/invoice_entity.dart';
 import 'package:wara2a/core/database/entities/invoice_item_entity.dart';
 import 'package:wara2a/core/database/invoice_embedding_status.dart';
@@ -10,10 +12,10 @@ import 'package:wara2a/core/database/invoice_search_spec.dart';
 import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/core/utils/document_type_normalization.dart';
 
-const _modelId = 'test/embedding-model@1';
-const _searchSchema = 2;
-const _embeddingSchema = 2;
-const _dimensions = 768;
+const _modelId = MultilingualE5Artifact.modelId;
+const _searchSchema = DatabaseVersions.searchTextSchema;
+const _embeddingSchema = DatabaseVersions.embeddingSchema;
+const _dimensions = MultilingualE5Artifact.dimensions;
 
 void main() {
   late Directory directory;

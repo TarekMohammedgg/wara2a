@@ -3,7 +3,7 @@
   "evidenceClass": "unexecuted_labeled_fixture",
   "approvedForThreshold": false,
   "productionSemanticQualityClaim": false,
-  "requiredModelId": "litert-community/embeddinggemma-300m/embeddinggemma-300M_seq256_mixed-precision.tflite@model-37115ef7bff76cd37dd86abe503ff511b1032bf85fc624a85c49c84899e92bc5.tokenizer-d6daa52d93d7aad10e8388bd526c4e501d914b47177398d1d9621f1fe48438c7.runtime-litertlm-0.14.0.prompt-flutter_gemma_embeddings-1.0.4-retrieval-prompts-v1.schema-2",
+  "requiredModelId": "intfloat-multilingual-e5-small-qint8-614241f",
   "note": "Synthetic invoice-shaped labels for wiring and future device evaluation. No retrieval metric or threshold is approved until all cases run with the licensed real model on the reference corpus.",
   "corpus": [
     {

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import '../../objectbox.g.dart';
-import '../ai/embedding/embedding_gemma_artifact.dart';
 import '../ai/embedding/embedding_vector_validator.dart';
+import '../ai/embedding/multilingual_e5_artifact.dart';
 import 'database_versions.dart';
 import 'entities/invoice_entity.dart';
 import 'entities/invoice_item_entity.dart';
@@ -463,11 +463,11 @@ bool _acceptDistance(double distance, double? maximumDistance) =>
 
 void _validateVectorQuery(InvoiceVectorQuery request) {
   _validateFilter(request.filter);
-  if (request.dimensions != EmbeddingGemmaArtifact.dimensions) {
+  if (request.dimensions != MultilingualE5Artifact.dimensions) {
     throw ArgumentError.value(
       request.dimensions,
       'dimensions',
-      'The HNSW index requires ${EmbeddingGemmaArtifact.dimensions}.',
+      'The HNSW index requires ${MultilingualE5Artifact.dimensions}.',
     );
   }
   EmbeddingVectorValidator.validateNormalized(
@@ -544,7 +544,7 @@ List<InvoiceRecord> _getPendingEmbeddings(
       .where((invoice) {
         if (invoice.embeddingStatus != InvoiceEmbeddingStatus.ready.name ||
             invoice.embeddingModelId != request.modelId ||
-            invoice.embeddingDimensions != EmbeddingGemmaArtifact.dimensions ||
+            invoice.embeddingDimensions != MultilingualE5Artifact.dimensions ||
             invoice.embeddingSchemaVersion != request.embeddingSchemaVersion ||
             invoice.searchTextSchemaVersion !=
                 request.searchTextSchemaVersion ||
@@ -554,7 +554,7 @@ List<InvoiceRecord> _getPendingEmbeddings(
         try {
           EmbeddingVectorValidator.validateNormalized(
             invoice.embedding!,
-            dimensions: EmbeddingGemmaArtifact.dimensions,
+            dimensions: MultilingualE5Artifact.dimensions,
           );
           return false;
         } on InvalidEmbeddingVector {
@@ -567,14 +567,14 @@ List<InvoiceRecord> _getPendingEmbeddings(
 }
 
 bool _commitEmbedding(Store store, InvoiceEmbeddingCommit request) {
-  if (request.dimensions != EmbeddingGemmaArtifact.dimensions) {
+  if (request.dimensions != MultilingualE5Artifact.dimensions) {
     throw InvalidEmbeddingVector(
-      'Only ${EmbeddingGemmaArtifact.dimensions}-dimensional vectors may be stored.',
+      'Only ${MultilingualE5Artifact.dimensions}-dimensional vectors may be stored.',
     );
   }
   EmbeddingVectorValidator.validateNormalized(
     request.vector,
-    dimensions: EmbeddingGemmaArtifact.dimensions,
+    dimensions: MultilingualE5Artifact.dimensions,
   );
   if (request.modelId.trim().isEmpty || request.expectedAttemptId.isEmpty) {
     throw ArgumentError('Embedding model and attempt IDs must not be empty.');

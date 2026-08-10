@@ -59,7 +59,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 2710519800567843983),
     name: 'InvoiceEntity',
-    lastPropertyId: const obx_int.IdUid(30, 6884250741628774964),
+    lastPropertyId: const obx_int.IdUid(31, 5286991857557893889),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -167,7 +167,7 @@ final _entities = <obx_int.ModelEntity>[
       ),
       obx_int.ModelProperty(
         id: const obx_int.IdUid(17, 3475944700035130751),
-        name: 'embedding',
+        name: 'legacyEmbedding768',
         type: 28,
         flags: 8,
         indexId: const obx_int.IdUid(5, 5674699518843013707),
@@ -254,6 +254,14 @@ final _entities = <obx_int.ModelEntity>[
         name: 'embeddingAttemptId',
         type: 9,
         flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(31, 5286991857557893889),
+        name: 'embedding',
+        type: 28,
+        flags: 8,
+        indexId: const obx_int.IdUid(15, 8049682333177546105),
+        hnswParams: obx_int.ModelHnswParams(dimensions: 384, distanceType: 2),
       ),
     ],
     relations: <obx_int.ModelRelation>[],
@@ -358,7 +366,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
     lastEntityId: const obx_int.IdUid(3, 7266021108998744756),
-    lastIndexId: const obx_int.IdUid(14, 3409279870630035987),
+    lastIndexId: const obx_int.IdUid(15, 8049682333177546105),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
@@ -452,9 +460,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ? null
             : fbb.writeString(object.thumbnailPath!);
         final sourceTypeOffset = fbb.writeString(object.sourceType);
-        final embeddingOffset = object.embedding == null
+        final legacyEmbedding768Offset = object.legacyEmbedding768 == null
             ? null
-            : fbb.writeListFloat32(object.embedding!);
+            : fbb.writeListFloat32(object.legacyEmbedding768!);
         final embeddingModelIdOffset = object.embeddingModelId == null
             ? null
             : fbb.writeString(object.embeddingModelId!);
@@ -472,7 +480,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final embeddingAttemptIdOffset = object.embeddingAttemptId == null
             ? null
             : fbb.writeString(object.embeddingAttemptId!);
-        fbb.startTable(31);
+        final embeddingOffset = object.embedding == null
+            ? null
+            : fbb.writeListFloat32(object.embedding!);
+        fbb.startTable(32);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, merchantOffset);
         fbb.addOffset(2, merchantNormalizedOffset);
@@ -489,7 +500,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(13, imagePathOffset);
         fbb.addOffset(14, thumbnailPathOffset);
         fbb.addOffset(15, sourceTypeOffset);
-        fbb.addOffset(16, embeddingOffset);
+        fbb.addOffset(16, legacyEmbedding768Offset);
         fbb.addOffset(17, embeddingModelIdOffset);
         fbb.addInt64(18, object.embeddingDimensions);
         fbb.addInt64(19, object.searchTextSchemaVersion);
@@ -503,6 +514,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(27, embeddingFailureCodeOffset);
         fbb.addOffset(28, documentTypeNormalizedOffset);
         fbb.addOffset(29, embeddingAttemptIdOffset);
+        fbb.addOffset(30, embeddingOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -579,10 +591,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final sourceTypeParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGet(buffer, rootOffset, 34, '');
-        final embeddingParam = const fb.ListReader<double>(
+        final legacyEmbedding768Param = const fb.ListReader<double>(
           fb.Float32Reader(),
           lazy: false,
         ).vTableGetNullable(buffer, rootOffset, 36);
+        final embeddingParam = const fb.ListReader<double>(
+          fb.Float32Reader(),
+          lazy: false,
+        ).vTableGetNullable(buffer, rootOffset, 64);
         final embeddingModelIdParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 38);
@@ -642,6 +658,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           imagePath: imagePathParam,
           thumbnailPath: thumbnailPathParam,
           sourceType: sourceTypeParam,
+          legacyEmbedding768: legacyEmbedding768Param,
           embedding: embeddingParam,
           embeddingModelId: embeddingModelIdParam,
           embeddingDimensions: embeddingDimensionsParam,
@@ -841,8 +858,8 @@ class InvoiceEntity_ {
     _entities[1].properties[15],
   );
 
-  /// See [InvoiceEntity.embedding].
-  static final embedding = obx.QueryHnswProperty<InvoiceEntity>(
+  /// See [InvoiceEntity.legacyEmbedding768].
+  static final legacyEmbedding768 = obx.QueryHnswProperty<InvoiceEntity>(
     _entities[1].properties[16],
   );
 
@@ -908,6 +925,11 @@ class InvoiceEntity_ {
   /// See [InvoiceEntity.embeddingAttemptId].
   static final embeddingAttemptId = obx.QueryStringProperty<InvoiceEntity>(
     _entities[1].properties[29],
+  );
+
+  /// See [InvoiceEntity.embedding].
+  static final embedding = obx.QueryHnswProperty<InvoiceEntity>(
+    _entities[1].properties[30],
   );
 }
 

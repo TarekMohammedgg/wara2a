@@ -17,6 +17,13 @@ class ModelInstallationLayout {
     return ModelInstallationLayout(Directory('${support.path}/models/phase7'));
   }
 
+  static Future<ModelInstallationLayout> embeddingV3() async {
+    final support = await getApplicationSupportDirectory();
+    return ModelInstallationLayout(
+      Directory('${support.path}/models/embedding-v3'),
+    );
+  }
+
   String pathFor(ModelArtifactManifest artifact) =>
       '${rootDirectory.path}/${artifact.modelId}/${artifact.fileName}';
 
@@ -61,11 +68,23 @@ class ModelInstallationInspector {
     required ModelInstallationLayout layout,
     AiCancellationToken? cancellationToken,
   }) async {
-    const ids = requiredPhase7ArtifactIds;
+    return inspectArtifacts(
+      artifacts: requiredPhase7ArtifactIds
+          .map(manifest.byId)
+          .toList(growable: false),
+      layout: layout,
+      cancellationToken: cancellationToken,
+    );
+  }
+
+  Future<ModelInstallationReport> inspectArtifacts({
+    required List<ModelArtifactManifest> artifacts,
+    required ModelInstallationLayout layout,
+    AiCancellationToken? cancellationToken,
+  }) async {
     final results = <ModelFileVerification>[];
-    for (final id in ids) {
+    for (final artifact in artifacts) {
       cancellationToken?.throwIfCancelled();
-      final artifact = manifest.byId(id);
       results.add(
         await verifier.verify(
           artifact: artifact,

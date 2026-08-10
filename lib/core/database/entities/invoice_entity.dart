@@ -20,6 +20,7 @@ class InvoiceEntity {
     required this.imagePath,
     this.thumbnailPath,
     required this.sourceType,
+    this.legacyEmbedding768,
     this.embedding,
     this.embeddingModelId,
     this.embeddingDimensions,
@@ -74,8 +75,15 @@ class InvoiceEntity {
   String? thumbnailPath;
   String sourceType;
 
-  @Property(type: PropertyType.floatVector)
+  // Keep the v2 property and index intact until every installed store has
+  // crossed the 768 -> 384 migration. Its UID must never be reused for a
+  // vector with different HNSW dimensions.
+  @Property(type: PropertyType.floatVector, uid: 3475944700035130751)
   @HnswIndex(dimensions: 768, distanceType: VectorDistanceType.cosine)
+  List<double>? legacyEmbedding768;
+
+  @Property(type: PropertyType.floatVector)
+  @HnswIndex(dimensions: 384, distanceType: VectorDistanceType.cosine)
   List<double>? embedding;
 
   String? embeddingModelId;

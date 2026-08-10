@@ -38,7 +38,10 @@ class ObjectBoxSearchRepository
   Future<int> pendingEmbeddingCount() => indexer.pendingCount();
 
   @override
-  Future<void> releaseSearchResources() => engine.unload();
+  Future<void> releaseSearchResources() async {
+    await engine.cancel();
+    await engine.unload();
+  }
 
   @override
   Future<SearchResponse> search(SearchRequest request) async {
@@ -124,6 +127,13 @@ class ObjectBoxSearchRepository
         SemanticSearchGate.modelUnavailable,
       );
     }
+    if (availability.modelId != calibration.modelId) {
+      return _semanticFallback(
+        request,
+        pending,
+        SemanticSearchGate.calibrationRequired,
+      );
+    }
 
     final query = request.contentQuery.trim().isEmpty
         ? request.normalizedQuery
@@ -148,6 +158,13 @@ class ObjectBoxSearchRepository
         request,
         pending,
         SemanticSearchGate.runtimeFailure,
+      );
+    }
+    if (!calibration.accepts(output)) {
+      return _semanticFallback(
+        request,
+        pending,
+        SemanticSearchGate.calibrationRequired,
       );
     }
 

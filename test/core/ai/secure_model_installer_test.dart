@@ -91,6 +91,35 @@ void main() {
     expect(File('${layout.pathFor(artifact)}.part').existsSync(), isFalse);
     expect(File('${directory.path}/installation.json').existsSync(), isFalse);
   });
+
+  test('installs an explicit embedding artifact set without Phase 7 coupling',
+      () async {
+    final fixture = _manifestFixture();
+    final artifact = fixture.manifest.artifacts.first;
+    final directory = await Directory.systemTemp.createTemp(
+      'wara2a_embedding_installer_',
+    );
+    addTearDown(() => directory.delete(recursive: true));
+    final layout = ModelInstallationLayout(directory);
+
+    await SecureModelInstaller(
+      transfer: _FixtureTransfer(fixture.payloads),
+      storageProbe: const _StorageProbe(1 << 30),
+      freeSpaceReserveBytes: 0,
+    ).installArtifacts(
+      artifacts: <ModelArtifactManifest>[artifact],
+      schemaVersion: 3,
+      layout: layout,
+      onProgress: (_) {},
+    );
+
+    expect(await File(layout.pathFor(artifact)).exists(), isTrue);
+    final record = jsonDecode(
+      await File('${directory.path}/installation.json').readAsString(),
+    ) as Map<String, Object?>;
+    expect(record['schemaVersion'], 3);
+    expect((record['artifacts'] as List<Object?>), hasLength(1));
+  });
 }
 
 class _ManifestFixture {

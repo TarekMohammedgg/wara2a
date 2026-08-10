@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/embedding/embedding_engine.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/core/storage/invoice_file_cleaner.dart';
 import 'package:wara2a/core/utils/invoice_search_text_builder.dart';
@@ -28,7 +28,7 @@ void main() {
       fileCleaner: const NoOpInvoiceFileCleaner(),
     );
     final engine = UnavailableEmbeddingEngine(
-      modelId: EmbeddingGemmaArtifact.modelId,
+      modelId: MultilingualE5Artifact.modelId,
       reason: 'test model is intentionally unavailable',
     );
     search = ObjectBoxSearchRepository(

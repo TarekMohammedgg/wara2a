@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/core/ai/embedding/embedding_gemma_artifact.dart';
+import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
 
 void main() {
   test(
@@ -21,7 +21,7 @@ void main() {
       expect(fixture['evidenceClass'], 'unexecuted_labeled_fixture');
       expect(fixture['approvedForThreshold'], isFalse);
       expect(fixture['productionSemanticQualityClaim'], isFalse);
-      expect(fixture['requiredModelId'], EmbeddingGemmaArtifact.modelId);
+      expect(fixture['requiredModelId'], MultilingualE5Artifact.modelId);
       expect(cases, hasLength(100));
       expect(cases.map((entry) => entry['id']).toSet(), hasLength(100));
 
