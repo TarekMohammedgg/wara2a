@@ -36,7 +36,7 @@
     },
     {
       "id": "2:2710519800567843983",
-      "lastPropertyId": "31:5286991857557893889",
+      "lastPropertyId": "32:1361216334481608913",
       "name": "InvoiceEntity",
       "properties": [
         {
@@ -54,13 +54,6 @@
           "id": "3:171865172451866644",
           "name": "merchantNormalized",
           "indexId": "2:9154832734347378190",
-          "type": 9,
-          "flags": 2048
-        },
-        {
-          "id": "4:4944936005697346823",
-          "name": "documentType",
-          "indexId": "3:8953472198375689066",
           "type": 9,
           "flags": 2048
         },
@@ -203,21 +196,21 @@
           "type": 9
         },
         {
-          "id": "29:8633708862621090467",
-          "name": "documentTypeNormalized",
-          "indexId": "14:3409279870630035987",
-          "type": 9,
-          "flags": 2048
-        },
-        {
           "id": "30:6884250741628774964",
           "name": "embeddingAttemptId",
           "type": 9
         },
         {
           "id": "31:5286991857557893889",
-          "name": "embedding",
+          "name": "legacyEmbedding384",
           "indexId": "15:8049682333177546105",
+          "type": 28,
+          "flags": 8
+        },
+        {
+          "id": "32:1361216334481608913",
+          "name": "embedding",
+          "indexId": "16:8830480026863957190",
           "type": 28,
           "flags": 8
         }
@@ -272,14 +265,20 @@
     }
   ],
   "lastEntityId": "3:7266021108998744756",
-  "lastIndexId": "15:8049682333177546105",
+  "lastIndexId": "16:8830480026863957190",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredIndexUids": [
+    8953472198375689066,
+    3409279870630035987
+  ],
+  "retiredPropertyUids": [
+    4944936005697346823,
+    8633708862621090467
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

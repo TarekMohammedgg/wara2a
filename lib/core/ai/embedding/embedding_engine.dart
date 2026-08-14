@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../model_management/model_lifecycle_state.dart';
+import '../model_lifecycle_state.dart';
 
 enum EmbeddingCapability {
   supported,

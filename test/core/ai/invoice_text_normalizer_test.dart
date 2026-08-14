@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/extraction/invoice_text_normalizer.dart';
-import 'package:wara2a/core/ai/ocr/ocr_evidence.dart';
 
 void main() {
   group('InvoiceTextNormalizer', () {
@@ -63,10 +62,15 @@ void main() {
     expect(dates, contains(DateTime.utc(2026, 8, 9)));
   });
 
-  test('classifies Arabic-Indic and Persian digit-only text as numeric', () {
-    expect(OcrScriptDetector.classify('١٢٣٤'), OcrScript.numeric);
-    expect(OcrScriptDetector.classify('۱۲۳۴'), OcrScript.numeric);
-    expect(OcrScriptDetector.classify('ضمان ١٢'), OcrScript.arabic);
+  test('extracts spaced and compact numeric dates', () {
+    expect(
+      InvoiceDateNormalizer.extractDates('التاريخ 2024 05 28'),
+      contains(DateTime.utc(2024, 5, 28)),
+    );
+    expect(
+      InvoiceDateNormalizer.extractDates('20240528'),
+      contains(DateTime.utc(2024, 5, 28)),
+    );
   });
 
   test('keeps ambiguous Arabic currency abbreviations distinct', () {

@@ -16,11 +16,9 @@ import '../../features/home/view_models/home_cubit.dart';
 import '../../features/invoice_capture/view_models/review_cubit.dart';
 import '../../features/invoice_capture/view_models/invoice_capture_cubit.dart';
 import '../../features/invoice_capture/view_models/invoice_extraction_cubit.dart';
-import '../../features/invoice_capture/models/invoice_draft.dart';
 import '../../features/invoice_capture/models/review_route_args.dart';
 import '../../features/invoice_details/view_models/invoice_details_cubit.dart';
 import '../../features/search/view_models/search_cubit.dart';
-import '../../features/settings/view_models/embedding_status_cubit.dart';
 
 GoRouter buildAppRouter(AppDependencies dependencies) {
   return GoRouter(
@@ -46,13 +44,7 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => BlocProvider(
-              create: (_) => EmbeddingStatusCubit(
-                dependencies.embeddingEngine,
-                dependencies.embeddingIndexer,
-              )..refresh(),
-              child: const SettingsView(),
-            ),
+            builder: (context, state) => const SettingsView(),
           ),
         ],
       ),
@@ -83,18 +75,11 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
               ? state.extra! as ReviewRouteArgs
               : null;
           return BlocProvider(
-            create: (_) {
-              final cubit = ReviewCubit(
-                dependencies.invoiceCapture,
-                initialDraft:
-                    routeArgs?.draft ??
-                    InvoiceDraft.manualFallback(rawText: ''),
-              );
-              if (invoiceId != null && invoiceId > 0) {
-                cubit.loadForEditing(invoiceId);
-              }
-              return cubit;
-            },
+            create: (_) => ReviewCubit(
+              dependencies.invoiceCapture,
+              initialDraft: routeArgs?.draft,
+              invoiceIdToLoad: invoiceId,
+            ),
             child: ReviewView(invoiceId: invoiceId),
           );
         },

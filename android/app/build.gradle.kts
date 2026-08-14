@@ -28,14 +28,20 @@ android {
         applicationId = "com.tarek.wara2a"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // multilingual-e5-small ORT + Extensions Android packaging and the
-        // existing MediaPipe Qwen fallback both require API 30+.
-        minSdk = 30
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        ndk {
-            abiFilters += "arm64-v8a"
+    }
+
+    if (keystorePropertiesFile.exists()) {
+        signingConfigs {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = keystoreProperties["storeFile"]?.let { rootProject.file(it) }
+                storePassword = keystoreProperties["storePassword"] as String
+            }
         }
     }
 
@@ -46,33 +52,8 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
         }
     }
-
-    packaging {
-        jniLibs {
-            excludes += setOf(
-                "**/armeabi-v7a/*.so",
-                "**/x86/*.so",
-                "**/x86_64/*.so",
-            )
-        }
-    }
-}
-
-dependencies {
-    implementation(project(":ppocr-sdk"))
-    implementation("com.google.mediapipe:tasks-genai:0.10.27")
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.21.1")
-    implementation("com.microsoft.onnxruntime:onnxruntime-extensions-android:0.13.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test:runner:1.6.2")
 }
 
 kotlin {

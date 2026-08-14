@@ -62,67 +62,82 @@ class ReviewProductEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${l10n.product} ${index + 1}',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${l10n.product} ${index + 1}',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-                IconButton(
-                  onPressed: onRemove,
-                  tooltip: l10n.delete,
-                  icon: const Icon(Icons.delete_outline_rounded),
-                ),
-              ],
-            ),
-            TextFormField(
-              controller: controllers.name,
-              decoration: InputDecoration(labelText: l10n.productName),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: controllers.quantity,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (value) => _validateNumber(l10n, value),
-                    decoration: InputDecoration(labelText: l10n.quantity),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextFormField(
-                    controller: controllers.unitPrice,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (value) => _validateMoney(l10n, value),
-                    decoration: InputDecoration(labelText: l10n.unitPrice),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: controllers.lineTotal,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
               ),
-              validator: (value) => _validateMoney(l10n, value),
-              decoration: InputDecoration(labelText: l10n.lineTotal),
+              TextButton(
+                onPressed: onRemove,
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(l10n.delete),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controllers.name,
+            decoration: InputDecoration(
+              labelText: l10n.productName,
+              isDense: true,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controllers.quantity,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) => _validateNumber(l10n, value),
+                  decoration: InputDecoration(
+                    labelText: l10n.quantity,
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextFormField(
+                  controller: controllers.unitPrice,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) => _validateMoney(l10n, value),
+                  decoration: InputDecoration(
+                    labelText: l10n.unitPrice,
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controllers.lineTotal,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: (value) => _validateMoney(l10n, value),
+            decoration: InputDecoration(
+              labelText: l10n.lineTotal,
+              isDense: true,
+            ),
+          ),
+        ],
       ),
     );
   }

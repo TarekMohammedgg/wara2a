@@ -38,7 +38,6 @@ void main() {
 
         InvoiceSearchText build() => InvoiceSearchTextBuilder.build(
           merchant: input['merchant'] as String?,
-          documentType: input['documentType'] as String?,
           invoiceNumber: input['invoiceNumber'] as String?,
           purchaseDate: _date(input['purchaseDate']),
           totalMinor: input['totalMinor'] as int?,

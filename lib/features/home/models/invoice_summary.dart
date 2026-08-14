@@ -4,7 +4,6 @@ class InvoiceSummary implements InvoiceCardData {
   const InvoiceSummary({
     required this.id,
     required this.merchant,
-    required this.category,
     required this.date,
     required this.total,
     required this.currency,
@@ -16,9 +15,6 @@ class InvoiceSummary implements InvoiceCardData {
 
   @override
   final String merchant;
-
-  @override
-  final String category;
 
   @override
   final String date;

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import '../../objectbox.g.dart';
 import '../ai/embedding/embedding_vector_validator.dart';
-import '../ai/embedding/multilingual_e5_artifact.dart';
+import '../ai/embedding/open_router_embedding_artifact.dart';
 import 'database_versions.dart';
 import 'entities/invoice_entity.dart';
 import 'entities/invoice_item_entity.dart';
@@ -406,13 +406,6 @@ Condition<InvoiceEntity>? _filterCondition(InvoiceSearchFilter filter) {
       InvoiceEntity_.currencyCode.equals(currencyCode.toUpperCase()),
     );
   }
-  final documentType = filter.documentType?.trim();
-  if (documentType != null && documentType.isNotEmpty) {
-    condition = _andCondition(
-      condition,
-      InvoiceEntity_.documentTypeNormalized.equals(documentType),
-    );
-  }
   return condition;
 }
 
@@ -463,11 +456,11 @@ bool _acceptDistance(double distance, double? maximumDistance) =>
 
 void _validateVectorQuery(InvoiceVectorQuery request) {
   _validateFilter(request.filter);
-  if (request.dimensions != MultilingualE5Artifact.dimensions) {
+  if (request.dimensions != OpenRouterEmbeddingArtifact.dimensions) {
     throw ArgumentError.value(
       request.dimensions,
       'dimensions',
-      'The HNSW index requires ${MultilingualE5Artifact.dimensions}.',
+      'The HNSW index requires ${OpenRouterEmbeddingArtifact.dimensions}.',
     );
   }
   EmbeddingVectorValidator.validateNormalized(
@@ -544,7 +537,8 @@ List<InvoiceRecord> _getPendingEmbeddings(
       .where((invoice) {
         if (invoice.embeddingStatus != InvoiceEmbeddingStatus.ready.name ||
             invoice.embeddingModelId != request.modelId ||
-            invoice.embeddingDimensions != MultilingualE5Artifact.dimensions ||
+            invoice.embeddingDimensions !=
+                OpenRouterEmbeddingArtifact.dimensions ||
             invoice.embeddingSchemaVersion != request.embeddingSchemaVersion ||
             invoice.searchTextSchemaVersion !=
                 request.searchTextSchemaVersion ||
@@ -554,7 +548,7 @@ List<InvoiceRecord> _getPendingEmbeddings(
         try {
           EmbeddingVectorValidator.validateNormalized(
             invoice.embedding!,
-            dimensions: MultilingualE5Artifact.dimensions,
+            dimensions: OpenRouterEmbeddingArtifact.dimensions,
           );
           return false;
         } on InvalidEmbeddingVector {
@@ -567,14 +561,14 @@ List<InvoiceRecord> _getPendingEmbeddings(
 }
 
 bool _commitEmbedding(Store store, InvoiceEmbeddingCommit request) {
-  if (request.dimensions != MultilingualE5Artifact.dimensions) {
+  if (request.dimensions != OpenRouterEmbeddingArtifact.dimensions) {
     throw InvalidEmbeddingVector(
-      'Only ${MultilingualE5Artifact.dimensions}-dimensional vectors may be stored.',
+      'Only ${OpenRouterEmbeddingArtifact.dimensions}-dimensional vectors may be stored.',
     );
   }
   EmbeddingVectorValidator.validateNormalized(
     request.vector,
-    dimensions: MultilingualE5Artifact.dimensions,
+    dimensions: OpenRouterEmbeddingArtifact.dimensions,
   );
   if (request.modelId.trim().isEmpty || request.expectedAttemptId.isEmpty) {
     throw ArgumentError('Embedding model and attempt IDs must not be empty.');

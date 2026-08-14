@@ -3,7 +3,6 @@ import '../../../core/database/entities/invoice_item_entity.dart';
 import '../../../core/database/invoice_embedding_status.dart';
 import '../../../core/database/invoice_record.dart';
 import '../../../core/utils/invoice_search_text_builder.dart';
-import '../../../core/utils/document_type_normalization.dart';
 import '../../../core/utils/text_normalization.dart';
 import '../models/invoice.dart';
 
@@ -13,7 +12,6 @@ abstract final class InvoiceEntityMapper {
     return Invoice(
       id: entity.id,
       merchant: entity.merchant,
-      documentType: entity.documentType,
       purchaseDate: entity.purchaseDate,
       totalMinor: entity.totalMinor,
       currencyCode: entity.currencyCode,
@@ -63,10 +61,6 @@ abstract final class InvoiceEntityMapper {
         id: invoice.id,
         merchant: invoice.merchant,
         merchantNormalized: _nullableNormalize(invoice.merchant),
-        documentType: invoice.documentType,
-        documentTypeNormalized: DocumentTypeNormalization.normalize(
-          invoice.documentType,
-        ),
         purchaseDate: invoice.purchaseDate,
         totalMinor: invoice.totalMinor,
         currencyCode: invoice.currencyCode?.toUpperCase(),
@@ -124,7 +118,6 @@ abstract final class InvoiceEntityMapper {
 
   static String buildSearchableText({
     String? merchant,
-    String? documentType,
     String? invoiceNumber,
     DateTime? purchaseDate,
     int? totalMinor,
@@ -135,7 +128,6 @@ abstract final class InvoiceEntityMapper {
   }) {
     return InvoiceSearchTextBuilder.build(
       merchant: merchant,
-      documentType: documentType,
       invoiceNumber: invoiceNumber,
       purchaseDate: purchaseDate,
       totalMinor: totalMinor,

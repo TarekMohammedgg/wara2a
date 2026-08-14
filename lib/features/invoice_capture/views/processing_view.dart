@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ai/model_management/model_lifecycle_state.dart';
+import '../../../core/ai/model_lifecycle_state.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../models/invoice_draft.dart';
 import '../models/invoice_image_draft.dart';
 import '../models/review_route_args.dart';
 import '../view_models/invoice_extraction_cubit.dart';
@@ -15,147 +16,163 @@ class ProcessingView extends StatelessWidget {
 
   final InvoiceImageDraft image;
 
+  void _openDraft(BuildContext context, InvoiceDraft draft) {
+    context.pushReplacement('/review', extra: ReviewRouteArgs(draft: draft));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return BlocBuilder<InvoiceExtractionCubit, InvoiceExtractionState>(
-      builder: (context, state) => Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () async {
-              await context.read<InvoiceExtractionCubit>().cancel();
-              if (context.mounted) context.pop();
-            },
-            icon: const Icon(Icons.arrow_forward_rounded),
+    return BlocConsumer<InvoiceExtractionCubit, InvoiceExtractionState>(
+      listenWhen: (previous, current) {
+        final becameReady =
+            current is InvoiceExtractionReady &&
+            previous is! InvoiceExtractionReady;
+        final becameManual =
+            current is InvoiceExtractionManualReview &&
+            previous is! InvoiceExtractionManualReview;
+        return becameReady || becameManual;
+      },
+      listener: (context, state) {
+        switch (state) {
+          case InvoiceExtractionReady(:final result):
+            _openDraft(context, result.draft);
+          case InvoiceExtractionManualReview(:final result):
+            _openDraft(context, result.draft);
+          default:
+            break;
+        }
+      },
+      builder: (context, state) {
+        final isSuccess =
+            state is InvoiceExtractionReady ||
+            state is InvoiceExtractionManualReview;
+        final isFailure =
+            state is InvoiceExtractionFailure ||
+            state is InvoiceExtractionCancelled;
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () async {
+                await context.read<InvoiceExtractionCubit>().cancel();
+                if (context.mounted) context.pop();
+              },
+              icon: const Icon(Icons.arrow_forward_rounded),
+            ),
+            title: Text(l10n.processingTitle),
           ),
-          title: Text(l10n.processingTitle),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.softBlue, AppColors.softCyan],
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 78,
-                        height: 78,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(21),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            color: AppColors.blue,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 78,
+                          height: 78,
+                          decoration: BoxDecoration(
+                            color: AppColors.softBlue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(21),
+                            child: isSuccess
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 36,
+                                    color: Color(0xFF169C75),
+                                  )
+                                : isFailure
+                                ? const Icon(
+                                    Icons.error_outline_rounded,
+                                    size: 36,
+                                    color: AppColors.warning,
+                                  )
+                                : const CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    color: AppColors.blue,
+                                  ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        state is InvoiceExtractionManualReview
-                            ? l10n.processingManualTitle
-                            : state is InvoiceExtractionFailure
-                            ? l10n.processingFailureTitle
-                            : l10n.processingTitle,
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 7),
-                      Text(
-                        state is InvoiceExtractionManualReview
-                            ? l10n.processingManualBody
-                            : state is InvoiceExtractionFailure
-                            ? l10n.processingFailureBody
-                            : l10n.processingBody,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 26),
-                _ProcessingStep(
-                  number: '01',
-                  label: l10n.processingStepOne,
-                  state: _stepState(state, 0),
-                ),
-                _Connector(),
-                _ProcessingStep(
-                  number: '02',
-                  label: l10n.processingStepTwo,
-                  state: _stepState(state, 1),
-                ),
-                _Connector(),
-                _ProcessingStep(
-                  number: '03',
-                  label: l10n.processingStepThree,
-                  state: _stepState(state, 2),
-                ),
-                const Spacer(),
-                if (state case InvoiceExtractionReady(:final result))
-                  PrimaryButton(
-                    label: l10n.showDraft,
-                    icon: Icons.arrow_back_rounded,
-                    onPressed: () => context.pushReplacement(
-                      '/review',
-                      extra: ReviewRouteArgs(draft: result.draft),
-                    ),
-                  )
-                else if (state case InvoiceExtractionManualReview(
-                  :final result,
-                ))
-                  Column(
-                    children: [
-                      PrimaryButton(
-                        label: l10n.continueManualReview,
-                        icon: Icons.edit_note_rounded,
-                        onPressed: () => context.pushReplacement(
-                          '/review',
-                          extra: ReviewRouteArgs(draft: result.draft),
+                        const SizedBox(height: 18),
+                        Text(
+                          state is InvoiceExtractionManualReview
+                              ? l10n.processingManualTitle
+                              : state is InvoiceExtractionFailure
+                              ? l10n.processingFailureTitle
+                              : isSuccess
+                              ? l10n.processingTitle
+                              : l10n.processingTitle,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () => context
-                            .read<InvoiceExtractionCubit>()
-                            .extract(image),
-                        child: Text(l10n.retry),
-                      ),
-                    ],
-                  )
-                else if (state is InvoiceExtractionFailure ||
-                    state is InvoiceExtractionCancelled)
-                  PrimaryButton(
-                    label: l10n.retry,
-                    icon: Icons.refresh_rounded,
-                    onPressed: () =>
-                        context.read<InvoiceExtractionCubit>().extract(image),
-                  )
-                else
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        context.read<InvoiceExtractionCubit>().cancel(),
-                    icon: const Icon(Icons.close_rounded),
-                    label: Text(
-                      MaterialLocalizations.of(context).cancelButtonLabel,
+                        const SizedBox(height: 7),
+                        Text(
+                          state is InvoiceExtractionManualReview
+                              ? l10n.processingManualBody
+                              : state is InvoiceExtractionFailure
+                              ? l10n.processingFailureBody
+                              : isSuccess
+                              ? l10n.reviewSubtitle
+                              : l10n.processingBody,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-              ],
+                  const SizedBox(height: 26),
+                  _ProcessingStep(
+                    number: '01',
+                    label: l10n.processingStepOne,
+                    state: _stepState(state, 0),
+                  ),
+                  _Connector(),
+                  _ProcessingStep(
+                    number: '02',
+                    label: l10n.processingStepTwo,
+                    state: _stepState(state, 1),
+                  ),
+                  _Connector(),
+                  _ProcessingStep(
+                    number: '03',
+                    label: l10n.processingStepThree,
+                    state: _stepState(state, 2),
+                  ),
+                  const Spacer(),
+                  if (state is InvoiceExtractionFailure ||
+                      state is InvoiceExtractionCancelled)
+                    PrimaryButton(
+                      label: l10n.retry,
+                      icon: Icons.refresh_rounded,
+                      onPressed: () =>
+                          context.read<InvoiceExtractionCubit>().extract(image),
+                    )
+                  else if (!isSuccess)
+                    OutlinedButton.icon(
+                      onPressed: () =>
+                          context.read<InvoiceExtractionCubit>().cancel(),
+                      icon: const Icon(Icons.close_rounded),
+                      label: Text(
+                        MaterialLocalizations.of(context).cancelButtonLabel,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -169,8 +186,9 @@ class ProcessingView extends StatelessWidget {
     }
     final stage = state.lifecycle.stage;
     final activeIndex = switch (stage) {
-      ExtractionStage.checkingCapability || ExtractionStage.loadingOcr => 0,
+      ExtractionStage.preparing => 0,
       ExtractionStage.readingImage => 1,
+      ExtractionStage.interpreting || ExtractionStage.validating => 2,
       _ => 2,
     };
     if (index < activeIndex) return _StepState.done;

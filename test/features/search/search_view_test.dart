@@ -25,6 +25,8 @@ void main() {
 
     expect(find.text('B.TECH reviewed'), findsOneWidget);
     expect(find.text('1 matching results'), findsOneWidget);
+    expect(find.text('Exact match'), findsNothing);
+    expect(find.text('Semantic match'), findsNothing);
     expect(repository.requests, hasLength(1));
   });
 }
@@ -61,7 +63,16 @@ class _ViewSearchRepository implements SearchRepository {
   Future<int> pendingEmbeddingCount() async => 0;
 
   @override
-  Future<SearchResponse> search(SearchRequest request) async {
+  Future<PendingEmbeddingSyncResult> reindexPendingEmbeddings() async =>
+      const PendingEmbeddingSyncResult(
+        remaining: 0,
+        indexed: 0,
+        unavailable: 0,
+        failed: 0,
+      );
+
+  @override
+  Future<SearchResponse> searchFast(SearchRequest request) async {
     requests.add(request);
     return SearchResponse(
       request: request,
@@ -77,6 +88,18 @@ class _ViewSearchRepository implements SearchRepository {
       ],
     );
   }
+
+  @override
+  Future<SearchResponse> searchSemantic(SearchRequest request) async {
+    return SearchResponse(
+      request: request,
+      pendingEmbeddingCount: 0,
+      results: const [],
+    );
+  }
+
+  @override
+  Future<SearchResponse> search(SearchRequest request) => searchFast(request);
 }
 
 Invoice _invoice() {
@@ -84,7 +107,6 @@ Invoice _invoice() {
   return Invoice(
     id: 42,
     merchant: 'B.TECH reviewed',
-    documentType: 'Purchase invoice',
     purchaseDate: now,
     totalMinor: 2499900,
     currencyCode: 'EGP',

@@ -52,7 +52,6 @@ abstract final class InvoiceSearchTextBuilder {
 
   static InvoiceSearchText build({
     String? merchant,
-    String? documentType,
     String? invoiceNumber,
     DateTime? purchaseDate,
     int? totalMinor,
@@ -62,7 +61,6 @@ abstract final class InvoiceSearchTextBuilder {
     required Iterable<InvoiceSearchItemInput> items,
   }) {
     final cleanMerchant = _clean(merchant);
-    final cleanDocumentType = _clean(documentType);
     final cleanInvoiceNumber = _clean(invoiceNumber);
     final currency = _clean(currencyCode)?.toUpperCase();
     final uniqueItems = _deduplicateItems(items);
@@ -79,7 +77,6 @@ abstract final class InvoiceSearchTextBuilder {
         : _currencyAliases[currency] ?? <String>[currency];
 
     final lines = <String>[
-      if (cleanDocumentType != null) 'نوع المستند: $cleanDocumentType',
       if (cleanMerchant != null) 'المتجر: $cleanMerchant',
       if (cleanInvoiceNumber != null) 'رقم الفاتورة: $cleanInvoiceNumber',
       if (products.isNotEmpty) 'المنتجات: $products',
@@ -97,7 +94,6 @@ abstract final class InvoiceSearchTextBuilder {
 
     final keywordValues = <String?>[
       cleanMerchant,
-      cleanDocumentType,
       cleanInvoiceNumber,
       ...uniqueItems.map((item) => item.name),
       ...currencyWords,

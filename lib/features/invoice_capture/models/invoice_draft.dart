@@ -27,7 +27,6 @@ class InvoiceDraft extends Equatable {
   const InvoiceDraft({
     this.invoiceId = 0,
     this.merchant,
-    this.documentType,
     this.purchaseDate,
     this.invoiceNumber,
     this.totalMinor,
@@ -57,7 +56,6 @@ class InvoiceDraft extends Equatable {
 
   final int invoiceId;
   final String? merchant;
-  final String? documentType;
   final DateTime? purchaseDate;
   final String? invoiceNumber;
   final int? totalMinor;
@@ -85,7 +83,6 @@ class InvoiceDraft extends Equatable {
   InvoiceDraft copyWith({
     int? invoiceId,
     Object? merchant = _unset,
-    Object? documentType = _unset,
     Object? purchaseDate = _unset,
     Object? invoiceNumber = _unset,
     Object? totalMinor = _unset,
@@ -105,9 +102,6 @@ class InvoiceDraft extends Equatable {
       merchant: identical(merchant, _unset)
           ? this.merchant
           : merchant as String?,
-      documentType: identical(documentType, _unset)
-          ? this.documentType
-          : documentType as String?,
       purchaseDate: identical(purchaseDate, _unset)
           ? this.purchaseDate
           : purchaseDate as DateTime?,
@@ -142,7 +136,6 @@ class InvoiceDraft extends Equatable {
   List<Object?> get props => [
     invoiceId,
     merchant,
-    documentType,
     purchaseDate,
     invoiceNumber,
     totalMinor,

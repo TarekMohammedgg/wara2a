@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('الوضع الداكن'), findsOneWidget);
     expect(find.text('محرك الذكاء المحلي'), findsOneWidget);
-    expect(find.textContaining('685,888,541 بايت (654.1 MiB)'), findsOneWidget);
+    expect(find.textContaining('1.62 GiB'), findsOneWidget);
 
     await tester.tap(find.text('الرئيسية').last);
     await tester.pumpAndSettle();

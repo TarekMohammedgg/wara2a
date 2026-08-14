@@ -17,9 +17,6 @@ class AppLocalizations {
   String _value(String key) => (isArabic ? _ar : _en)[key] ?? key;
 
   String get appName => _value('appName');
-  String get appTagline => _value('appTagline');
-  String get greeting => _value('greeting');
-  String get greetingSubtitle => _value('greetingSubtitle');
   String get totalInvoices => _value('totalInvoices');
   String get thisMonth => _value('thisMonth');
   String get recentInvoices => _value('recentInvoices');
@@ -29,9 +26,6 @@ class AppLocalizations {
   String get gallery => _value('gallery');
   String get captureTitle => _value('captureTitle');
   String get captureBody => _value('captureBody');
-  String get privateBadge => _value('privateBadge');
-  String get offlineFirst => _value('offlineFirst');
-  String get noCloud => _value('noCloud');
   String get home => _value('home');
   String get search => _value('search');
   String get notifications => _value('notifications');
@@ -44,12 +38,12 @@ class AppLocalizations {
   String get filter => _value('filter');
   String get amount => _value('amount');
   String get date => _value('date');
-  String get documentType => _value('documentType');
   String get exactMatch => _value('exactMatch');
   String get semanticMatch => _value('semanticMatch');
   String get filteredMatch => _value('filteredMatch');
   String get noResults => _value('noResults');
   String get noResultsBody => _value('noResultsBody');
+  String get noInvoices => _value('noInvoices');
   String get addInvoiceTitle => _value('addInvoiceTitle');
   String get addInvoiceBody => _value('addInvoiceBody');
   String get useCamera => _value('useCamera');
@@ -102,12 +96,22 @@ class AppLocalizations {
   String get arabic => _value('arabic');
   String get english => _value('english');
   String get darkMode => _value('darkMode');
+  String get extractionModeTitle => _value('extractionModeTitle');
+  String get extractionModeLocal => _value('extractionModeLocal');
+  String get extractionModeCloud => _value('extractionModeCloud');
+  String get extractionModeLocalDetails => _value('extractionModeLocalDetails');
+  String get extractionModeCloudDetails => _value('extractionModeCloudDetails');
+  String get openRouterApiKeyLabel => _value('openRouterApiKeyLabel');
+  String get openRouterApiKeyHint => _value('openRouterApiKeyHint');
+  String get openRouterExperimentalNote => _value('openRouterExperimentalNote');
+  String get cloudProcessingConsentTitle =>
+      _value('cloudProcessingConsentTitle');
+  String get cloudProcessingConsentBody => _value('cloudProcessingConsentBody');
   String get modelStatus => _value('modelStatus');
   String get modelReady => _value('modelReady');
   String get modelReadyDetails => _value('modelReadyDetails');
   String get modelChecking => _value('modelChecking');
   String get modelNotInstalled => _value('modelNotInstalled');
-  String get modelArtifactBlocked => _value('modelArtifactBlocked');
   String get modelUnsupported => _value('modelUnsupported');
   String get modelVerificationFailed => _value('modelVerificationFailed');
   String get modelRuntimeUnavailable => _value('modelRuntimeUnavailable');
@@ -116,11 +120,17 @@ class AppLocalizations {
   String get modelRefresh => _value('modelRefresh');
   String get modelInstall => _value('modelInstall');
   String get modelInstalling => _value('modelInstalling');
+  String get modelInstallDownloading => _value('modelInstallDownloading');
+  String get modelInstallVerifying => _value('modelInstallVerifying');
+  String get modelInstallActivating => _value('modelInstallActivating');
+  String get modelInstallCheckingStorage =>
+      _value('modelInstallCheckingStorage');
   String get modelCancelInstall => _value('modelCancelInstall');
   String get modelRemove => _value('modelRemove');
   String get modelRemoving => _value('modelRemoving');
   String get modelRemoveConfirm => _value('modelRemoveConfirm');
   String get modelInstallFailed => _value('modelInstallFailed');
+  String get modelSize => _value('modelSize');
   String get privacy => _value('privacy');
   String get privacyBody => _value('privacyBody');
   String get localStorage => _value('localStorage');
@@ -159,24 +169,8 @@ class AppLocalizations {
   String get keywordFallback => _value('keywordFallback');
   String get searchError => _value('searchError');
   String get allCurrencies => _value('allCurrencies');
-  String get allDocumentTypes => _value('allDocumentTypes');
   String get selectRange => _value('selectRange');
   String get invalidAmountRange => _value('invalidAmountRange');
-  String get purchaseInvoice => _value('purchaseInvoice');
-  String get receipt => _value('receipt');
-  String get creditNote => _value('creditNote');
-  String get warrantyCertificate => _value('warrantyCertificate');
-  String get embeddingSearchModel => _value('embeddingSearchModel');
-  String get embeddingReady => _value('embeddingReady');
-  String get embeddingAccessRequired => _value('embeddingAccessRequired');
-  String get embeddingNotInstalled => _value('embeddingNotInstalled');
-  String get embeddingUnsupported => _value('embeddingUnsupported');
-  String get embeddingRuntimeFailure => _value('embeddingRuntimeFailure');
-  String get embeddingWorking => _value('embeddingWorking');
-  String get embeddingInstallRequirement =>
-      _value('embeddingInstallRequirement');
-  String get embeddingModelDetails => _value('embeddingModelDetails');
-  String get installEmbeddingModel => _value('installEmbeddingModel');
   String get reindexInvoices => _value('reindexInvoices');
 
   String invoicesCount(int count) {
@@ -194,21 +188,26 @@ class AppLocalizations {
     return '$count invoices are waiting for semantic indexing.';
   }
 
-  String embeddingReadyDetails(int pendingCount) {
-    if (isArabic) {
-      return 'ملفات النموذج اجتازت فحص الحجم وSHA-256، ويتحقق المشغل من '
-          'الأبعاد الـ384 عند التحميل. $pendingCount فاتورة تنتظر الفهرسة.';
-    }
-    return 'The model files passed byte-length and SHA-256 checks; the runtime '
-        'enforces 384 dimensions when loaded. $pendingCount invoices await '
-        'indexing.';
+  String get searchIndexRunning => _value('searchIndexRunning');
+  String get searchIndexNow => _value('searchIndexNow');
+  String searchIndexSucceeded(int count) {
+    if (isArabic) return 'تم فهرسة $count فاتورة بنجاح.';
+    return 'Indexed $count invoices successfully.';
   }
+
+  String searchIndexPartial(int indexed, int remaining) {
+    if (isArabic) {
+      return 'فُهرس $indexed وبقي $remaining بانتظار الفهرسة.';
+    }
+    return 'Indexed $indexed; $remaining still pending.';
+  }
+
+  String get searchIndexModelNotReady => _value('searchIndexModelNotReady');
+  String get searchIndexFailed => _value('searchIndexFailed');
+  String get searchIndexAlreadyDone => _value('searchIndexAlreadyDone');
 
   static const _ar = <String, String>{
     'appName': 'wara2a',
-    'appTagline': 'ذكاء فواتيرك، على جهازك',
-    'greeting': 'أهلاً بك، تذكّر كل فاتورة.',
-    'greetingSubtitle': 'صوّر فاتورتك أو أضفها من المعرض، والباقي علينا.',
     'totalInvoices': 'إجمالي الفواتير',
     'thisMonth': 'هذا الشهر',
     'recentInvoices': 'الفواتير الأخيرة',
@@ -217,10 +216,7 @@ class AppLocalizations {
     'camera': 'الكاميرا',
     'gallery': 'المعرض',
     'captureTitle': 'أضف فاتورة جديدة',
-    'captureBody': 'اختر مصدر الصورة. كل شيء يظل على جهازك.',
-    'privateBadge': 'خصوصيتك أولاً',
-    'offlineFirst': 'يعمل بدون إنترنت',
-    'noCloud': 'لا توجد سحابة',
+    'captureBody': 'التقط صورة للفاتورة أو اخترها من المعرض.',
     'home': 'الرئيسية',
     'search': 'البحث',
     'notifications': 'الإشعارات',
@@ -233,12 +229,12 @@ class AppLocalizations {
     'filter': 'فلترة',
     'amount': 'المبلغ',
     'date': 'التاريخ',
-    'documentType': 'نوع المستند',
     'exactMatch': 'تطابق مباشر',
     'semanticMatch': 'تطابق بالمعنى',
     'filteredMatch': 'نتيجة مفلترة',
     'noResults': 'لا توجد نتائج بعد',
     'noResultsBody': 'جرّب البحث باسم متجر أو منتج مختلف.',
+    'noInvoices': 'لا توجد فواتير',
     'addInvoiceTitle': 'من أين نبدأ؟',
     'addInvoiceBody': 'اختر صورة فاتورة من الكاميرا أو المعرض.',
     'useCamera': 'تصوير فاتورة',
@@ -249,14 +245,15 @@ class AppLocalizations {
     'retake': 'إعادة التصوير',
     'useImage': 'استخدام الصورة',
     'processingTitle': 'نجهّز مسودة فاتورتك',
-    'processingBody': 'يتم التحليل على جهازك فقط. راجع كل حقل قبل الحفظ.',
+    'processingBody':
+        'يتم إرسال صورة الفاتورة إلى OpenRouter للتحليل. راجع كل حقل قبل الحفظ.',
     'processingStepOne': 'تجهيز الصورة',
-    'processingStepTwo': 'قراءة النص العربي والإنجليزي',
+    'processingStepTwo': 'إرسال الصورة واستخراج الحقول',
     'processingStepThree': 'تحضير المسودة للمراجعة',
-    'processingManualTitle': 'تعذر إكمال الاستخراج المحلي',
+    'processingManualTitle': 'تعذر إكمال الاستخراج',
     'processingManualBody':
         'يمكنك متابعة المراجعة يدوياً. لن يتم حفظ أي شيء قبل تأكيدك.',
-    'processingFailureTitle': 'توقف الاستخراج المحلي بأمان',
+    'processingFailureTitle': 'توقف الاستخراج بأمان',
     'processingFailureBody': 'حاول مرة أخرى أو ارجع لاختيار صورة أوضح.',
     'continueManualReview': 'المتابعة بالمراجعة اليدوية',
     'retry': 'إعادة المحاولة',
@@ -293,34 +290,45 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'الوضع الداكن',
-    'modelStatus': 'محرك الذكاء المحلي',
-    'modelReady': 'جاهز للاستخدام بدون إنترنت',
-    'modelReadyDetails':
-        'تم التحقق من PP-OCRv5 mobile وQwen2.5-0.5B-Instruct Q8 وmultilingual-e5-small qint8. يعمل الاستخراج والبحث بالمعنى محلياً.',
-    'modelChecking': 'جارٍ التحقق من المحرك المحلي',
-    'modelNotInstalled': 'نماذج الذكاء المحلي غير مثبتة',
-    'modelArtifactBlocked': 'ملف Qwen2.5-0.5B-Instruct Q8 غير متوافق مع المحرك المحلي',
-    'modelUnsupported': 'الذكاء المحلي غير مدعوم على هذا الجهاز حالياً',
-    'modelVerificationFailed': 'فشل التحقق من ملفات النماذج',
-    'modelRuntimeUnavailable': 'محرك الذكاء المحلي غير متاح',
-    'modelError': 'تعذر فحص حالة النماذج',
-    'modelRequirement':
-        'تنزيل واحد بحجم 685,888,541 بايت (654.1 MiB): PP-OCRv5 mobile (كشف + عربي + لاتيني)، Qwen2.5-0.5B-Instruct Q8، وmultilingual-e5-small qint8. يتم التحقق من SHA-256 قبل التفعيل.',
-    'modelRefresh': 'إعادة التحقق',
-    'modelInstall': 'تثبيت الذكاء المحلي',
-    'modelInstalling': 'جارٍ تثبيت النماذج والتحقق منها',
-    'modelCancelInstall': 'إلغاء التنزيل',
-    'modelRemove': 'حذف النماذج',
-    'modelRemoving': 'جارٍ حذف النماذج',
-    'modelRemoveConfirm':
-        'سيتم حذف نماذج الذكاء فقط، ولن تُحذف الفواتير أو الصور.',
-    'modelInstallFailed':
-        'تعذر تثبيت النماذج بأمان. لم يتم تفعيل أي ملف غير موثوق.',
-    'modelSize': '685,888,541 بايت (654.1 MiB)',
-    'installModel': 'تثبيت الذكاء المحلي',
+    'extractionModeTitle': 'طريقة استخراج الفاتورة',
+    'extractionModeLocal': 'محلي',
+    'extractionModeCloud': 'قراءة الفواتير',
+    'extractionModeLocalDetails': '',
+    'extractionModeCloudDetails': 'مطلوب لقراءة الفواتير والبحث بالمعنى.',
+    'openRouterApiKeyLabel': 'مفتاح الخدمة من OpenRouter',
+    'openRouterApiKeyHint': 'الصق المفتاح هنا',
+    'openRouterExperimentalNote':
+        'تُرسل صورة الفاتورة ونصوص البحث إلى OpenRouter عند تفعيل المعالجة السحابية.',
+    'cloudProcessingConsentTitle': 'السماح بالمعالجة السحابية',
+    'cloudProcessingConsentBody':
+        'أفهم أن صور الفواتير ونصوص البحث قد تُرسل إلى OpenRouter.',
+    'modelStatus': '',
+    'modelReady': '',
+    'modelReadyDetails': '',
+    'modelChecking': '',
+    'modelNotInstalled': '',
+    'modelUnsupported': '',
+    'modelVerificationFailed': '',
+    'modelRuntimeUnavailable': '',
+    'modelError': '',
+    'modelRequirement': '',
+    'modelRefresh': '',
+    'modelInstall': '',
+    'modelInstalling': '',
+    'modelInstallDownloading': '',
+    'modelInstallVerifying': '',
+    'modelInstallActivating': '',
+    'modelInstallCheckingStorage': '',
+    'modelCancelInstall': '',
+    'modelRemove': '',
+    'modelRemoving': '',
+    'modelRemoveConfirm': '',
+    'modelInstallFailed': '',
+    'modelSize': '',
+    'installModel': '',
     'privacy': 'الخصوصية',
     'privacyBody':
-        'صور الفواتير وبياناتها وعبارات البحث لا تغادر جهازك، ولا توجد حسابات أو تحليلات. قد يتصل تثبيت النماذج فقط بالمصدر المعتمد.',
+        'تبقى الفواتير على جهازك، لكن قد تُرسل الصور ونصوص البحث إلى OpenRouter عند تفعيل المعالجة السحابية.',
     'localStorage': 'التخزين المحلي',
     'localStorageBody': 'يتم حفظ فواتيرك داخل مساحة التطبيق الآمنة.',
     'about': 'عن wara2a',
@@ -338,7 +346,8 @@ class AppLocalizations {
     'capturePickerError': 'تعذر فتح الكاميرا أو المعرض. حاول مرة أخرى.',
     'captureRecoveryError': 'تعذر استعادة الصورة. اخترها مرة أخرى.',
     'savedJustNow': 'تم الحفظ منذ لحظات',
-    'searchModelNote': 'البحث يعمل محلياً ويحافظ على خصوصيتك.',
+    'searchModelNote':
+        'تأتي النتائج من قاعدة بياناتك المحلية بعد إرسال نص الفاتورة إلى OpenRouter للفهرسة.',
     'recentQueryMerchant': 'سامسونج',
     'recentQueryAmount': 'أكثر من ١٠٠٠ جنيه',
     'recentQueryCategory': 'إلكترونيات',
@@ -352,39 +361,25 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'البحث بالمعنى متوقف حتى يعتمد حد المسافة على مجموعة تقييم من 100 استعلام على الأقل.',
     'semanticModelUnavailable':
-        'نموذج multilingual-e5-small المحلي غير مثبت أو غير متاح على هذا الجهاز.',
-    'semanticQueryTooLong': 'الاستعلام أطول من الحد الآمن للنموذج المحلي.',
-    'semanticRuntimeFailure': 'تعذر تشغيل محرك البحث بالمعنى محلياً.',
+        'محرك التضمين عبر OpenRouter غير جاهز. أضف مفتاح API من الإعدادات.',
+    'semanticQueryTooLong': 'الاستعلام أطول من الحد الآمن للتضمين.',
+    'semanticRuntimeFailure': 'تعذر تشغيل محرك البحث بالمعنى عبر OpenRouter.',
     'keywordFallback': 'تم عرض التطابقات المباشرة التي تحقق الفلاتر فقط.',
     'searchError': 'تعذر إكمال البحث',
     'allCurrencies': 'كل العملات',
-    'allDocumentTypes': 'كل أنواع المستندات',
     'selectRange': 'اختر نطاقاً',
     'invalidAmountRange': 'يجب ألا يكون الحد الأدنى أكبر من الحد الأقصى.',
-    'purchaseInvoice': 'فاتورة شراء',
-    'receipt': 'إيصال',
-    'creditNote': 'إشعار دائن',
-    'warrantyCertificate': 'شهادة ضمان',
-    'embeddingSearchModel': 'محرك البحث بالمعنى',
-    'embeddingReady': 'multilingual-e5-small جاهز محلياً',
-    'embeddingAccessRequired': 'ملف النموذج العام غير متاح للتثبيت',
-    'embeddingNotInstalled': 'multilingual-e5-small غير مثبت',
-    'embeddingUnsupported': 'البحث بالمعنى غير مدعوم على هذا الجهاز',
-    'embeddingRuntimeFailure': 'تعذر تهيئة محرك multilingual-e5-small المحلي',
-    'embeddingWorking': 'جارٍ تجهيز محرك البحث بالمعنى',
-    'embeddingInstallRequirement':
-        'يُثبَّت مع حزمة الذكاء المحلي أعلاه: intfloat/multilingual-e5-small qint8 (model_qint8_avx512_vnni.onnx، 118,346,824 بايت، MIT).',
-    'embeddingModelDetails':
-        'يعمل multilingual-e5-small qint8 محلياً على CPU وينتج متجهات من 384 بُعداً لاسترجاع العربية والإنجليزية والنص المختلط. يتطلب Android API 30 ومعمارية arm64.',
-    'installEmbeddingModel': 'تثبيت النموذج',
+    'searchIndexRunning': 'جارٍ فهرسة الفواتير بالمعنى…',
+    'searchIndexNow': 'فهرسة الآن',
+    'searchIndexModelNotReady':
+        'تعذرت الفهرسة: محرك OpenRouter غير جاهز. أضف مفتاح API من الإعدادات.',
+    'searchIndexFailed': 'تعذرت فهرسة بعض الفواتير. أعد المحاولة لاحقاً.',
+    'searchIndexAlreadyDone': 'لا توجد فواتير معلّقة للفهرسة.',
     'reindexInvoices': 'فهرسة الفواتير المعلقة',
   };
 
   static const _en = <String, String>{
     'appName': 'wara2a',
-    'appTagline': 'Invoice intelligence, on-device',
-    'greeting': 'Welcome back, keep every receipt.',
-    'greetingSubtitle': 'Capture an invoice or choose one from your gallery.',
     'totalInvoices': 'Total invoices',
     'thisMonth': 'This month',
     'recentInvoices': 'Recent invoices',
@@ -393,10 +388,8 @@ class AppLocalizations {
     'camera': 'Camera',
     'gallery': 'Gallery',
     'captureTitle': 'Add a new invoice',
-    'captureBody': 'Choose a source. Everything stays on your device.',
-    'privateBadge': 'Privacy first',
-    'offlineFirst': 'Works offline',
-    'noCloud': 'No cloud',
+    'captureBody':
+        'Take a photo of the invoice or choose one from your gallery.',
     'home': 'Home',
     'search': 'Search',
     'notifications': 'Notifications',
@@ -410,12 +403,12 @@ class AppLocalizations {
     'filter': 'Filter',
     'amount': 'Amount',
     'date': 'Date',
-    'documentType': 'Document type',
     'exactMatch': 'Direct match',
     'semanticMatch': 'Meaning match',
     'filteredMatch': 'Filtered result',
     'noResults': 'No results yet',
     'noResultsBody': 'Try searching for a different store or product.',
+    'noInvoices': 'No invoices',
     'addInvoiceTitle': 'Where should we start?',
     'addInvoiceBody': 'Choose an invoice image from camera or gallery.',
     'useCamera': 'Take a photo',
@@ -427,14 +420,14 @@ class AppLocalizations {
     'useImage': 'Use this image',
     'processingTitle': 'Preparing your invoice draft',
     'processingBody':
-        'Analysis runs only on your device. Review every field before saving.',
+        'The invoice image is sent to OpenRouter for analysis. Review every field before saving.',
     'processingStepOne': 'Preparing image',
-    'processingStepTwo': 'Reading Arabic and English text',
+    'processingStepTwo': 'Sending the image and extracting fields',
     'processingStepThree': 'Preparing the review draft',
-    'processingManualTitle': 'Local extraction could not finish',
+    'processingManualTitle': 'Extraction could not finish',
     'processingManualBody':
         'You can continue with manual review. Nothing is saved before you confirm.',
-    'processingFailureTitle': 'Local extraction stopped safely',
+    'processingFailureTitle': 'Extraction stopped safely',
     'processingFailureBody': 'Try again or go back and choose a clearer image.',
     'continueManualReview': 'Continue with manual review',
     'retry': 'Try again',
@@ -472,35 +465,46 @@ class AppLocalizations {
     'arabic': 'العربية',
     'english': 'English',
     'darkMode': 'Dark mode',
-    'modelStatus': 'Local offline AI engine',
-    'modelReady': 'Ready to use offline',
-    'modelReadyDetails':
-        'PP-OCRv5 mobile, Qwen2.5-0.5B-Instruct Q8, and multilingual-e5-small qint8 are verified. Extraction and semantic search run locally.',
-    'modelChecking': 'Checking the local engine',
-    'modelNotInstalled': 'Offline AI models are not installed',
-    'modelArtifactBlocked':
-        'The Qwen2.5-0.5B-Instruct Q8 file is incompatible with the local runtime',
-    'modelUnsupported': 'Local offline AI is not supported on this device yet',
-    'modelVerificationFailed': 'Model file verification failed',
-    'modelRuntimeUnavailable': 'The local offline AI runtime is unavailable',
-    'modelError': 'Could not inspect local model status',
-    'modelRequirement':
-        'One 685,888,541-byte (654.1 MiB) download installs PP-OCRv5 mobile (det + Arabic + Latin), Qwen2.5-0.5B-Instruct Q8, and multilingual-e5-small qint8. SHA-256 is checked before activation.',
-    'modelRefresh': 'Check again',
-    'modelInstall': 'Install offline AI',
-    'modelInstalling': 'Installing and verifying models',
-    'modelCancelInstall': 'Cancel download',
-    'modelRemove': 'Remove models',
-    'modelRemoving': 'Removing models',
-    'modelRemoveConfirm':
-        'Only AI model files will be removed. Invoices and images stay intact.',
-    'modelInstallFailed':
-        'The models could not be installed safely. No unverified file was activated.',
-    'modelSize': '685,888,541 bytes (654.1 MiB)',
-    'installModel': 'Install offline AI',
+    'extractionModeTitle': 'Invoice extraction mode',
+    'extractionModeLocal': 'Local',
+    'extractionModeCloud': 'Invoice reading',
+    'extractionModeLocalDetails': '',
+    'extractionModeCloudDetails':
+        'Needed to read invoices and search by meaning.',
+    'openRouterApiKeyLabel': 'OpenRouter service key',
+    'openRouterApiKeyHint': 'Paste your key here',
+    'openRouterExperimentalNote':
+        'Invoice images and search text are sent to OpenRouter when cloud processing is enabled.',
+    'cloudProcessingConsentTitle': 'Allow cloud processing',
+    'cloudProcessingConsentBody':
+        'I understand that invoice images and search text may be sent to OpenRouter.',
+    'modelStatus': '',
+    'modelReady': '',
+    'modelReadyDetails': '',
+    'modelChecking': '',
+    'modelNotInstalled': '',
+    'modelUnsupported': '',
+    'modelVerificationFailed': '',
+    'modelRuntimeUnavailable': '',
+    'modelError': '',
+    'modelRequirement': '',
+    'modelRefresh': '',
+    'modelInstall': '',
+    'modelInstalling': '',
+    'modelInstallDownloading': '',
+    'modelInstallVerifying': '',
+    'modelInstallActivating': '',
+    'modelInstallCheckingStorage': '',
+    'modelCancelInstall': '',
+    'modelRemove': '',
+    'modelRemoving': '',
+    'modelRemoveConfirm': '',
+    'modelInstallFailed': '',
+    'modelSize': '',
+    'installModel': '',
     'privacy': 'Privacy',
     'privacyBody':
-        'Invoice images, data, and search queries stay on your device, with no accounts or analytics. Only model installation may contact the approved host.',
+        'Invoices stay on your device, but images and search text may be sent to OpenRouter when cloud processing is enabled.',
     'localStorage': 'Local storage',
     'localStorageBody': 'Your invoices are stored inside the app sandbox.',
     'about': 'About wara2a',
@@ -522,7 +526,8 @@ class AppLocalizations {
     'captureRecoveryError':
         'The image could not be recovered. Choose it again.',
     'savedJustNow': 'Saved moments ago',
-    'searchModelNote': 'Search runs locally and protects your privacy.',
+    'searchModelNote':
+        'Results come from your local database after invoice text is sent to OpenRouter for indexing.',
     'recentQueryMerchant': 'Samsung',
     'recentQueryAmount': 'Over EGP 1,000',
     'recentQueryCategory': 'Electronics',
@@ -536,34 +541,21 @@ class AppLocalizations {
     'semanticCalibrationRequired':
         'Semantic search stays disabled until its distance threshold is approved on at least 100 labeled queries.',
     'semanticModelUnavailable':
-        'The local multilingual-e5-small model is not installed or unavailable on this device.',
-    'semanticQueryTooLong': 'The query exceeds the local model safety limit.',
-    'semanticRuntimeFailure': 'The local semantic-search runtime failed.',
+        'OpenRouter embeddings are not ready. Add an API key in Settings.',
+    'semanticQueryTooLong': 'The query exceeds the embedding safety limit.',
+    'semanticRuntimeFailure': 'OpenRouter semantic search failed.',
     'keywordFallback':
         'Only exact keyword matches that satisfy the filters are shown.',
     'searchError': 'Search could not be completed',
     'allCurrencies': 'All currencies',
-    'allDocumentTypes': 'All document types',
     'selectRange': 'Select a range',
     'invalidAmountRange': 'The minimum amount must not exceed the maximum.',
-    'purchaseInvoice': 'Purchase invoice',
-    'receipt': 'Receipt',
-    'creditNote': 'Credit note',
-    'warrantyCertificate': 'Warranty certificate',
-    'embeddingSearchModel': 'Semantic search engine',
-    'embeddingReady': 'multilingual-e5-small is ready locally',
-    'embeddingAccessRequired':
-        'The public model artifact is unavailable for installation',
-    'embeddingNotInstalled': 'multilingual-e5-small is not installed',
-    'embeddingUnsupported': 'Semantic search is unsupported on this device',
-    'embeddingRuntimeFailure':
-        'The local multilingual-e5-small runtime could not be initialized',
-    'embeddingWorking': 'Preparing the semantic-search engine',
-    'embeddingInstallRequirement':
-        'Installed with the offline AI package above: intfloat/multilingual-e5-small qint8 (model_qint8_avx512_vnni.onnx, 118,346,824 bytes, MIT).',
-    'embeddingModelDetails':
-        'multilingual-e5-small qint8 runs locally on CPU and produces 384-dimensional vectors for Arabic, English, and mixed-text retrieval. Android requires API 30 and arm64.',
-    'installEmbeddingModel': 'Install model',
+    'searchIndexRunning': 'Indexing invoices for semantic search…',
+    'searchIndexNow': 'Index now',
+    'searchIndexModelNotReady':
+        'Indexing failed: OpenRouter embeddings are not ready. Add an API key in Settings.',
+    'searchIndexFailed': 'Some invoices could not be indexed. Try again later.',
+    'searchIndexAlreadyDone': 'No invoices are waiting for indexing.',
     'reindexInvoices': 'Index pending invoices',
   };
 }

@@ -1,39 +1,41 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-enum InferenceBackendPreference { automatic, cpu, gpu }
-
 class AppSettings extends Equatable {
   const AppSettings({
     this.localeCode = 'ar',
     this.themeMode = ThemeMode.light,
-    this.preferredInferenceBackend = InferenceBackendPreference.automatic,
-    this.modelInstallAcknowledged = false,
     this.lastSelectedCaptureSource,
+    this.openRouterApiKey,
+    this.cloudProcessingConsent = false,
   });
 
   final String localeCode;
   final ThemeMode themeMode;
-  final InferenceBackendPreference preferredInferenceBackend;
-  final bool modelInstallAcknowledged;
   final String? lastSelectedCaptureSource;
+
+  /// User-provided OpenRouter API key for cloud extraction and indexing.
+  final String? openRouterApiKey;
+  final bool cloudProcessingConsent;
 
   AppSettings copyWith({
     String? localeCode,
     ThemeMode? themeMode,
-    InferenceBackendPreference? preferredInferenceBackend,
-    bool? modelInstallAcknowledged,
     String? lastSelectedCaptureSource,
+    String? openRouterApiKey,
+    bool clearOpenRouterApiKey = false,
+    bool? cloudProcessingConsent,
   }) {
     return AppSettings(
       localeCode: localeCode ?? this.localeCode,
       themeMode: themeMode ?? this.themeMode,
-      preferredInferenceBackend:
-          preferredInferenceBackend ?? this.preferredInferenceBackend,
-      modelInstallAcknowledged:
-          modelInstallAcknowledged ?? this.modelInstallAcknowledged,
       lastSelectedCaptureSource:
           lastSelectedCaptureSource ?? this.lastSelectedCaptureSource,
+      openRouterApiKey: clearOpenRouterApiKey
+          ? null
+          : (openRouterApiKey ?? this.openRouterApiKey),
+      cloudProcessingConsent:
+          cloudProcessingConsent ?? this.cloudProcessingConsent,
     );
   }
 
@@ -41,8 +43,8 @@ class AppSettings extends Equatable {
   List<Object?> get props => [
     localeCode,
     themeMode,
-    preferredInferenceBackend,
-    modelInstallAcknowledged,
     lastSelectedCaptureSource,
+    openRouterApiKey,
+    cloudProcessingConsent,
   ];
 }

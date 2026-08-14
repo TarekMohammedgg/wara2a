@@ -151,8 +151,8 @@ class _InvoiceImagePreview extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: const Color(0xFFE4EAF2),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white, width: 5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Image.file(
         File(draft.path),

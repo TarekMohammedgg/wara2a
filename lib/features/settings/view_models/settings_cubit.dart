@@ -51,6 +51,17 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> setThemeMode(ThemeMode themeMode) =>
       _persist(state.settings.copyWith(themeMode: themeMode));
 
+  Future<void> setOpenRouterApiKey(String? apiKey) {
+    final trimmed = apiKey?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return _persist(state.settings.copyWith(clearOpenRouterApiKey: true));
+    }
+    return _persist(state.settings.copyWith(openRouterApiKey: trimmed));
+  }
+
+  Future<void> setCloudProcessingConsent(bool enabled) =>
+      _persist(state.settings.copyWith(cloudProcessingConsent: enabled));
+
   Future<void> _persist(AppSettings settings) async {
     final previous = state.settings;
     emit(SettingsState(status: SettingsStatus.ready, settings: settings));

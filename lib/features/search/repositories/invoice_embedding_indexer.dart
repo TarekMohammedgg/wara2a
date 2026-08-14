@@ -1,5 +1,5 @@
 import '../../../core/ai/embedding/embedding_engine.dart';
-import '../../../core/ai/embedding/multilingual_e5_artifact.dart';
+import '../../../core/ai/embedding/open_router_embedding_artifact.dart';
 import '../../../core/ai/embedding/reviewed_invoice_indexer.dart';
 import '../../../core/ai/ai_cancellation_token.dart';
 import '../../../core/database/database_versions.dart';
@@ -53,13 +53,9 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
 
   @override
   Future<void> indexReviewedInvoice(int invoiceId) async {
-    try {
-      await indexInvoice(invoiceId);
-    } finally {
-      // Capture/review performs a one-off document embedding. Batch reindexing
-      // calls indexInvoice directly so it can intentionally retain the model.
-      await engine.unload();
-    }
+    // Keep the embedding client warm so search can embed immediately afterwards.
+    // Session unload is owned by SearchResourceLifecycle / app lifecycle.
+    await indexInvoice(invoiceId);
   }
 
   Future<InvoiceIndexingOutcome> indexInvoice(int invoiceId) {
@@ -251,7 +247,7 @@ class InvoiceEmbeddingIndexer implements ReviewedInvoiceIndexer {
   }
 
   Future<List<InvoiceRecord>> _pending() => store.getPendingEmbeddings(
-    modelId: MultilingualE5Artifact.modelId,
+    modelId: OpenRouterEmbeddingArtifact.modelId,
     searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
     embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
   );

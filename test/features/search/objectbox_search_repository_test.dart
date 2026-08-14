@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/embedding/embedding_engine.dart';
-import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/ai/embedding/open_router_embedding_artifact.dart';
 import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/core/storage/invoice_file_cleaner.dart';
 import 'package:wara2a/core/utils/invoice_search_text_builder.dart';
@@ -28,7 +28,7 @@ void main() {
       fileCleaner: const NoOpInvoiceFileCleaner(),
     );
     final engine = UnavailableEmbeddingEngine(
-      modelId: MultilingualE5Artifact.modelId,
+      modelId: OpenRouterEmbeddingArtifact.modelId,
       reason: 'test model is intentionally unavailable',
     );
     search = ObjectBoxSearchRepository(
@@ -60,21 +60,18 @@ void main() {
     },
   );
 
-  test(
-    'applies amount, currency, document, and warranty metadata filters',
-    () async {
-      final amountIntent = search.interpret('فاتورة شراء فوق ١٠٠٠٠ جنيه');
-      final amountResponse = await search.search(amountIntent.toRequest());
-      final warrantyIntent = search.interpret(
-        'الفواتير اللي ضمانها هيخلص الشهر ده',
-      );
-      final warrantyResponse = await search.search(warrantyIntent.toRequest());
+  test('applies amount, currency, and warranty metadata filters', () async {
+    final amountIntent = search.interpret('فوق ١٠٠٠٠ جنيه');
+    final amountResponse = await search.search(amountIntent.toRequest());
+    final warrantyIntent = search.interpret(
+      'الفواتير اللي ضمانها هيخلص الشهر ده',
+    );
+    final warrantyResponse = await search.search(warrantyIntent.toRequest());
 
-      expect(amountIntent.route, SearchRouteType.structured);
-      expect(amountResponse.results, hasLength(1));
-      expect(warrantyResponse.results, hasLength(1));
-    },
-  );
+    expect(amountIntent.route, SearchRouteType.structured);
+    expect(amountResponse.results, hasLength(1));
+    expect(warrantyResponse.results, hasLength(1));
+  });
 
   test('gates descriptive semantic search with no fabricated result', () async {
     final intent = search.interpret(
@@ -84,7 +81,7 @@ void main() {
 
     expect(intent.route, SearchRouteType.semantic);
     expect(response.results, isEmpty);
-    expect(response.semanticGate, SemanticSearchGate.calibrationRequired);
+    expect(response.semanticGate, SemanticSearchGate.none);
     expect(response.pendingEmbeddingCount, 1);
   });
 
@@ -99,7 +96,7 @@ void main() {
       expect(intent.route, SearchRouteType.hybrid);
       expect(response.results, hasLength(1));
       expect(response.usedKeywordFallback, isTrue);
-      expect(response.semanticGate, SemanticSearchGate.calibrationRequired);
+      expect(response.semanticGate, SemanticSearchGate.none);
     },
   );
 
@@ -112,8 +109,40 @@ void main() {
     expect(intent.route, SearchRouteType.hybrid);
     expect(response.results, isEmpty);
     expect(response.usedKeywordFallback, isFalse);
-    expect(response.semanticGate, SemanticSearchGate.calibrationRequired);
+    expect(response.semanticGate, SemanticSearchGate.none);
   });
+
+  test(
+    'natural-language semantic query soft-matches merchant and product tokens',
+    () async {
+      await invoices.save(
+        _invoice().copyWith(
+          merchant: 'متجر النور للإلكترونيات',
+          items: const [
+            InvoiceItem(name: 'سماعة رأس لاسلكية P47', quantity: 1),
+          ],
+          searchableText:
+              'المتجر: متجر النور للالكترونيات المنتجات: سماعة راس لاسلكية p47',
+          keywordText: ' متجر النور للالكترونيات سماعة راس لاسلكية p47 بلوتوث ',
+        ),
+      );
+
+      final intent = search.interpret(
+        'فاتورة السماعة اللي اشتريتها من معرض النور',
+      );
+      final response = await search.search(intent.toRequest());
+
+      expect(intent.route, SearchRouteType.semantic);
+      expect(response.results, isNotEmpty);
+      expect(
+        response.results.any(
+          (result) => result.value.merchant?.contains('النور') == true,
+        ),
+        isTrue,
+      );
+      expect(response.semanticGate, SemanticSearchGate.none);
+    },
+  );
 }
 
 Invoice _invoice() {
@@ -122,7 +151,6 @@ Invoice _invoice() {
   final warrantyEndDate = DateTime.utc(2026, 8, 20);
   final searchText = InvoiceSearchTextBuilder.build(
     merchant: 'بي تك',
-    documentType: 'فاتورة شراء',
     invoiceNumber: 'BT-A56-1',
     purchaseDate: purchaseDate,
     totalMinor: 2499900,
@@ -135,7 +163,6 @@ Invoice _invoice() {
   );
   return Invoice(
     merchant: 'بي تك',
-    documentType: 'فاتورة شراء',
     purchaseDate: purchaseDate,
     totalMinor: 2499900,
     currencyCode: 'EGP',

@@ -1,17 +1,17 @@
 # wara2a
 
-A new Flutter project.
+Arabic-first Flutter app for capturing invoices, extracting fields via OpenRouter Gemini, reviewing drafts, storing invoices locally in ObjectBox, and searching with OpenRouter `text-embedding-3-small` embeddings.
 
-## Getting Started
+## Setup
 
-This project is a starting point for a Flutter application.
+```powershell
+flutter pub get
+```
 
-A few resources to get you started if this is your first Flutter project:
+Add an OpenRouter API key in Settings, or pass:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```powershell
+flutter run --dart-define=OPENROUTER_API_KEY=sk-or-...
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+See [docs/development.md](docs/development.md) for analyze/test gates.

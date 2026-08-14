@@ -1,8 +1,7 @@
 import '../../objectbox.g.dart';
 import '../ai/embedding/embedding_vector_validator.dart';
-import '../ai/embedding/multilingual_e5_artifact.dart';
+import '../ai/embedding/open_router_embedding_artifact.dart';
 import '../utils/invoice_search_text_builder.dart';
-import '../utils/document_type_normalization.dart';
 import 'database_versions.dart';
 import 'entities/database_metadata_entity.dart';
 import 'entities/invoice_entity.dart';
@@ -63,14 +62,6 @@ class DatabaseMigrationRunner {
       }
 
       for (final invoice in invoices.getAll()) {
-        final normalizedDocumentType = DocumentTypeNormalization.normalize(
-          invoice.documentType,
-        );
-        final documentTypeStale =
-            invoice.documentTypeNormalized != normalizedDocumentType;
-        if (documentTypeStale) {
-          invoice.documentTypeNormalized = normalizedDocumentType;
-        }
         final searchTextStale =
             searchTextVersion < DatabaseVersions.searchTextSchema ||
             invoice.searchTextSchemaVersion !=
@@ -79,7 +70,6 @@ class DatabaseMigrationRunner {
           final items = _itemsFor(invoice.id);
           final rebuilt = InvoiceSearchTextBuilder.build(
             merchant: invoice.merchant,
-            documentType: invoice.documentType,
             invoiceNumber: invoice.invoiceNumber,
             purchaseDate: invoice.purchaseDate,
             totalMinor: invoice.totalMinor,
@@ -103,13 +93,15 @@ class DatabaseMigrationRunner {
             embeddingVersion < DatabaseVersions.embeddingSchema ||
             invoice.embeddingSchemaVersion !=
                 DatabaseVersions.embeddingSchema ||
-            invoice.embeddingModelId != MultilingualE5Artifact.modelId ||
-            invoice.embeddingDimensions != MultilingualE5Artifact.dimensions ||
+            invoice.embeddingModelId != OpenRouterEmbeddingArtifact.modelId ||
+            invoice.embeddingDimensions !=
+                OpenRouterEmbeddingArtifact.dimensions ||
             invoice.embeddingStatus != InvoiceEmbeddingStatus.ready.name ||
             !_isValidVector(invoice.embedding);
         if (embeddingStale) {
           invoice
             ..legacyEmbedding768 = null
+            ..legacyEmbedding384 = null
             ..embedding = null
             ..embeddingModelId = null
             ..embeddingDimensions = null
@@ -119,7 +111,7 @@ class DatabaseMigrationRunner {
             ..embeddingFailureCode = null
             ..embeddingAttemptId = null;
         }
-        if (searchTextStale || embeddingStale || documentTypeStale) {
+        if (searchTextStale || embeddingStale) {
           invoices.put(invoice);
         }
       }
@@ -160,7 +152,7 @@ class DatabaseMigrationRunner {
     try {
       EmbeddingVectorValidator.validateNormalized(
         vector,
-        dimensions: MultilingualE5Artifact.dimensions,
+        dimensions: OpenRouterEmbeddingArtifact.dimensions,
       );
       return true;
     } on InvalidEmbeddingVector {

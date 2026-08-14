@@ -94,6 +94,8 @@ class CurrencyNormalizer {
     'egp': 'EGP',
     'ج م': 'EGP',
     'ج.م': 'EGP',
+    'جم': 'EGP',
+    'ج٠م': 'EGP',
     'جنيه': 'EGP',
     'جنيه مصري': 'EGP',
     'جنيها': 'EGP',
@@ -330,6 +332,26 @@ class InvoiceDateNormalizer {
       final date = first > 31
           ? _checkedDate(first, second, third)
           : _checkedDate(_expandYear(third), second, first);
+      if (date != null) dates.add(date);
+    }
+    // OCR sometimes drops separators: "2024 05 28" or "28 05 2024".
+    final spaced = RegExp(r'(?<!\d)(\d{1,4})\s+(\d{1,2})\s+(\d{1,4})(?!\d)');
+    for (final match in spaced.allMatches(normalized)) {
+      final first = int.parse(match.group(1)!);
+      final second = int.parse(match.group(2)!);
+      final third = int.parse(match.group(3)!);
+      final date = first > 31
+          ? _checkedDate(first, second, third)
+          : _checkedDate(_expandYear(third), second, first);
+      if (date != null) dates.add(date);
+    }
+    final compact = RegExp(r'(?<!\d)(\d{4})(\d{2})(\d{2})(?!\d)');
+    for (final match in compact.allMatches(normalized)) {
+      final date = _checkedDate(
+        int.parse(match.group(1)!),
+        int.parse(match.group(2)!),
+        int.parse(match.group(3)!),
+      );
       if (date != null) dates.add(date);
     }
     for (final entry in _arabicMonths.entries) {

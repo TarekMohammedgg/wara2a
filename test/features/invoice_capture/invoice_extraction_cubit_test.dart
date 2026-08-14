@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/ai_runtime_error.dart';
-import 'package:wara2a/core/ai/extraction/invoice_draft_validator.dart';
-import 'package:wara2a/core/ai/model_management/model_coordinator.dart';
-import 'package:wara2a/core/ai/model_management/model_lifecycle_state.dart';
+import 'package:wara2a/core/ai/model_lifecycle_state.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_draft.dart';
 import 'package:wara2a/features/invoice_capture/models/invoice_image_draft.dart';
 import 'package:wara2a/features/invoice_capture/repositories/invoice_extraction_repository.dart';
@@ -13,22 +11,26 @@ import 'package:wara2a/features/invoice_capture/view_models/invoice_extraction_c
 
 void main() {
   blocTest<InvoiceExtractionCubit, InvoiceExtractionState>(
-    'emits a manual-review-ready result when local interpretation is gated',
+    'emits a manual-review-ready result when extraction falls back safely',
     build: () {
       final result = InvoiceExtractionResult(
         draft: InvoiceDraft.manualFallback(rawText: 'الإجمالي ١٠٠'),
         manualFallback: true,
         repaired: false,
-        validationIssues: const <DraftValidationIssue>[],
+        validationIssues: const [],
         error: const AiRuntimeException(
-          code: AiErrorCode.incompatibleArtifact,
-          message: 'A compatible LiteRT-LM container is unavailable.',
+          code: AiErrorCode.invalidRuntimeResponse,
+          stage: 'openrouter',
+          message: 'Cloud extraction could not finish.',
         ),
       );
       return InvoiceExtractionCubit(_FakeExtractionRepository(result: result));
     },
     act: (cubit) => cubit.extract(_image()),
-    expect: () => <Object>[isA<InvoiceExtractionManualReview>()],
+    expect: () => <Object>[
+      isA<InvoiceExtractionRunning>(),
+      isA<InvoiceExtractionManualReview>(),
+    ],
     verify: (cubit) {
       final state = cubit.state as InvoiceExtractionManualReview;
       expect(state.result.draft.rawText, 'الإجمالي ١٠٠');
@@ -37,7 +39,7 @@ void main() {
   );
 
   blocTest<InvoiceExtractionCubit, InvoiceExtractionState>(
-    'maps coordinator cancellation to an explicit cancelled state',
+    'maps cancellation to an explicit cancelled state',
     build: () => InvoiceExtractionCubit(
       _FakeExtractionRepository(
         error: const AiRuntimeException(
@@ -47,7 +49,10 @@ void main() {
       ),
     ),
     act: (cubit) => cubit.extract(_image()),
-    expect: () => <Object>[isA<InvoiceExtractionCancelled>()],
+    expect: () => <Object>[
+      isA<InvoiceExtractionRunning>(),
+      isA<InvoiceExtractionCancelled>(),
+    ],
   );
 }
 

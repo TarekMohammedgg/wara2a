@@ -11,9 +11,9 @@ class ObjectBoxDatabase {
   final InvoiceStore invoices;
 
   static Future<ObjectBoxDatabase> open({String? directory}) async {
-    final resolvedDirectory =
-        directory ??
-        '${(await getApplicationDocumentsDirectory()).path}/wara2a-objectbox';
+    final resolvedDirectory = directory == null
+        ? '${(await getApplicationDocumentsDirectory()).path}/wara2a-objectbox'
+        : directory;
     final store = await openStore(directory: resolvedDirectory);
     try {
       final database = ObjectBoxDatabase._(store);

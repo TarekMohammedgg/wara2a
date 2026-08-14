@@ -1,19 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum SearchFilterField {
-  amount,
-  purchaseDate,
-  warrantyEndDate,
-  currency,
-  documentType,
-}
-
-enum SearchDocumentType {
-  purchaseInvoice,
-  receipt,
-  creditNote,
-  warrantyCertificate,
-}
+enum SearchFilterField { amount, purchaseDate, warrantyEndDate, currency }
 
 class SearchAmountRange extends Equatable {
   const SearchAmountRange({
@@ -76,14 +63,12 @@ class SearchFilters extends Equatable {
     this.purchaseDate,
     this.warrantyEndDate,
     this.currencyCode,
-    this.documentType,
   });
 
   final SearchAmountRange? amount;
   final SearchDateRange? purchaseDate;
   final SearchDateRange? warrantyEndDate;
   final String? currencyCode;
-  final SearchDocumentType? documentType;
 
   bool get isEmpty => activeCount == 0;
   bool get isNotEmpty => !isEmpty;
@@ -93,7 +78,6 @@ class SearchFilters extends Equatable {
     purchaseDate,
     warrantyEndDate,
     currencyCode,
-    documentType,
   ].where((value) => value != null).length;
 
   SearchFilters copyWith({
@@ -101,12 +85,10 @@ class SearchFilters extends Equatable {
     SearchDateRange? purchaseDate,
     SearchDateRange? warrantyEndDate,
     String? currencyCode,
-    SearchDocumentType? documentType,
     bool clearAmount = false,
     bool clearPurchaseDate = false,
     bool clearWarrantyEndDate = false,
     bool clearCurrency = false,
-    bool clearDocumentType = false,
   }) {
     return SearchFilters(
       amount: clearAmount ? null : amount ?? this.amount,
@@ -117,9 +99,6 @@ class SearchFilters extends Equatable {
           ? null
           : warrantyEndDate ?? this.warrantyEndDate,
       currencyCode: clearCurrency ? null : currencyCode ?? this.currencyCode,
-      documentType: clearDocumentType
-          ? null
-          : documentType ?? this.documentType,
     );
   }
 
@@ -129,7 +108,6 @@ class SearchFilters extends Equatable {
       SearchFilterField.purchaseDate => copyWith(clearPurchaseDate: true),
       SearchFilterField.warrantyEndDate => copyWith(clearWarrantyEndDate: true),
       SearchFilterField.currency => copyWith(clearCurrency: true),
-      SearchFilterField.documentType => copyWith(clearDocumentType: true),
     };
   }
 
@@ -139,6 +117,5 @@ class SearchFilters extends Equatable {
     purchaseDate,
     warrantyEndDate,
     currencyCode,
-    documentType,
   ];
 }

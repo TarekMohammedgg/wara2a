@@ -6,8 +6,6 @@ class InvoiceEntity {
     this.id = 0,
     this.merchant,
     this.merchantNormalized,
-    this.documentType,
-    this.documentTypeNormalized,
     this.purchaseDate,
     this.totalMinor,
     this.currencyCode,
@@ -21,6 +19,7 @@ class InvoiceEntity {
     this.thumbnailPath,
     required this.sourceType,
     this.legacyEmbedding768,
+    this.legacyEmbedding384,
     this.embedding,
     this.embeddingModelId,
     this.embeddingDimensions,
@@ -43,12 +42,6 @@ class InvoiceEntity {
 
   @Index()
   String? merchantNormalized;
-
-  @Index()
-  String? documentType;
-
-  @Index()
-  String? documentTypeNormalized;
 
   @Property(type: PropertyType.date)
   @Index()
@@ -75,15 +68,18 @@ class InvoiceEntity {
   String? thumbnailPath;
   String sourceType;
 
-  // Keep the v2 property and index intact until every installed store has
-  // crossed the 768 -> 384 migration. Its UID must never be reused for a
-  // vector with different HNSW dimensions.
+  // Keep retired HNSW properties and UIDs forever; dimensions are immutable.
   @Property(type: PropertyType.floatVector, uid: 3475944700035130751)
   @HnswIndex(dimensions: 768, distanceType: VectorDistanceType.cosine)
   List<double>? legacyEmbedding768;
 
-  @Property(type: PropertyType.floatVector)
+  @Property(type: PropertyType.floatVector, uid: 5286991857557893889)
   @HnswIndex(dimensions: 384, distanceType: VectorDistanceType.cosine)
+  List<double>? legacyEmbedding384;
+
+  /// Active cloud embedding index (`openai/text-embedding-3-small`, 1536-d).
+  @Property(type: PropertyType.floatVector)
+  @HnswIndex(dimensions: 1536, distanceType: VectorDistanceType.cosine)
   List<double>? embedding;
 
   String? embeddingModelId;

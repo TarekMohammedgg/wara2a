@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../../../features/invoice_capture/models/invoice_draft.dart';
-import '../ocr/ocr_evidence.dart';
 import 'invoice_text_normalizer.dart';
 
 enum DraftValidationCode {
@@ -18,7 +17,6 @@ enum DraftValidationCode {
   invalidQuantity,
   invalidWarranty,
   tooManyProducts,
-  unsupportedByEvidence,
   inconsistentArithmetic,
 }
 
@@ -53,12 +51,10 @@ class InvoiceDraftValidator {
   const InvoiceDraftValidator({
     this.maxProducts = 100,
     this.maxStringLength = 500,
-    this.minimumEvidenceConfidence = 0.5,
   });
 
   static const Set<String> _rootKeys = <String>{
     'merchant',
-    'documentType',
     'purchaseDate',
     'invoiceNumber',
     'total',
@@ -76,11 +72,9 @@ class InvoiceDraftValidator {
 
   final int maxProducts;
   final int maxStringLength;
-  final double minimumEvidenceConfidence;
 
   DraftValidationResult validate({
     required String modelOutput,
-    required OcrEvidence evidence,
     required InvoiceDraftOrigin origin,
   }) {
     final issues = <DraftValidationIssue>[];
@@ -111,7 +105,7 @@ class InvoiceDraftValidator {
         ],
       );
     }
-    if (decoded is! Map<String, Object?>) {
+    if (decoded is! Map) {
       return const DraftValidationResult(
         issues: <DraftValidationIssue>[
           DraftValidationIssue(
@@ -122,19 +116,15 @@ class InvoiceDraftValidator {
         ],
       );
     }
-    _validateKeys(decoded, _rootKeys, r'$', issues);
+    final root = <String, Object?>{
+      for (final entry in decoded.entries) entry.key.toString(): entry.value,
+    };
+    // Legacy model outputs may still include this retired field.
+    root.remove('documentType');
+    _validateKeys(root, _rootKeys, r'$', issues);
 
-    final merchant = _nullableString(
-      decoded['merchant'],
-      r'$.merchant',
-      issues,
-    );
-    final documentType = _nullableString(
-      decoded['documentType'],
-      r'$.documentType',
-      issues,
-    );
-    final purchaseDateValue = decoded['purchaseDate'];
+    final merchant = _nullableString(root['merchant'], r'$.merchant', issues);
+    final purchaseDateValue = root['purchaseDate'];
     DateTime? purchaseDate;
     if (purchaseDateValue != null) {
       purchaseDate = InvoiceDateNormalizer.parseIsoDate(purchaseDateValue);
@@ -150,23 +140,23 @@ class InvoiceDraftValidator {
       }
     }
 
-    final invoiceNumber = _nullableString(
-      decoded['invoiceNumber'],
+    var invoiceNumber = _nullableString(
+      root['invoiceNumber'],
       r'$.invoiceNumber',
       issues,
       maxLength: 128,
     );
 
     final currencyValue = _nullableString(
-      decoded['currency'],
+      root['currency'],
       r'$.currency',
       issues,
       maxLength: 32,
     );
-    final currencyCode = CurrencyNormalizer.normalize(currencyValue);
-    final currency = currencyCode ?? currencyValue;
+    var currencyCode = CurrencyNormalizer.normalize(currencyValue);
+    var currency = currencyCode ?? currencyValue;
 
-    final totalValue = decoded['total'];
+    final totalValue = root['total'];
     int? totalMinor;
     if (totalValue != null) {
       totalMinor = MoneyNormalizer.majorToMinor(
@@ -186,8 +176,8 @@ class InvoiceDraftValidator {
     }
 
     final products = <InvoiceItemDraft>[];
-    final productsValue = decoded['products'];
-    if (productsValue is! List<Object?>) {
+    final productsValue = root['products'];
+    if (productsValue is! List) {
       issues.add(
         const DraftValidationIssue(
           code: DraftValidationCode.invalidType,
@@ -207,7 +197,7 @@ class InvoiceDraftValidator {
       for (var index = 0; index < productsValue.length; index++) {
         final item = productsValue[index];
         final path = '\$.products[$index]';
-        if (item is! Map<String, Object?>) {
+        if (item is! Map) {
           issues.add(
             DraftValidationIssue(
               code: DraftValidationCode.invalidType,
@@ -217,21 +207,24 @@ class InvoiceDraftValidator {
           );
           continue;
         }
-        _validateKeys(item, _productKeys, path, issues);
-        final name = _nullableString(item['name'], '$path.name', issues);
+        final productMap = <String, Object?>{
+          for (final entry in item.entries) entry.key.toString(): entry.value,
+        };
+        _validateKeys(productMap, _productKeys, path, issues);
+        final name = _nullableString(productMap['name'], '$path.name', issues);
         final quantity = _nullableQuantity(
-          item['quantity'],
+          productMap['quantity'],
           '$path.quantity',
           issues,
         );
         final unitPriceMinor = _nullableMoney(
-          item['unitPrice'],
+          productMap['unitPrice'],
           '$path.unitPrice',
           currencyCode,
           issues,
         );
         final lineTotalMinor = _nullableMoney(
-          item['lineTotal'],
+          productMap['lineTotal'],
           '$path.lineTotal',
           currencyCode,
           issues,
@@ -245,7 +238,7 @@ class InvoiceDraftValidator {
               DraftValidationIssue(
                 code: DraftValidationCode.inconsistentArithmetic,
                 path: path,
-                message: 'quantity × unitPrice does not equal lineTotal.',
+                message: 'quantity Ã— unitPrice does not equal lineTotal.',
               ),
             );
           }
@@ -261,7 +254,7 @@ class InvoiceDraftValidator {
       }
     }
 
-    final warrantyValue = decoded['warrantyMonths'];
+    final warrantyValue = root['warrantyMonths'];
     int? warrantyMonths;
     if (warrantyValue != null) {
       if (warrantyValue is int && warrantyValue >= 0 && warrantyValue <= 1200) {
@@ -293,22 +286,15 @@ class InvoiceDraftValidator {
         ),
       );
     }
-    _nullableString(decoded['rawText'], r'$.rawText', issues, maxLength: 20000);
+    final modelRawText = _nullableString(
+      root['rawText'],
+      r'$.rawText',
+      issues,
+      maxLength: 20000,
+    );
 
     if (issues.isEmpty) {
-      _crossCheckEvidence(
-        evidence: evidence,
-        merchant: merchant,
-        documentType: documentType,
-        purchaseDate: purchaseDate,
-        invoiceNumber: invoiceNumber,
-        totalMinor: totalMinor,
-        currency: currency,
-        currencyCode: currencyCode,
-        products: products,
-        warrantyMonths: warrantyMonths,
-        issues: issues,
-      );
+      _rejectInconsistentArithmetic(products, totalMinor, issues);
     }
     if (issues.isNotEmpty) {
       return DraftValidationResult(issues: List.unmodifiable(issues));
@@ -317,14 +303,13 @@ class InvoiceDraftValidator {
       issues: const <DraftValidationIssue>[],
       draft: InvoiceDraft(
         merchant: merchant,
-        documentType: documentType,
         purchaseDate: purchaseDate,
         invoiceNumber: invoiceNumber,
         totalMinor: totalMinor,
         currency: currency,
         products: products,
         warrantyMonths: warrantyMonths,
-        rawText: evidence.rawText,
+        rawText: modelRawText ?? '',
         origin: origin,
         requiresManualReview: true,
       ),
@@ -433,242 +418,28 @@ class InvoiceDraftValidator {
     return minor;
   }
 
-  void _crossCheckEvidence({
-    required OcrEvidence evidence,
-    required String? merchant,
-    required String? documentType,
-    required DateTime? purchaseDate,
-    required String? invoiceNumber,
-    required int? totalMinor,
-    required String? currency,
-    required String? currencyCode,
-    required List<InvoiceItemDraft> products,
-    required int? warrantyMonths,
-    required List<DraftValidationIssue> issues,
-  }) {
-    final trustedLines = evidence.lines
-        .where((line) => line.confidence >= minimumEvidenceConfidence)
-        .toList(growable: false);
-    final trustedEvidence = trustedLines.map((line) => line.text).join('\n');
-    final normalizedEvidence = InvoiceTextNormalizer.normalizeForEvidenceMatch(
-      trustedEvidence,
-    );
-    void requireTextEvidence(String? value, String path) {
-      if (value == null) return;
-      final normalized = InvoiceTextNormalizer.normalizeForEvidenceMatch(value);
-      final meaningfulTokens = normalized
-          .split(' ')
-          .where((token) => token.length > 1)
-          .toList(growable: false);
-      if (meaningfulTokens.isNotEmpty &&
-          meaningfulTokens.any(
-            (token) => !normalizedEvidence.contains(token),
-          )) {
-        issues.add(
-          DraftValidationIssue(
-            code: DraftValidationCode.unsupportedByEvidence,
-            path: path,
-            message: 'The value is not supported by the supplied OCR evidence.',
-          ),
-        );
-      }
-    }
-
-    requireTextEvidence(merchant, r'$.merchant');
-    requireTextEvidence(documentType, r'$.documentType');
-    requireTextEvidence(invoiceNumber, r'$.invoiceNumber');
-    for (var index = 0; index < products.length; index++) {
-      final product = products[index];
-      final path = '\$.products[$index]';
-      requireTextEvidence(product.name, '$path.name');
-      final productEvidence = _productEvidenceText(product.name, trustedLines);
-      final productMoneyEvidence = MoneyNormalizer.extractMinorAmounts(
-        productEvidence,
-        currencyCode: currencyCode,
-      );
-      final productQuantityEvidence = MoneyNormalizer.extractScaledNumbers(
-        productEvidence,
-        fractionDigits: 6,
-      );
-      if (product.quantity != null) {
-        final scaled = MoneyNormalizer.decimalStringToMinor(
-          product.quantity!.toString(),
-          fractionDigits: 6,
-        );
-        if (scaled == null || !productQuantityEvidence.contains(scaled)) {
-          issues.add(
-            DraftValidationIssue(
-              code: DraftValidationCode.unsupportedByEvidence,
-              path: '$path.quantity',
-              message: 'The quantity is absent from trusted OCR evidence.',
-            ),
-          );
-        }
-      }
-      _requireMoneyEvidence(
-        product.unitPriceMinor,
-        '$path.unitPrice',
-        productMoneyEvidence,
-        issues,
-      );
-      _requireMoneyEvidence(
-        product.lineTotalMinor,
-        '$path.lineTotal',
-        productMoneyEvidence,
-        issues,
-      );
-    }
-    if (purchaseDate != null) {
-      final candidates = InvoiceDateNormalizer.extractDates(trustedEvidence);
-      final supported = candidates.any(
-        (candidate) =>
-            candidate.year == purchaseDate.year &&
-            candidate.month == purchaseDate.month &&
-            candidate.day == purchaseDate.day,
-      );
-      if (!supported) {
-        issues.add(
-          const DraftValidationIssue(
-            code: DraftValidationCode.unsupportedByEvidence,
-            path: r'$.purchaseDate',
-            message: 'The date does not occur in the supplied OCR evidence.',
-          ),
-        );
-      }
-    }
-    if (totalMinor != null) {
-      final totalEvidence = trustedLines
-          .where((line) => _looksLikeTotalLine(line.text))
-          .map((line) => line.text)
-          .join('\n');
-      final totalAmounts = MoneyNormalizer.extractMinorAmounts(
-        totalEvidence,
-        currencyCode: currencyCode,
-      );
-      if (!totalAmounts.contains(totalMinor)) {
-        issues.add(
-          const DraftValidationIssue(
-            code: DraftValidationCode.unsupportedByEvidence,
-            path: r'$.total',
-            message: 'The total does not occur in the supplied OCR evidence.',
-          ),
-        );
-      }
-    }
-    if (currencyCode != null) {
-      final supported = CurrencyNormalizer.isSupportedByEvidence(
-        currencyCode,
-        trustedEvidence,
-      );
-      if (!supported) {
-        issues.add(
-          const DraftValidationIssue(
-            code: DraftValidationCode.unsupportedByEvidence,
-            path: r'$.currency',
-            message:
-                'The currency does not occur in the supplied OCR evidence.',
-          ),
-        );
-      }
-    } else {
-      requireTextEvidence(currency, r'$.currency');
-    }
-    final warrantyEvidence = trustedLines
-        .where((line) => _looksLikeWarrantyLine(line.text))
-        .map((line) => line.text)
-        .join('\n');
-    final warrantyNumbers = MoneyNormalizer.extractScaledNumbers(
-      warrantyEvidence,
-      fractionDigits: 0,
-    );
-    if (warrantyMonths != null && !warrantyNumbers.contains(warrantyMonths)) {
-      issues.add(
-        const DraftValidationIssue(
-          code: DraftValidationCode.unsupportedByEvidence,
-          path: r'$.warrantyMonths',
-          message: 'Warranty months are absent from trusted OCR evidence.',
-        ),
-      );
-    }
+  void _rejectInconsistentArithmetic(
+    List<InvoiceItemDraft> products,
+    int? totalMinor,
+    List<DraftValidationIssue> issues,
+  ) {
     final lineTotals = products
         .map((product) => product.lineTotalMinor)
         .whereType<int>();
-    if (totalMinor != null &&
-        lineTotals.length == products.length &&
-        products.isNotEmpty) {
-      final sum = lineTotals.fold<int>(0, (total, value) => total + value);
-      if (sum > totalMinor) {
-        issues.add(
-          const DraftValidationIssue(
-            code: DraftValidationCode.inconsistentArithmetic,
-            path: r'$.products',
-            message:
-                'The sum of line totals is greater than the invoice total.',
-          ),
-        );
-      }
+    if (totalMinor == null ||
+        lineTotals.length != products.length ||
+        products.isEmpty) {
+      return;
     }
-  }
-
-  void _requireMoneyEvidence(
-    int? value,
-    String path,
-    Set<int> evidence,
-    List<DraftValidationIssue> issues,
-  ) {
-    if (value == null || evidence.contains(value)) return;
-    issues.add(
-      DraftValidationIssue(
-        code: DraftValidationCode.unsupportedByEvidence,
-        path: path,
-        message: 'The amount is absent from trusted OCR evidence.',
-      ),
-    );
-  }
-
-  bool _looksLikeTotalLine(String source) {
-    final normalized = InvoiceTextNormalizer.normalizeForEvidenceMatch(source);
-    final tokens = normalized.split(' ').toSet();
-    return tokens.contains('الاجمالي') ||
-        tokens.contains('المجموع') ||
-        normalized.contains('المبلغ المستحق') ||
-        tokens.contains('total') ||
-        normalized.contains('amount due') ||
-        normalized.contains('grand total') ||
-        normalized.contains('net total');
-  }
-
-  bool _looksLikeWarrantyLine(String source) {
-    final normalized = InvoiceTextNormalizer.normalizeForEvidenceMatch(source);
-    final tokens = normalized.split(' ').toSet();
-    return tokens.contains('ضمان') ||
-        tokens.contains('الضمان') ||
-        tokens.contains('كفاله') ||
-        tokens.contains('warranty') ||
-        normalized.contains('guarantee period');
-  }
-
-  String _productEvidenceText(String? name, List<OcrLine> lines) {
-    if (name == null) return '';
-    final normalizedName = InvoiceTextNormalizer.normalizeForEvidenceMatch(
-      name,
-    );
-    final tokens = normalizedName
-        .split(' ')
-        .where((token) => token.isNotEmpty)
-        .toList(growable: false);
-    if (tokens.isEmpty) return '';
-    final selected = <int>{};
-    for (var index = 0; index < lines.length; index++) {
-      final line = InvoiceTextNormalizer.normalizeForEvidenceMatch(
-        lines[index].text,
+    final sum = lineTotals.fold<int>(0, (total, value) => total + value);
+    if (sum > totalMinor) {
+      issues.add(
+        const DraftValidationIssue(
+          code: DraftValidationCode.inconsistentArithmetic,
+          path: r'$.products',
+          message: 'The sum of line totals is greater than the invoice total.',
+        ),
       );
-      if (tokens.every(line.contains)) {
-        selected.add(index);
-        if (index + 1 < lines.length) selected.add(index + 1);
-      }
     }
-    final ordered = selected.toList()..sort();
-    return ordered.map((index) => lines[index].text).join('\n');
   }
 }

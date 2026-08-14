@@ -16,7 +16,6 @@ abstract final class InvoiceDraftMapper {
     );
     final searchText = InvoiceSearchTextBuilder.build(
       merchant: draft.merchant,
-      documentType: draft.documentType,
       invoiceNumber: draft.invoiceNumber,
       purchaseDate: draft.purchaseDate,
       totalMinor: draft.totalMinor,
@@ -35,7 +34,6 @@ abstract final class InvoiceDraftMapper {
     return Invoice(
       id: draft.invoiceId,
       merchant: draft.merchant,
-      documentType: draft.documentType,
       purchaseDate: draft.purchaseDate,
       totalMinor: draft.totalMinor,
       currencyCode: draft.currencyCode,
@@ -72,21 +70,22 @@ abstract final class InvoiceDraftMapper {
     return InvoiceDraft(
       invoiceId: invoice.id,
       merchant: invoice.merchant,
-      documentType: invoice.documentType,
       purchaseDate: invoice.purchaseDate,
       totalMinor: invoice.totalMinor,
-      currencyCode: invoice.currencyCode,
+      currency: invoice.currencyCode,
       warrantyMonths: invoice.warrantyMonths,
       invoiceNumber: invoice.invoiceNumber,
-      rawExtractedText: invoice.rawExtractedText,
+      rawText: invoice.rawExtractedText ?? '',
       imagePath: invoice.imagePath,
       thumbnailPath: invoice.thumbnailPath,
       sourceType: invoice.sourceType,
       extractionModelId: invoice.extractionModelId,
-      items: invoice.items
+      origin: InvoiceDraftOrigin.extracted,
+      requiresManualReview: false,
+      products: invoice.items
           .map(
             (item) => InvoiceItemDraft(
-              name: item.name,
+              name: item.name.isEmpty ? null : item.name,
               quantity: item.quantity,
               unitPriceMinor: item.unitPriceMinor,
               lineTotalMinor: item.lineTotalMinor,

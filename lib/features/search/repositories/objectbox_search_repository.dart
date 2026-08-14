@@ -1,9 +1,9 @@
 import '../../../core/ai/embedding/embedding_engine.dart';
 import '../../../core/database/database_versions.dart';
+import '../../../core/database/invoice_record.dart';
 import '../../../core/database/invoice_search_spec.dart';
 import '../../../core/database/invoice_store.dart';
 import '../../../core/utils/arabic_query_normalization/arabic_query_normalizer.dart';
-import '../../../core/utils/document_type_normalization.dart';
 import '../../invoice_details/models/invoice.dart';
 import '../../invoice_details/repositories/invoice_entity_mapper.dart';
 import '../models/search_filters.dart';
@@ -38,20 +38,100 @@ class ObjectBoxSearchRepository
   Future<int> pendingEmbeddingCount() => indexer.pendingCount();
 
   @override
-  Future<void> releaseSearchResources() async {
+  Future<PendingEmbeddingSyncResult> reindexPendingEmbeddings() async {
+    final pendingBefore = await pendingEmbeddingCount();
+    if (pendingBefore == 0) {
+      return const PendingEmbeddingSyncResult(
+        remaining: 0,
+        indexed: 0,
+        unavailable: 0,
+        failed: 0,
+      );
+    }
+    late final EmbeddingEngineSnapshot snapshot;
+    try {
+      snapshot = await engine.refresh();
+    } on Object catch (error) {
+      return PendingEmbeddingSyncResult(
+        remaining: pendingBefore,
+        indexed: 0,
+        unavailable: pendingBefore,
+        failed: 0,
+        modelReady: false,
+        modelMessage: error.toString(),
+      );
+    }
+    if (!snapshot.canEmbed) {
+      return PendingEmbeddingSyncResult(
+        remaining: pendingBefore,
+        indexed: 0,
+        unavailable: pendingBefore,
+        failed: 0,
+        modelReady: false,
+        modelMessage:
+            snapshot.message ??
+            'OpenRouter embedding is not ready. Add an API key in Settings.',
+      );
+    }
+    // Keep the embedding client warm for the next search; unload happens when the
+    // search session releases resources or the app backgrounds.
+    final report = await indexer.reindexPending();
+    final remaining = await pendingEmbeddingCount();
+    return PendingEmbeddingSyncResult(
+      remaining: remaining,
+      indexed: report.indexed,
+      unavailable: report.unavailable,
+      failed: report.failed,
+      modelReady: true,
+      modelMessage: snapshot.message,
+    );
+  }
+
+  @override
+  Future<void> cancelSearchOperation() async {
+    await indexer.cancelReindex();
     await engine.cancel();
+  }
+
+  @override
+  Future<void> releaseSearchResources() async {
+    await cancelSearchOperation();
     await engine.unload();
   }
 
   @override
   Future<SearchResponse> search(SearchRequest request) async {
+    final fast = await searchFast(request);
+    if (!request.route.requiresEmbedding) return fast;
+    final semantic = await searchSemantic(request);
+    if (semantic.results.isEmpty) return fast;
+    return SearchResponse(
+      request: request,
+      pendingEmbeddingCount: semantic.pendingEmbeddingCount,
+      semanticGate: SemanticSearchGate.none,
+      usedKeywordFallback: fast.usedKeywordFallback && semantic.results.isEmpty,
+      results: mergeSearchResults(fast.results, semantic.results),
+    );
+  }
+
+  @override
+  Future<SearchResponse> searchFast(SearchRequest request) async {
     final pending = await pendingEmbeddingCount();
     return switch (request.route) {
       SearchRouteType.keyword => _keyword(request, pending),
       SearchRouteType.structured => _structured(request, pending),
       SearchRouteType.semantic ||
-      SearchRouteType.hybrid => _semantic(request, pending),
+      SearchRouteType.hybrid => _softKeywordResponse(request, pending),
     };
+  }
+
+  @override
+  Future<SearchResponse> searchSemantic(SearchRequest request) async {
+    final pending = await pendingEmbeddingCount();
+    if (!request.route.requiresEmbedding) {
+      return _empty(request, pending);
+    }
+    return _semanticVectorsOnly(request, pending);
   }
 
   Future<SearchResponse> _keyword(SearchRequest request, int pending) async {
@@ -102,37 +182,23 @@ class ObjectBoxSearchRepository
     );
   }
 
-  Future<SearchResponse> _semantic(SearchRequest request, int pending) async {
+  /// Pure ANN path. Returns empty results when the model/index cannot help so
+  /// the cubit can keep a prior keyword paint.
+  Future<SearchResponse> _semanticVectorsOnly(
+    SearchRequest request,
+    int pending,
+  ) async {
     if (!calibration.canReturnSemanticResults) {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.calibrationRequired,
-      );
+      return _empty(request, pending);
     }
     late final EmbeddingEngineSnapshot availability;
     try {
       availability = await engine.refresh();
     } on Object {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.runtimeFailure,
-      );
+      return _empty(request, pending);
     }
-    if (!availability.canEmbed) {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.modelUnavailable,
-      );
-    }
-    if (availability.modelId != calibration.modelId) {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.calibrationRequired,
-      );
+    if (!availability.canEmbed || availability.modelId != calibration.modelId) {
+      return _empty(request, pending);
     }
 
     final query = request.contentQuery.trim().isEmpty
@@ -141,35 +207,13 @@ class ObjectBoxSearchRepository
     late final EmbeddingOutput output;
     try {
       output = await engine.embedQuery(query);
-    } on EmbeddingInputTooLongException {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.queryTooLong,
-      );
-    } on EmbeddingUnavailableException {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.modelUnavailable,
-      );
     } on Object {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.runtimeFailure,
-      );
+      return _empty(request, pending);
     }
     if (!calibration.accepts(output)) {
-      return _semanticFallback(
-        request,
-        pending,
-        SemanticSearchGate.calibrationRequired,
-      );
+      return _empty(request, pending);
     }
 
-    // Keep persistence failures visible to the Cubit instead of presenting a
-    // damaged index or database as a model-capability problem.
     final hits = await store.searchNearest(
       InvoiceVectorQuery(
         vector: output.vector,
@@ -224,50 +268,76 @@ class ObjectBoxSearchRepository
     );
   }
 
-  Future<SearchResponse> _semanticFallback(
+  Future<SearchResponse> _softKeywordResponse(
     SearchRequest request,
     int pending,
-    SemanticSearchGate gate,
   ) async {
-    if (request.route != SearchRouteType.hybrid) {
-      return SearchResponse(
-        request: request,
-        results: const [],
-        pendingEmbeddingCount: pending,
-        semanticGate: gate,
-      );
-    }
-    final tokens = _fallbackTokens(request.contentQuery);
-    if (tokens.isEmpty) {
-      return SearchResponse(
-        request: request,
-        results: const [],
-        pendingEmbeddingCount: pending,
-        semanticGate: gate,
-      );
-    }
-    final hits = await store.searchExactKeywords(
-      InvoiceKeywordQuery(
-        normalizedTokens: tokens,
-        filter: _databaseFilter(request.filters),
-        limit: 50,
-      ),
+    final filter = request.route == SearchRouteType.hybrid
+        ? _databaseFilter(request.filters)
+        : const InvoiceSearchFilter();
+    final ranked = await _softKeywordHits(
+      contentQuery: request.contentQuery,
+      filter: filter,
     );
     return SearchResponse(
       request: request,
       pendingEmbeddingCount: pending,
-      semanticGate: gate,
-      usedKeywordFallback: true,
-      results: hits.map(
-        (hit) => SearchResult<Invoice>(
-          invoiceId: hit.record.invoice.id,
-          value: InvoiceEntityMapper.fromRecord(hit.record),
+      semanticGate: SemanticSearchGate.none,
+      usedKeywordFallback: ranked.isNotEmpty,
+      results: ranked.map(
+        (entry) => SearchResult<Invoice>(
+          invoiceId: entry.record.invoice.id,
+          value: InvoiceEntityMapper.fromRecord(entry.record),
           route: request.route,
-          matchKind: SearchMatchKind.filtered,
-          matchedKeywords: tokens,
+          matchKind: SearchMatchKind.exact,
+          matchedKeywords: entry.matchedTokens,
         ),
       ),
     );
+  }
+
+  Future<List<({InvoiceRecord record, List<String> matchedTokens})>>
+  _softKeywordHits({
+    required String contentQuery,
+    required InvoiceSearchFilter filter,
+  }) async {
+    final tokens = _significantTokens(contentQuery);
+    if (tokens.isEmpty) return const [];
+
+    final matchedById = <int, ({InvoiceRecord record, Set<String> tokens})>{};
+    for (final token in tokens) {
+      final hits = await store.searchExactKeywords(
+        InvoiceKeywordQuery(
+          normalizedTokens: [token],
+          filter: filter,
+          limit: 50,
+        ),
+      );
+      for (final hit in hits) {
+        final id = hit.record.invoice.id;
+        final existing = matchedById[id];
+        if (existing == null) {
+          matchedById[id] = (record: hit.record, tokens: {token});
+        } else {
+          existing.tokens.add(token);
+        }
+      }
+    }
+
+    final ranked = matchedById.values.toList(growable: false)
+      ..sort((left, right) {
+        final byCount = right.tokens.length.compareTo(left.tokens.length);
+        if (byCount != 0) return byCount;
+        return right.record.invoice.id.compareTo(left.record.invoice.id);
+      });
+    return ranked
+        .map(
+          (entry) => (
+            record: entry.record,
+            matchedTokens: entry.tokens.toList(growable: false),
+          ),
+        )
+        .toList(growable: false);
   }
 
   SearchResponse _empty(SearchRequest request, int pending) => SearchResponse(
@@ -281,8 +351,16 @@ List<String> _tokens(String value) => ArabicQueryNormalizer.normalizeForKeyword(
   value,
 ).split(' ').where((token) => token.isNotEmpty).toSet().toList(growable: false);
 
-List<String> _fallbackTokens(String value) {
-  final tokens = _tokens(value);
+/// Content tokens useful for recall on natural-language Arabic/English queries.
+List<String> _significantTokens(String value) {
+  final tokens = <String>{};
+  for (final raw in _tokens(value)) {
+    for (final token in _keywordVariants(raw)) {
+      if (token.length < 2) continue;
+      if (_searchStopwords.contains(token)) continue;
+      tokens.add(token);
+    }
+  }
   final identifiers = tokens
       .where(
         (token) =>
@@ -291,11 +369,65 @@ List<String> _fallbackTokens(String value) {
       )
       .toList(growable: false);
   if (identifiers.isNotEmpty) return identifiers;
-  // A semantic failure must not silently turn descriptive words into exact
-  // claims. Only explicit quotes or mixed letter/digit identifiers receive
-  // the limited exact-keyword fallback.
-  return RegExp(r'"[^"]+"').hasMatch(value) ? tokens : const <String>[];
+  return tokens.toList(growable: false);
 }
+
+List<String> _keywordVariants(String token) {
+  final variants = <String>{token};
+  if (token.startsWith('ال') && token.length > 3) {
+    variants.add(token.substring(2));
+  }
+  return variants.toList(growable: false);
+}
+
+const Set<String> _searchStopwords = {
+  'فاتورة',
+  'الفاتورة',
+  'فواتير',
+  'الفواتير',
+  'بتاعة',
+  'بتاع',
+  'بتاعت',
+  'اللي',
+  'الي',
+  'الذي',
+  'التي',
+  'اشترى',
+  'اشتري',
+  'اشتريت',
+  'اشتريته',
+  'اشتريتها',
+  'اشتريتو',
+  'من',
+  'في',
+  'على',
+  'الى',
+  'إلي',
+  'عن',
+  'مع',
+  'هذا',
+  'هذه',
+  'ده',
+  'دي',
+  'كان',
+  'كانت',
+  'عايز',
+  'عاوز',
+  'أريد',
+  'اريد',
+  'the',
+  'a',
+  'an',
+  'of',
+  'from',
+  'for',
+  'with',
+  'invoice',
+  'receipt',
+  'bought',
+  'buy',
+  'purchase',
+};
 
 List<String> _matchedTokens(String keywordText, List<String> tokens) => tokens
     .where((token) => keywordText.contains(' $token '))
@@ -327,14 +459,5 @@ InvoiceSearchFilter _databaseFilter(SearchFilters filters) {
             endExclusive: warrantyEndDate.endExclusive,
           ),
     currencyCode: filters.currencyCode,
-    documentType: switch (filters.documentType) {
-      SearchDocumentType.purchaseInvoice =>
-        DocumentTypeNormalization.purchaseInvoice,
-      SearchDocumentType.receipt => DocumentTypeNormalization.receipt,
-      SearchDocumentType.creditNote => DocumentTypeNormalization.creditNote,
-      SearchDocumentType.warrantyCertificate =>
-        DocumentTypeNormalization.warrantyCertificate,
-      null => null,
-    },
   );
 }

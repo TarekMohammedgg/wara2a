@@ -22,9 +22,6 @@ class LocalHomeInvoiceRepository implements HomeInvoiceRepository {
       merchant: invoice.merchant?.trim().isNotEmpty == true
           ? invoice.merchant!.trim()
           : '—',
-      category: invoice.documentType?.trim().isNotEmpty == true
-          ? invoice.documentType!.trim()
-          : '—',
       date: _formatDate(invoice.purchaseDate ?? invoice.reviewedAt),
       total: _formatMinor(invoice.totalMinor),
       currency: invoice.currencyCode ?? '',

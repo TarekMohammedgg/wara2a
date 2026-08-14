@@ -30,7 +30,6 @@ class SearchIntentRouter {
     SearchDateRange? purchaseDate;
     SearchDateRange? warrantyEndDate;
     String? currencyCode;
-    SearchDocumentType? documentType;
 
     final amountParse = _parseAmount(normalized);
     if (amountParse.issue != null) {
@@ -96,28 +95,11 @@ class SearchIntentRouter {
       }
     }
 
-    final documentParse = _parseDocumentType(normalized);
-    if (documentParse.issue != null) {
-      issues.add(documentParse.issue!);
-    } else if (documentParse.value != null &&
-        _accept(documentParse.confidence, issues)) {
-      documentType = documentParse.value;
-      removedSpans.addAll(documentParse.spans);
-      inferences.add(
-        SearchFilterInference(
-          field: SearchFilterField.documentType,
-          confidence: documentParse.confidence,
-          evidence: documentParse.evidence,
-        ),
-      );
-    }
-
     final filters = SearchFilters(
       amount: amount,
       purchaseDate: purchaseDate,
       warrantyEndDate: warrantyEndDate,
       currencyCode: currencyCode,
-      documentType: documentType,
     );
     final contentQuery = _contentQuery(_removeSpans(normalized, removedSpans));
     final semanticContent = _isSemantic(
@@ -291,29 +273,6 @@ _FilterParse<String> _parseCurrency(String query) {
     candidates,
     ambiguity: SearchParseIssue.ambiguousCurrency,
     confidence: 0.97,
-  );
-}
-
-_FilterParse<SearchDocumentType> _parseDocumentType(String query) {
-  return _singleValueParse(
-    query,
-    [
-      _ValuePattern(
-        SearchDocumentType.warrantyCertificate,
-        RegExp(r'(?:شهاد[ةه]\s+ضمان|warranty\s+certificate)'),
-      ),
-      _ValuePattern(
-        SearchDocumentType.creditNote,
-        RegExp(r'(?:اشعار\s+داين|credit\s+note)'),
-      ),
-      _ValuePattern(
-        SearchDocumentType.purchaseInvoice,
-        RegExp(r'(?:فاتور[ةه]\s+شراء|purchase\s+invoice)'),
-      ),
-      _ValuePattern(SearchDocumentType.receipt, RegExp(r'(?:ايصال|receipt)')),
-    ],
-    ambiguity: SearchParseIssue.ambiguousDocumentType,
-    confidence: 0.96,
   );
 }
 

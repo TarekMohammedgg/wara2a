@@ -3,7 +3,6 @@ import '../widgets/invoice_card_data.dart';
 class InvoiceMock implements InvoiceCardData {
   const InvoiceMock({
     required this.merchant,
-    required this.category,
     required this.date,
     required this.total,
     required this.currency,
@@ -15,8 +14,6 @@ class InvoiceMock implements InvoiceCardData {
 
   @override
   final String merchant;
-  @override
-  final String category;
   @override
   final String date;
   @override
@@ -34,7 +31,6 @@ class InvoiceMock implements InvoiceCardData {
 class InvoiceDraftMock {
   const InvoiceDraftMock({
     this.merchant = 'بي تك',
-    this.documentType = 'فاتورة شراء',
     this.date = '09 أغسطس 2026',
     this.number = 'BT-2026-0841',
     this.total = '24,999',
@@ -43,7 +39,6 @@ class InvoiceDraftMock {
   });
 
   final String merchant;
-  final String documentType;
   final String date;
   final String number;
   final String total;

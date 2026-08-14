@@ -133,15 +133,60 @@ class SearchResponse extends Equatable {
   ];
 }
 
+class PendingEmbeddingSyncResult extends Equatable {
+  const PendingEmbeddingSyncResult({
+    required this.remaining,
+    required this.indexed,
+    required this.unavailable,
+    required this.failed,
+    this.modelReady = true,
+    this.modelMessage,
+  });
+
+  final int remaining;
+  final int indexed;
+  final int unavailable;
+  final int failed;
+  final bool modelReady;
+  final String? modelMessage;
+
+  bool get hadWork => indexed > 0 || unavailable > 0 || failed > 0;
+
+  @override
+  List<Object?> get props => [
+    remaining,
+    indexed,
+    unavailable,
+    failed,
+    modelReady,
+    modelMessage,
+  ];
+}
+
 abstract interface class SearchRepository {
   SearchIntent interpret(String rawQuery);
 
+  /// Full search (fast path + semantic when applicable). Prefer the two-phase
+  /// APIs from the UI cubit for progressive results.
   Future<SearchResponse> search(SearchRequest request);
 
+  /// Instant keyword/structured/soft-keyword results (never waits on embed).
+  Future<SearchResponse> searchFast(SearchRequest request);
+
+  /// Vector retrieval only. Empty when embeddings are unavailable; does not
+  /// wipe or replace a prior fast-path paint by itself.
+  Future<SearchResponse> searchSemantic(SearchRequest request);
+
   Future<int> pendingEmbeddingCount();
+
+  /// Indexes invoices that still lack a ready embedding when the engine can run.
+  Future<PendingEmbeddingSyncResult> reindexPendingEmbeddings();
 }
 
 abstract interface class SearchResourceLifecycle {
+  /// Cancels in-flight embed/reindex work without unloading the model.
+  Future<void> cancelSearchOperation();
+
   Future<void> releaseSearchResources();
 }
 

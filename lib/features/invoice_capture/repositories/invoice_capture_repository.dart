@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../invoice_details/repositories/invoice_repository.dart';
 import '../../../core/ai/embedding/reviewed_invoice_indexer.dart';
 import '../models/invoice_draft.dart';
@@ -13,11 +15,15 @@ class LocalInvoiceCaptureRepository implements InvoiceCaptureRepository {
     this._invoices, {
     DateTime Function()? now,
     this.indexer,
+    this.onIndexingScheduled,
   }) : _now = now ?? _utcNow;
 
   final InvoiceRepository _invoices;
   final DateTime Function() _now;
   final ReviewedInvoiceIndexer? indexer;
+
+  /// Optional hook so the app can retry any leftovers in the background.
+  final void Function()? onIndexingScheduled;
 
   @override
   Future<int> saveReviewedDraft(InvoiceDraft draft) async {
@@ -32,13 +38,19 @@ class LocalInvoiceCaptureRepository implements InvoiceCaptureRepository {
         createdAt: existing?.createdAt,
       ),
     );
+    // Indexing must not block save; pending leftovers are synced automatically.
+    unawaited(_indexInBackground(invoiceId));
+    return invoiceId;
+  }
+
+  Future<void> _indexInBackground(int invoiceId) async {
     try {
       await indexer?.indexReviewedInvoice(invoiceId);
     } on Object {
-      // The reviewed invoice is already durable. The persisted pending/failed
-      // state is retried locally and indexing never rolls back user data.
+      // Durable invoice stays saved; automatic sync retries later.
+    } finally {
+      onIndexingScheduled?.call();
     }
-    return invoiceId;
   }
 
   @override

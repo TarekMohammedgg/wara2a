@@ -42,7 +42,12 @@ class AppTheme {
         color: isDark ? const Color(0xFF172239) : AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF2D3A51) : AppColors.line,
+          ),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -53,18 +58,22 @@ class AppTheme {
         suffixIconColor: mutedColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
-          vertical: 16,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF33435D) : AppColors.line,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF33435D) : AppColors.line,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.blue, width: 1.4),
         ),
       ),
@@ -72,7 +81,7 @@ class AppTheme {
         backgroundColor: isDark ? const Color(0xFF121D31) : AppColors.surface,
         indicatorColor: isDark ? const Color(0xFF253D70) : AppColors.softBlue,
         elevation: 0,
-        height: 76,
+        height: 68,
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontSize: 12,
@@ -87,7 +96,7 @@ class AppTheme {
         side: BorderSide(
           color: isDark ? const Color(0xFF33435D) : AppColors.line,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         labelStyle: TextStyle(
           color: textColor,
           fontSize: 12,
@@ -96,6 +105,27 @@ class AppTheme {
       ),
       dividerTheme: DividerThemeData(
         color: isDark ? const Color(0xFF2D3A51) : AppColors.line,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.blue,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: textColor,
+          side: BorderSide(
+            color: isDark ? const Color(0xFF46566E) : AppColors.line,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       ),
     );
   }

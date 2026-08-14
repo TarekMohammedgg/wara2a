@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/ai/embedding/open_router_embedding_artifact.dart';
 import 'package:wara2a/core/database/database_migration_runner.dart';
 import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/entities/database_metadata_entity.dart';
@@ -14,7 +14,7 @@ import 'package:wara2a/objectbox.g.dart';
 
 void main() {
   test(
-    'opens a real v2 768-dimensional store and preserves rows for E5 reindex',
+    'opens a real v2 768-dimensional store and preserves rows for reindex',
     () async {
       final source = Directory(
         'test/fixtures/database/legacy_embedding_768_v2',
@@ -79,7 +79,7 @@ void main() {
         );
 
         final pending = await database.invoices.getPendingEmbeddings(
-          modelId: MultilingualE5Artifact.modelId,
+          modelId: OpenRouterEmbeddingArtifact.modelId,
           searchTextSchemaVersion: DatabaseVersions.searchTextSchema,
           embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
         );
@@ -102,10 +102,10 @@ void main() {
       keywordText: 'old',
       imagePath: 'invoice.jpg',
       sourceType: 'gallery',
-      embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+      embedding: List<double>.filled(OpenRouterEmbeddingArtifact.dimensions, 0)
         ..[0] = 1,
       embeddingModelId: 'old-model',
-      embeddingDimensions: MultilingualE5Artifact.dimensions,
+      embeddingDimensions: OpenRouterEmbeddingArtifact.dimensions,
       searchTextSchemaVersion: 0,
       createdAt: now,
       updatedAt: now,
@@ -153,10 +153,12 @@ void main() {
         keywordText: ' future ',
         imagePath: 'future.jpg',
         sourceType: 'gallery',
-        embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
-          ..[0] = 1,
-        embeddingModelId: MultilingualE5Artifact.modelId,
-        embeddingDimensions: MultilingualE5Artifact.dimensions,
+        embedding: List<double>.filled(
+          OpenRouterEmbeddingArtifact.dimensions,
+          0,
+        )..[0] = 1,
+        embeddingModelId: OpenRouterEmbeddingArtifact.modelId,
+        embeddingDimensions: OpenRouterEmbeddingArtifact.dimensions,
         embeddingStatus: InvoiceEmbeddingStatus.ready.name,
         embeddingSchemaVersion: 999,
         embeddingAttemptId: 'future-attempt',

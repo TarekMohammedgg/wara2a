@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -119,17 +121,21 @@ class _LoadedInvoiceDetails extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${invoice.documentType ?? '—'} · ${_formatDate(invoice.purchaseDate)}',
+            _formatDate(invoice.purchaseDate),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 22),
           _SummaryCard(invoice: invoice),
           const SizedBox(height: 22),
           Text(l10n.products, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
           ...invoice.items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+            (item) => DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
+                ),
+              ),
               child: _DetailProduct(
                 name: item.name,
                 meta: item.quantity?.toString() ?? '—',
@@ -146,7 +152,7 @@ class _LoadedInvoiceDetails extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
-          const _SmallInvoiceImage(),
+          _InvoiceImagePreview(invoice: invoice),
           const SizedBox(height: 22),
           PrimaryButton(
             label: l10n.scanAgain,
@@ -170,54 +176,29 @@ class _DetailsHero extends StatelessWidget {
       height: 116,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.softBlue, AppColors.softCyan],
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-        ),
-        borderRadius: BorderRadius.circular(24),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Row(
         children: [
-          Container(
-            width: 74,
-            height: 80,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(9),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.navy.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(height: 8, width: 34, color: AppColors.blue),
-                const SizedBox(height: 11),
-                ...List.generate(
-                  4,
-                  (index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 7),
-                    child: Container(
-                      height: 4,
-                      width: index.isEven ? 42 : 28,
-                      color: const Color(0xFFDDE4EC),
-                    ),
-                  ),
-                ),
-              ],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: SizedBox(
+              width: 74,
+              height: 80,
+              child: _InvoiceFileImage(
+                path: invoice.thumbnailPath ?? invoice.imagePath,
+                fit: BoxFit.cover,
+                fallbackIconSize: 28,
+              ),
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               invoice.invoiceNumber ?? '—',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: AppColors.navy),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           const Icon(
@@ -321,20 +302,30 @@ class _DetailProduct extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: const BoxDecoration(
-            color: AppColors.softBlue,
-            shape: BoxShape.circle,
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(meta, style: textTheme.bodySmall),
+              ],
+            ),
           ),
-          child: const Icon(Icons.inventory_2_outlined, color: AppColors.blue),
-        ),
-        title: Text(name),
-        subtitle: Text(meta),
-        trailing: Text(price, style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(width: 12),
+          Text(price, style: textTheme.bodyLarge),
+        ],
       ),
     );
   }
@@ -364,22 +355,91 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-class _SmallInvoiceImage extends StatelessWidget {
-  const _SmallInvoiceImage();
+class _InvoiceImagePreview extends StatelessWidget {
+  const _InvoiceImagePreview({required this.invoice});
+
+  final Invoice invoice;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Theme.of(context).dividerColor),
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _openFullImage(context),
+        child: Ink(
+          height: 220,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Theme.of(context).dividerColor),
+          ),
+          child: _InvoiceFileImage(
+            path: invoice.imagePath,
+            fit: BoxFit.cover,
+            fallbackIconSize: 54,
+          ),
+        ),
       ),
-      child: const Center(
+    );
+  }
+
+  Future<void> _openFullImage(BuildContext context) async {
+    final path = invoice.imagePath.trim();
+    if (path.isEmpty || !File(path).existsSync()) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: InteractiveViewer(
+          child: Image.file(File(path), fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
+}
+
+class _InvoiceFileImage extends StatelessWidget {
+  const _InvoiceFileImage({
+    required this.path,
+    required this.fit,
+    required this.fallbackIconSize,
+  });
+
+  final String? path;
+  final BoxFit fit;
+  final double fallbackIconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolved = path?.trim() ?? '';
+    final file = resolved.isEmpty ? null : File(resolved);
+    if (file != null && file.existsSync()) {
+      return Image.file(
+        file,
+        fit: fit,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, _, _) => _Fallback(iconSize: fallbackIconSize),
+      );
+    }
+    return _Fallback(iconSize: fallbackIconSize);
+  }
+}
+
+class _Fallback extends StatelessWidget {
+  const _Fallback({required this.iconSize});
+
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: Center(
         child: Icon(
           Icons.receipt_long_rounded,
-          size: 54,
+          size: iconSize,
           color: AppColors.blue,
         ),
       ),
@@ -408,7 +468,6 @@ Invoice _preview() {
   final reviewedAt = DateTime.utc(2026, 8, 9);
   return Invoice(
     merchant: draft.merchant,
-    documentType: draft.documentType,
     purchaseDate: draft.purchaseDate,
     totalMinor: draft.totalMinor,
     currencyCode: draft.currencyCode,

@@ -8,7 +8,6 @@ class MockData {
   static const invoices = [
     InvoiceMock(
       merchant: 'بي تك',
-      category: 'إلكترونيات',
       date: 'اليوم، 10:42 ص',
       total: '24,999',
       currency: 'ج.م',
@@ -18,7 +17,6 @@ class MockData {
     ),
     InvoiceMock(
       merchant: 'Carrefour',
-      category: 'مستلزمات منزلية',
       date: 'أمس، 06:18 م',
       total: '1,248',
       currency: 'ج.م',
@@ -29,7 +27,6 @@ class MockData {
     ),
     InvoiceMock(
       merchant: 'محطة موبيل',
-      category: 'وقود',
       date: '05 أغسطس 2026',
       total: '720',
       currency: 'ج.م',
@@ -44,7 +41,6 @@ class MockData {
 
   static final draft = InvoiceDraft(
     merchant: invoices.first.merchant,
-    documentType: 'فاتورة شراء',
     purchaseDate: DateTime.utc(2026, 8, 9),
     totalMinor: 2499900,
     currencyCode: 'EGP',

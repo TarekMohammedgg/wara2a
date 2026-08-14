@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/features/search/models/search_filters.dart';
 import 'package:wara2a/features/search/models/search_intent.dart';
 import 'package:wara2a/features/search/models/search_intent_router.dart';
 import 'package:wara2a/features/search/models/search_route_type.dart';
@@ -64,12 +63,12 @@ void main() {
     expect(intent.filters.purchaseDate, isNull);
   });
 
-  test('parses currency and reviewed document-type filters', () {
-    final intent = router.parse('فاتورة شراء بالدولار USD');
+  test('parses currency filters', () {
+    final intent = router.parse('USD');
 
     expect(intent.route, SearchRouteType.structured);
     expect(intent.filters.currencyCode, 'USD');
-    expect(intent.filters.documentType, SearchDocumentType.purchaseInvoice);
+    expect(intent.contentQuery, isEmpty);
   });
 
   test('uses semantic search for conversational descriptions', () {

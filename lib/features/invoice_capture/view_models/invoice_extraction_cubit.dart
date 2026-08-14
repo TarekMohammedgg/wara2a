@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/ai/ai_runtime_error.dart';
-import '../../../core/ai/model_management/model_coordinator.dart';
-import '../../../core/ai/model_management/model_lifecycle_state.dart';
+import '../../../core/ai/model_lifecycle_state.dart';
 import '../repositories/invoice_extraction_repository.dart';
 import '../models/invoice_image_draft.dart';
 
@@ -62,6 +61,16 @@ class InvoiceExtractionCubit extends Cubit<InvoiceExtractionState> {
   late final StreamSubscription<ModelLifecycleState> _lifecycleSubscription;
 
   Future<void> extract(InvoiceImageDraft image) async {
+    if (!isClosed) {
+      emit(
+        const InvoiceExtractionRunning(
+          ModelLifecycleState(
+            status: ModelLifecycleStatus.loading,
+            stage: ExtractionStage.preparing,
+          ),
+        ),
+      );
+    }
     try {
       final result = await repository.extract(image);
       if (isClosed) return;

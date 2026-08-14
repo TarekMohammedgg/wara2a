@@ -1,0 +1,464 @@
+[
+    {
+        "label": "lldb",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "lldb",
+        "description": "lldb",
+        "detail": "lldb",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "argparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "argparse",
+        "description": "argparse",
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Iterable",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Iterable",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "onnx",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "onnx",
+        "description": "onnx",
+        "detail": "onnx",
+        "documentation": {}
+    },
+    {
+        "label": "numpy_helper",
+        "importPath": "onnx",
+        "description": "onnx",
+        "isExtraImport": true,
+        "detail": "onnx",
+        "documentation": {}
+    },
+    {
+        "label": "onnxruntime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "onnxruntime",
+        "description": "onnxruntime",
+        "detail": "onnxruntime",
+        "documentation": {}
+    },
+    {
+        "label": "gen_processing_models",
+        "importPath": "onnxruntime_extensions",
+        "description": "onnxruntime_extensions",
+        "isExtraImport": true,
+        "detail": "onnxruntime_extensions",
+        "documentation": {}
+    },
+    {
+        "label": "get_library_path",
+        "importPath": "onnxruntime_extensions",
+        "description": "onnxruntime_extensions",
+        "isExtraImport": true,
+        "detail": "onnxruntime_extensions",
+        "documentation": {}
+    },
+    {
+        "label": "AutoTokenizer",
+        "importPath": "transformers",
+        "description": "transformers",
+        "isExtraImport": true,
+        "detail": "transformers",
+        "documentation": {}
+    },
+    {
+        "label": "AutoTokenizer",
+        "importPath": "transformers",
+        "description": "transformers",
+        "isExtraImport": true,
+        "detail": "transformers",
+        "documentation": {}
+    },
+    {
+        "label": "calendar",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "calendar",
+        "description": "calendar",
+        "detail": "calendar",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "platform",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "platform",
+        "description": "platform",
+        "detail": "platform",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "statistics",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "statistics",
+        "description": "statistics",
+        "detail": "statistics",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "psutil",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "psutil",
+        "description": "psutil",
+        "detail": "psutil",
+        "documentation": {}
+    },
+    {
+        "label": "handle_new_rx_page",
+        "kind": 2,
+        "importPath": "ios.Flutter.ephemeral.flutter_lldb_helper",
+        "description": "ios.Flutter.ephemeral.flutter_lldb_helper",
+        "peekOfCode": "def handle_new_rx_page(frame: lldb.SBFrame, bp_loc, extra_args, intern_dict):\n    \"\"\"Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages.\"\"\"\n    base = frame.register[\"x0\"].GetValueAsAddress()\n    page_len = frame.register[\"x1\"].GetValueAsUnsigned()\n    # Note: NOTIFY_DEBUGGER_ABOUT_RX_PAGES will check contents of the\n    # first page to see if handled it correctly. This makes diagnosing\n    # misconfiguration (e.g. missing breakpoint) easier.\n    data = bytearray(page_len)\n    data[0:8] = b'IHELPED!'\n    error = lldb.SBError()",
+        "detail": "ios.Flutter.ephemeral.flutter_lldb_helper",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "def main() -> None:\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--output\", type=Path, default=DEFAULT_OUTPUT)\n    parser.add_argument(\n        \"--corpus\",\n        type=Path,\n        action=\"append\",\n        default=None,\n        help=\"JSON corpus to include in exact token-id parity checks (repeatable)\",\n    )",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "REPOSITORY",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "REPOSITORY = \"intfloat/multilingual-e5-small\"\nREVISION = \"614241f622f53c4eeff9890bdc4f31cfecc418b3\"\nSENTENCEPIECE_BYTES = 5_069_051\nSENTENCEPIECE_SHA256 = (\n    \"cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865\"\n)\nDEFAULT_OUTPUT = Path(\n    \"android/app/src/main/assets/embedding/\"\n    \"multilingual_e5_small_tokenizer.onnx\"\n)",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "REVISION",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "REVISION = \"614241f622f53c4eeff9890bdc4f31cfecc418b3\"\nSENTENCEPIECE_BYTES = 5_069_051\nSENTENCEPIECE_SHA256 = (\n    \"cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865\"\n)\nDEFAULT_OUTPUT = Path(\n    \"android/app/src/main/assets/embedding/\"\n    \"multilingual_e5_small_tokenizer.onnx\"\n)\nDEFAULT_CORPUS = Path(",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "SENTENCEPIECE_BYTES",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "SENTENCEPIECE_BYTES = 5_069_051\nSENTENCEPIECE_SHA256 = (\n    \"cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865\"\n)\nDEFAULT_OUTPUT = Path(\n    \"android/app/src/main/assets/embedding/\"\n    \"multilingual_e5_small_tokenizer.onnx\"\n)\nDEFAULT_CORPUS = Path(\n    \"test/fixtures/search/semantic_retrieval_evaluation_v1.json\"",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "SENTENCEPIECE_SHA256",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "SENTENCEPIECE_SHA256 = (\n    \"cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865\"\n)\nDEFAULT_OUTPUT = Path(\n    \"android/app/src/main/assets/embedding/\"\n    \"multilingual_e5_small_tokenizer.onnx\"\n)\nDEFAULT_CORPUS = Path(\n    \"test/fixtures/search/semantic_retrieval_evaluation_v1.json\"\n)",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_OUTPUT",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "DEFAULT_OUTPUT = Path(\n    \"android/app/src/main/assets/embedding/\"\n    \"multilingual_e5_small_tokenizer.onnx\"\n)\nDEFAULT_CORPUS = Path(\n    \"test/fixtures/search/semantic_retrieval_evaluation_v1.json\"\n)\n_COHORT = (\n    \"query: فاتورة الغسالة من توكيل العربي\",\n    \"query: office chair receipt\",",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_CORPUS",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "DEFAULT_CORPUS = Path(\n    \"test/fixtures/search/semantic_retrieval_evaluation_v1.json\"\n)\n_COHORT = (\n    \"query: فاتورة الغسالة من توكيل العربي\",\n    \"query: office chair receipt\",\n    \"query: Samsung S25 Ultra فاتورة Vodafone\",\n    \"passage: صيدليات العزبي\\nOmron blood pressure monitor\\n2026-02-14\",\n    \"passage: IKEA Cairo\\noffice chair\\nEGP 7499.00\",\n    \"passage: Carrefour\\nفاتورة AirPods Pro\\n2026-03-01\",",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "_COHORT",
+        "kind": 5,
+        "importPath": "tool.embedding.generate_e5_tokenizer_graph",
+        "description": "tool.embedding.generate_e5_tokenizer_graph",
+        "peekOfCode": "_COHORT = (\n    \"query: فاتورة الغسالة من توكيل العربي\",\n    \"query: office chair receipt\",\n    \"query: Samsung S25 Ultra فاتورة Vodafone\",\n    \"passage: صيدليات العزبي\\nOmron blood pressure monitor\\n2026-02-14\",\n    \"passage: IKEA Cairo\\noffice chair\\nEGP 7499.00\",\n    \"passage: Carrefour\\nفاتورة AirPods Pro\\n2026-03-01\",\n)\ndef _sha256(data: bytes) -> str:\n    return hashlib.sha256(data).hexdigest()",
+        "detail": "tool.embedding.generate_e5_tokenizer_graph",
+        "documentation": {}
+    },
+    {
+        "label": "OnnxEmbedder",
+        "kind": 6,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "class OnnxEmbedder:\n    def __init__(\n        self,\n        *,\n        model_dir: Path,\n        onnx_model: Path,\n        family: str,\n        threads: int,\n    ) -> None:\n        self.family = family",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "normalize_natural",
+        "kind": 2,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "def normalize_natural(value: str) -> str:\n    normalized = _fold_full_width_ascii(value).lower()\n    normalized = BIDI.sub(\"\", normalized).replace(\"ـ\", \"\")\n    normalized = DIACRITICS.sub(\"\", normalized)\n    normalized = re.sub(\"[أإآٱ]\", \"ا\", normalized)\n    normalized = re.sub(\"[ىیۍې]\", \"ي\", normalized)\n    normalized = normalized.translate(DIGIT_MAP)\n    normalized = normalized.replace(\"٫\", \".\").replace(\"٬\", \",\")\n    return WHITESPACE.sub(\" \", normalized).strip()\ndef normalize_query(value: str) -> str:",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "normalize_query",
+        "kind": 2,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "def normalize_query(value: str) -> str:\n    normalized = _fold_full_width_ascii(value).lower().translate(DIGIT_MAP)\n    normalized = QUERY_BIDI.sub(\"\", normalized).replace(\"ـ\", \"\")\n    normalized = DIACRITICS.sub(\"\", normalized)\n    normalized = re.sub(\"[أإآٱ]\", \"ا\", normalized)\n    normalized = (\n        normalized.replace(\"ى\", \"ي\").replace(\"ؤ\", \"و\").replace(\"ئ\", \"ي\")\n    )\n    normalized = normalized.replace(\"٫\", \".\").replace(\"٬\", \",\")\n    normalized = re.sub(\"[،؛؟٪]\", \" \", normalized)",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "build_searchable_text",
+        "kind": 2,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "def build_searchable_text(\n    *,\n    merchant: str | None = None,\n    document_type: str | None = None,\n    invoice_number: str | None = None,\n    purchase_date: str | None = None,\n    total_minor: int | None = None,\n    currency: str | None = None,\n    warranty_months: int | None = None,\n    warranty_end_date: str | None = None,",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "def main() -> None:\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--repo-root\", type=Path, default=Path.cwd())\n    parser.add_argument(\"--family\", choices=[\"e5\", \"minilm\"], required=True)\n    parser.add_argument(\"--model-dir\", type=Path, required=True)\n    parser.add_argument(\"--onnx-model\", type=Path, required=True)\n    parser.add_argument(\"--revision\", required=True)\n    parser.add_argument(\"--license\", required=True)\n    parser.add_argument(\"--label\", required=True)\n    parser.add_argument(\"--threads\", type=int, default=6)",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "CORPUS_VERSION",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "CORPUS_VERSION = \"wara2a-eval-2026-08-09-v1\"\nARABIC_MONTHS = [\n    \"يناير\",\n    \"فبراير\",\n    \"مارس\",\n    \"ابريل\",\n    \"مايو\",\n    \"يونيو\",\n    \"يوليو\",\n    \"اغسطس\",",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "ARABIC_MONTHS",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "ARABIC_MONTHS = [\n    \"يناير\",\n    \"فبراير\",\n    \"مارس\",\n    \"ابريل\",\n    \"مايو\",\n    \"يونيو\",\n    \"يوليو\",\n    \"اغسطس\",\n    \"سبتمبر\",",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "CURRENCY_ALIASES",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "CURRENCY_ALIASES = {\n    \"EGP\": [\"EGP\", \"جنيه\", \"جنيه مصري\", \"ج م\"],\n    \"USD\": [\"USD\", \"دولار\", \"دولار امريكي\"],\n    \"EUR\": [\"EUR\", \"يورو\"],\n    \"SAR\": [\"SAR\", \"ريال\", \"ريال سعودي\"],\n    \"AED\": [\"AED\", \"درهم\", \"درهم اماراتي\"],\n    \"GBP\": [\"GBP\", \"جنيه استرليني\"],\n}\nMINOR_DIGITS = {\"BHD\": 3, \"JOD\": 3, \"KWD\": 3, \"OMR\": 3, \"JPY\": 0}\nDIGIT_MAP = str.maketrans(\"٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹\", \"01234567890123456789\")",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "MINOR_DIGITS",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "MINOR_DIGITS = {\"BHD\": 3, \"JOD\": 3, \"KWD\": 3, \"OMR\": 3, \"JPY\": 0}\nDIGIT_MAP = str.maketrans(\"٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹\", \"01234567890123456789\")\nDIACRITICS = re.compile(r\"[\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED]\")\nBIDI = re.compile(r\"[\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nQUERY_BIDI = re.compile(r\"[\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nWHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "DIGIT_MAP",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "DIGIT_MAP = str.maketrans(\"٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹\", \"01234567890123456789\")\nDIACRITICS = re.compile(r\"[\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED]\")\nBIDI = re.compile(r\"[\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nQUERY_BIDI = re.compile(r\"[\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nWHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "DIACRITICS",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "DIACRITICS = re.compile(r\"[\\u0610-\\u061A\\u064B-\\u065F\\u0670\\u06D6-\\u06ED]\")\nBIDI = re.compile(r\"[\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nQUERY_BIDI = re.compile(r\"[\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nWHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []\n    for character in value:",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "BIDI",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "BIDI = re.compile(r\"[\\u061C\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nQUERY_BIDI = re.compile(r\"[\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nWHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []\n    for character in value:\n        code = ord(character)",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "QUERY_BIDI",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "QUERY_BIDI = re.compile(r\"[\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]\")\nWHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []\n    for character in value:\n        code = ord(character)\n        if 0xFF01 <= code <= 0xFF5E:",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "WHITESPACE",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "WHITESPACE = re.compile(r\"\\s+\")\nQUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []\n    for character in value:\n        code = ord(character)\n        if 0xFF01 <= code <= 0xFF5E:\n            output.append(chr(code - 0xFEE0))",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    },
+    {
+        "label": "QUERY_UNSUPPORTED",
+        "kind": 5,
+        "importPath": "tool.evaluation.benchmark_multilingual_embeddings",
+        "description": "tool.evaluation.benchmark_multilingual_embeddings",
+        "peekOfCode": "QUERY_UNSUPPORTED = re.compile(\n    r'''[^\\u0600-\\u06FFa-z0-9<>=.,/\"'+\\-$\\u20ac\\u00a3]+'''\n)\ndef _fold_full_width_ascii(value: str) -> str:\n    output = []\n    for character in value:\n        code = ord(character)\n        if 0xFF01 <= code <= 0xFF5E:\n            output.append(chr(code - 0xFEE0))\n        elif code == 0x3000:",
+        "detail": "tool.evaluation.benchmark_multilingual_embeddings",
+        "documentation": {}
+    }
+]

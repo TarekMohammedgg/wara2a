@@ -9,7 +9,6 @@ void main() {
     final invoice = InvoiceDraftMapper.toInvoice(
       InvoiceDraft(
         merchant: 'بـي تِك',
-        documentType: 'فاتورة شراء',
         purchaseDate: DateTime.utc(2026, 1, 31),
         totalMinor: 2499900,
         currencyCode: 'egp',

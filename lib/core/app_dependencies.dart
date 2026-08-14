@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:path_provider/path_provider.dart';
 
 import '../features/search/models/search_intent_router.dart';
@@ -7,18 +9,15 @@ import '../features/search/repositories/search_repository.dart';
 import '../features/home/repositories/home_invoice_repository.dart';
 import '../features/invoice_capture/repositories/invoice_capture_repository.dart';
 import '../features/invoice_capture/repositories/invoice_extraction_repository.dart';
+import '../features/invoice_capture/repositories/open_router_gemini_extraction_repository.dart';
 import '../features/invoice_details/repositories/invoice_repository.dart';
 import '../features/invoice_details/repositories/objectbox_invoice_repository.dart';
 import '../features/settings/repositories/settings_repository.dart';
-import 'database/objectbox_database.dart';
-import 'ai/extraction/method_channel_qwen_interpreter.dart';
-import 'ai/model_management/model_coordinator.dart';
-import 'ai/ocr/method_channel_ocr_engine.dart';
 import 'ai/embedding/embedding_engine.dart';
-import 'ai/embedding/method_channel_e5_embedding_engine.dart';
-import 'ai/embedding/multilingual_e5_artifact.dart';
-import 'ai/embedding/multilingual_e5_calibration.dart';
-import 'ai/model_management/model_lifecycle_state.dart';
+import 'ai/embedding/open_router_embedding_artifact.dart';
+import 'ai/embedding/open_router_embedding_calibration.dart';
+import 'ai/embedding/open_router_embedding_engine.dart';
+import 'database/objectbox_database.dart';
 import 'storage/invoice_file_cleaner.dart';
 
 class AppDependencies {
@@ -42,16 +41,23 @@ class AppDependencies {
   final InvoiceEmbeddingIndexer embeddingIndexer;
   final SearchRepository search;
   Future<void>? _disposeFuture;
+  Future<PendingEmbeddingSyncResult>? _pendingEmbeddingSync;
 
   static Future<AppDependencies> production() async {
     final documents = await getApplicationDocumentsDirectory();
+    final settings = SharedPreferencesSettingsRepository();
     final database = await ObjectBoxDatabase.open(
       directory: '${documents.path}/wara2a-objectbox',
     );
-    final embeddingEngine = await _productionEmbeddingEngine();
+    final embeddingEngine = OpenRouterEmbeddingEngine(
+      resolveApiKey: () async {
+        final loaded = await settings.load();
+        return loaded.cloudProcessingConsent ? loaded.openRouterApiKey : null;
+      },
+    );
     return AppDependencies.fromDatabase(
       database,
-      settings: SharedPreferencesSettingsRepository(),
+      settings: settings,
       fileCleaner: LocalInvoiceFileCleaner(managedRoot: documents.path),
       embeddingEngine: embeddingEngine,
     );
@@ -66,8 +72,8 @@ class AppDependencies {
     final resolvedEmbeddingEngine =
         embeddingEngine ??
         UnavailableEmbeddingEngine(
-          modelId: MultilingualE5Artifact.modelId,
-          reason: 'Embedding runtime is not configured for this app scope.',
+          modelId: OpenRouterEmbeddingArtifact.modelId,
+          reason: 'OpenRouter embedding runtime is not configured.',
           capability: EmbeddingCapability.modelNotInstalled,
         );
     final invoices = ObjectBoxInvoiceRepository(
@@ -83,11 +89,10 @@ class AppDependencies {
       engine: resolvedEmbeddingEngine,
       indexer: embeddingIndexer,
       intentRouter: SearchIntentRouter(),
-      // Host Recall@K is not Android approval. Keep semantic results gated
-      // until RMX3636 offline evidence binds a threshold to this contract.
-      calibration: MultilingualE5Calibration.production,
+      calibration: OpenRouterEmbeddingCalibration.production,
     );
-    return AppDependencies(
+    late final AppDependencies dependencies;
+    dependencies = AppDependencies(
       database: database,
       settings: settings,
       invoices: invoices,
@@ -95,20 +100,34 @@ class AppDependencies {
       invoiceCapture: LocalInvoiceCaptureRepository(
         invoices,
         indexer: embeddingIndexer,
+        onIndexingScheduled: () {
+          dependencies.syncPendingEmbeddingsInBackground();
+        },
       ),
       embeddingEngine: resolvedEmbeddingEngine,
       embeddingIndexer: embeddingIndexer,
       search: search,
     );
+    return dependencies;
   }
 
   InvoiceExtractionRepository createInvoiceExtractionRepository() =>
-      LocalInvoiceExtractionRepository(
-        ModelCoordinator(
-          ocrEngineFactory: PlatformOcrEngine.new,
-          interpreterFactory: PlatformQwenTextInterpreter.new,
-        ),
+      OpenRouterGeminiExtractionRepository(
+        resolveApiKey: () async {
+          final loaded = await settings.load();
+          return loaded.cloudProcessingConsent ? loaded.openRouterApiKey : null;
+        },
       );
+
+  Future<PendingEmbeddingSyncResult> syncPendingEmbeddings() {
+    return _pendingEmbeddingSync ??= search
+        .reindexPendingEmbeddings()
+        .whenComplete(() => _pendingEmbeddingSync = null);
+  }
+
+  void syncPendingEmbeddingsInBackground() {
+    unawaited(syncPendingEmbeddings());
+  }
 
   Future<void> dispose() => _disposeFuture ??= _dispose();
 
@@ -118,25 +137,6 @@ class AppDependencies {
       await embeddingEngine.dispose();
     } finally {
       database.close();
-    }
-  }
-
-  static Future<EmbeddingEngine> _productionEmbeddingEngine() async {
-    if (!MethodChannelE5EmbeddingEngine.supportsCurrentPlatform) {
-      return UnavailableEmbeddingEngine(
-        modelId: MultilingualE5Artifact.modelId,
-        reason: 'The offline E5 runtime is available on Android arm64 only.',
-      );
-    }
-    try {
-      return await MethodChannelE5EmbeddingEngine.create();
-    } on Object {
-      return UnavailableEmbeddingEngine(
-        modelId: MultilingualE5Artifact.modelId,
-        reason: 'The local E5 embedding runtime could not be initialized.',
-        capability: EmbeddingCapability.runtimeFailure,
-        status: ModelLifecycleStatus.failed,
-      );
     }
   }
 }

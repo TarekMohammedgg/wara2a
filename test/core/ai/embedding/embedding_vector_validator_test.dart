@@ -2,13 +2,13 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wara2a/core/ai/embedding/embedding_vector_validator.dart';
-import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/ai/embedding/open_router_embedding_artifact.dart';
 
 void main() {
-  const dimensions = MultilingualE5Artifact.dimensions;
+  const dimensions = OpenRouterEmbeddingArtifact.dimensions;
 
   group('normalizeAndValidate', () {
-    test('returns an immutable finite 384-dimensional unit vector', () {
+    test('returns an immutable finite 1536-dimensional unit vector', () {
       final input = List<double>.filled(dimensions, 0)..setRange(0, 2, [3, 4]);
 
       final normalized = EmbeddingVectorValidator.normalizeAndValidate(
@@ -34,7 +34,7 @@ void main() {
           isA<InvalidEmbeddingVector>().having(
             (error) => error.message,
             'message',
-            'Expected 384 dimensions, got 383.',
+            'Expected 1536 dimensions, got 1535.',
           ),
         ),
       );

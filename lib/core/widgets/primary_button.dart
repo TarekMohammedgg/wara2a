@@ -33,7 +33,7 @@ class PrimaryButton extends StatelessWidget {
           horizontal: singleLine ? 8 : 20,
           vertical: 14,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
       ),
     );

@@ -5,7 +5,7 @@ import 'package:wara2a/core/database/objectbox_database.dart';
 import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/invoice_embedding_status.dart';
 import 'package:wara2a/core/database/invoice_record.dart';
-import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/ai/embedding/open_router_embedding_artifact.dart';
 import 'package:wara2a/core/storage/invoice_file_cleaner.dart';
 import 'package:wara2a/features/invoice_details/models/invoice.dart';
 import 'package:wara2a/features/invoice_details/repositories/objectbox_invoice_repository.dart';
@@ -73,8 +73,11 @@ void main() {
 
     final updated = (await repository.get(id))!;
     expect(updated.embeddingStatus, InvoiceEmbeddingStatus.ready);
-    expect(updated.embeddingModelId, MultilingualE5Artifact.modelId);
-    expect(updated.embedding, hasLength(MultilingualE5Artifact.dimensions));
+    expect(updated.embeddingModelId, OpenRouterEmbeddingArtifact.modelId);
+    expect(
+      updated.embedding,
+      hasLength(OpenRouterEmbeddingArtifact.dimensions),
+    );
   });
 
   test(
@@ -137,10 +140,10 @@ Future<void> _markReady(ObjectBoxDatabase database, Invoice invoice) async {
       expectedSearchableText: invoice.searchableText,
       expectedSearchTextSchemaVersion: invoice.searchTextSchemaVersion,
       expectedAttemptId: attemptId,
-      vector: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+      vector: List<double>.filled(OpenRouterEmbeddingArtifact.dimensions, 0)
         ..[0] = 1,
-      modelId: MultilingualE5Artifact.modelId,
-      dimensions: MultilingualE5Artifact.dimensions,
+      modelId: OpenRouterEmbeddingArtifact.modelId,
+      dimensions: OpenRouterEmbeddingArtifact.dimensions,
       embeddingSchemaVersion: DatabaseVersions.embeddingSchema,
       indexedAt: DateTime.utc(2026, 8, 9, 1),
     ),
@@ -152,7 +155,6 @@ Invoice _invoice({String? imagePath, String? thumbnailPath}) {
   final now = DateTime.utc(2026, 8, 9);
   return Invoice(
     merchant: 'بي تك',
-    documentType: 'فاتورة شراء',
     purchaseDate: now,
     totalMinor: 2499900,
     currencyCode: 'EGP',
@@ -161,10 +163,10 @@ Invoice _invoice({String? imagePath, String? thumbnailPath}) {
     imagePath: imagePath ?? 'invoice.jpg',
     thumbnailPath: thumbnailPath,
     sourceType: InvoiceSourceType.camera,
-    embedding: List<double>.filled(MultilingualE5Artifact.dimensions, 0)
+    embedding: List<double>.filled(OpenRouterEmbeddingArtifact.dimensions, 0)
       ..[0] = 1,
-    embeddingModelId: MultilingualE5Artifact.modelId,
-    embeddingDimensions: MultilingualE5Artifact.dimensions,
+    embeddingModelId: OpenRouterEmbeddingArtifact.modelId,
+    embeddingDimensions: OpenRouterEmbeddingArtifact.dimensions,
     searchTextSchemaVersion: 1,
     createdAt: now,
     updatedAt: now,

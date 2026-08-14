@@ -51,6 +51,10 @@ class _Wara2aAppState extends State<Wara2aApp> with WidgetsBindingObserver {
     _captureCubit.recoverLostData();
     _settingsCubit = SettingsCubit(widget.dependencies.settings)..load();
     _router = buildAppRouter(widget.dependencies);
+    // Quietly catch up any invoices that still need semantic vectors.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.dependencies.syncPendingEmbeddingsInBackground();
+    });
   }
 
   @override
@@ -65,6 +69,10 @@ class _Wara2aAppState extends State<Wara2aApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      widget.dependencies.syncPendingEmbeddingsInBackground();
+      return;
+    }
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {

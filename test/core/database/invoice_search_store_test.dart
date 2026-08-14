@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wara2a/core/ai/embedding/multilingual_e5_artifact.dart';
+import 'package:wara2a/core/ai/embedding/open_router_embedding_artifact.dart';
 import 'package:wara2a/core/database/database_versions.dart';
 import 'package:wara2a/core/database/entities/invoice_entity.dart';
 import 'package:wara2a/core/database/entities/invoice_item_entity.dart';
@@ -10,12 +10,11 @@ import 'package:wara2a/core/database/invoice_embedding_status.dart';
 import 'package:wara2a/core/database/invoice_record.dart';
 import 'package:wara2a/core/database/invoice_search_spec.dart';
 import 'package:wara2a/core/database/objectbox_database.dart';
-import 'package:wara2a/core/utils/document_type_normalization.dart';
 
-const _modelId = MultilingualE5Artifact.modelId;
+const _modelId = OpenRouterEmbeddingArtifact.modelId;
 const _searchSchema = DatabaseVersions.searchTextSchema;
 const _embeddingSchema = DatabaseVersions.embeddingSchema;
-const _dimensions = MultilingualE5Artifact.dimensions;
+const _dimensions = OpenRouterEmbeddingArtifact.dimensions;
 
 void main() {
   late Directory directory;
@@ -42,7 +41,6 @@ void main() {
         currencyCode: 'EGP',
         purchaseDate: DateTime.utc(2026, 8, 5),
         warrantyEndDate: DateTime.utc(2026, 9, 1),
-        documentType: 'فاتورة شراء',
       );
       await _save(
         database,
@@ -52,7 +50,6 @@ void main() {
         currencyCode: 'EGP',
         purchaseDate: DateTime.utc(2026, 8, 6),
         warrantyEndDate: DateTime.utc(2026, 9, 2),
-        documentType: 'فاتورة شراء',
       );
 
       final results = await database.invoices.searchExactKeywords(
@@ -69,7 +66,6 @@ void main() {
               endExclusive: DateTime.utc(2026, 10),
             ),
             currencyCode: 'egp',
-            documentType: DocumentTypeNormalization.purchaseInvoice,
           ),
         ),
       );
@@ -91,7 +87,6 @@ void main() {
         currencyCode: 'EGP',
         purchaseDate: DateTime.utc(2026, 8, 31, 23, 59),
         warrantyEndDate: DateTime.utc(2026, 9, 30, 23, 59),
-        documentType: 'فاتورة شراء',
       );
       await _save(
         database,
@@ -101,7 +96,6 @@ void main() {
         currencyCode: 'EGP',
         purchaseDate: DateTime.utc(2026, 9),
         warrantyEndDate: DateTime.utc(2026, 10),
-        documentType: 'فاتورة شراء',
       );
 
       final results = await database.invoices.searchFiltered(
@@ -340,7 +334,6 @@ Future<int> _save(
   String? currencyCode,
   DateTime? purchaseDate,
   DateTime? warrantyEndDate,
-  String? documentType,
   List<double>? vector,
   InvoiceEmbeddingStatus embeddingStatus = InvoiceEmbeddingStatus.pending,
   String embeddingModelId = _modelId,
@@ -351,10 +344,6 @@ Future<int> _save(
       invoice: InvoiceEntity(
         merchant: merchant,
         merchantNormalized: merchant.toLowerCase(),
-        documentType: documentType,
-        documentTypeNormalized: DocumentTypeNormalization.normalize(
-          documentType,
-        ),
         purchaseDate: purchaseDate,
         totalMinor: totalMinor,
         currencyCode: currencyCode,

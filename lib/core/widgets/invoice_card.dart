@@ -16,7 +16,7 @@ class InvoiceCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -26,7 +26,7 @@ class InvoiceCard extends StatelessWidget {
                 height: 50,
                 decoration: BoxDecoration(
                   color: Color(invoice.icon),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   Icons.receipt_long_rounded,
@@ -46,7 +46,7 @@ class InvoiceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${invoice.category} · ${invoice.date}',
+                      invoice.date,
                       style: textTheme.bodySmall,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

@@ -24,8 +24,23 @@ class ReviewState extends Equatable {
 }
 
 class ReviewCubit extends Cubit<ReviewState> {
-  ReviewCubit(this._repository, {required InvoiceDraft initialDraft})
-    : super(ReviewState(status: ReviewStatus.ready, draft: initialDraft));
+  ReviewCubit(
+    this._repository, {
+    InvoiceDraft? initialDraft,
+    int? invoiceIdToLoad,
+  }) : super(
+         invoiceIdToLoad != null && invoiceIdToLoad > 0
+             ? const ReviewState(status: ReviewStatus.loading)
+             : ReviewState(
+                 status: ReviewStatus.ready,
+                 draft:
+                     initialDraft ?? InvoiceDraft.manualFallback(rawText: ''),
+               ),
+       ) {
+    if (invoiceIdToLoad != null && invoiceIdToLoad > 0) {
+      loadForEditing(invoiceIdToLoad);
+    }
+  }
 
   final InvoiceCaptureRepository _repository;
 

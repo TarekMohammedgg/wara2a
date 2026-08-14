@@ -59,7 +59,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 2710519800567843983),
     name: 'InvoiceEntity',
-    lastPropertyId: const obx_int.IdUid(31, 5286991857557893889),
+    lastPropertyId: const obx_int.IdUid(32, 1361216334481608913),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -80,13 +80,6 @@ final _entities = <obx_int.ModelEntity>[
         type: 9,
         flags: 2048,
         indexId: const obx_int.IdUid(2, 9154832734347378190),
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(4, 4944936005697346823),
-        name: 'documentType',
-        type: 9,
-        flags: 2048,
-        indexId: const obx_int.IdUid(3, 8953472198375689066),
       ),
       obx_int.ModelProperty(
         id: const obx_int.IdUid(5, 2775593172922476841),
@@ -243,13 +236,6 @@ final _entities = <obx_int.ModelEntity>[
         flags: 0,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(29, 8633708862621090467),
-        name: 'documentTypeNormalized',
-        type: 9,
-        flags: 2048,
-        indexId: const obx_int.IdUid(14, 3409279870630035987),
-      ),
-      obx_int.ModelProperty(
         id: const obx_int.IdUid(30, 6884250741628774964),
         name: 'embeddingAttemptId',
         type: 9,
@@ -257,11 +243,19 @@ final _entities = <obx_int.ModelEntity>[
       ),
       obx_int.ModelProperty(
         id: const obx_int.IdUid(31, 5286991857557893889),
-        name: 'embedding',
+        name: 'legacyEmbedding384',
         type: 28,
         flags: 8,
         indexId: const obx_int.IdUid(15, 8049682333177546105),
         hnswParams: obx_int.ModelHnswParams(dimensions: 384, distanceType: 2),
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(32, 1361216334481608913),
+        name: 'embedding',
+        type: 28,
+        flags: 8,
+        indexId: const obx_int.IdUid(16, 8830480026863957190),
+        hnswParams: obx_int.ModelHnswParams(dimensions: 1536, distanceType: 2),
       ),
     ],
     relations: <obx_int.ModelRelation>[],
@@ -366,12 +360,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
     generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
     lastEntityId: const obx_int.IdUid(3, 7266021108998744756),
-    lastIndexId: const obx_int.IdUid(15, 8049682333177546105),
+    lastIndexId: const obx_int.IdUid(16, 8830480026863957190),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
     retiredEntityUids: const [],
-    retiredIndexUids: const [],
-    retiredPropertyUids: const [],
+    retiredIndexUids: const [8953472198375689066, 3409279870630035987],
+    retiredPropertyUids: const [4944936005697346823, 8633708862621090467],
     retiredRelationUids: const [],
     modelVersion: 5,
     modelVersionParserMinimum: 5,
@@ -441,9 +435,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final merchantNormalizedOffset = object.merchantNormalized == null
             ? null
             : fbb.writeString(object.merchantNormalized!);
-        final documentTypeOffset = object.documentType == null
-            ? null
-            : fbb.writeString(object.documentType!);
         final currencyCodeOffset = object.currencyCode == null
             ? null
             : fbb.writeString(object.currencyCode!);
@@ -473,21 +464,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final embeddingFailureCodeOffset = object.embeddingFailureCode == null
             ? null
             : fbb.writeString(object.embeddingFailureCode!);
-        final documentTypeNormalizedOffset =
-            object.documentTypeNormalized == null
-            ? null
-            : fbb.writeString(object.documentTypeNormalized!);
         final embeddingAttemptIdOffset = object.embeddingAttemptId == null
             ? null
             : fbb.writeString(object.embeddingAttemptId!);
+        final legacyEmbedding384Offset = object.legacyEmbedding384 == null
+            ? null
+            : fbb.writeListFloat32(object.legacyEmbedding384!);
         final embeddingOffset = object.embedding == null
             ? null
             : fbb.writeListFloat32(object.embedding!);
-        fbb.startTable(32);
+        fbb.startTable(33);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, merchantOffset);
         fbb.addOffset(2, merchantNormalizedOffset);
-        fbb.addOffset(3, documentTypeOffset);
         fbb.addInt64(4, object.purchaseDate?.millisecondsSinceEpoch);
         fbb.addInt64(5, object.totalMinor);
         fbb.addOffset(6, currencyCodeOffset);
@@ -512,9 +501,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(25, object.embeddingSchemaVersion);
         fbb.addInt64(26, object.embeddingUpdatedAt?.millisecondsSinceEpoch);
         fbb.addOffset(27, embeddingFailureCodeOffset);
-        fbb.addOffset(28, documentTypeNormalizedOffset);
         fbb.addOffset(29, embeddingAttemptIdOffset);
-        fbb.addOffset(30, embeddingOffset);
+        fbb.addOffset(30, legacyEmbedding384Offset);
+        fbb.addOffset(31, embeddingOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -545,12 +534,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final merchantNormalizedParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 8);
-        final documentTypeParam = const fb.StringReader(
-          asciiOptimization: true,
-        ).vTableGetNullable(buffer, rootOffset, 10);
-        final documentTypeNormalizedParam = const fb.StringReader(
-          asciiOptimization: true,
-        ).vTableGetNullable(buffer, rootOffset, 60);
         final purchaseDateParam = purchaseDateValue == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(purchaseDateValue);
@@ -595,10 +578,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fb.Float32Reader(),
           lazy: false,
         ).vTableGetNullable(buffer, rootOffset, 36);
-        final embeddingParam = const fb.ListReader<double>(
+        final legacyEmbedding384Param = const fb.ListReader<double>(
           fb.Float32Reader(),
           lazy: false,
         ).vTableGetNullable(buffer, rootOffset, 64);
+        final embeddingParam = const fb.ListReader<double>(
+          fb.Float32Reader(),
+          lazy: false,
+        ).vTableGetNullable(buffer, rootOffset, 66);
         final embeddingModelIdParam = const fb.StringReader(
           asciiOptimization: true,
         ).vTableGetNullable(buffer, rootOffset, 38);
@@ -644,8 +631,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
           id: idParam,
           merchant: merchantParam,
           merchantNormalized: merchantNormalizedParam,
-          documentType: documentTypeParam,
-          documentTypeNormalized: documentTypeNormalizedParam,
           purchaseDate: purchaseDateParam,
           totalMinor: totalMinorParam,
           currencyCode: currencyCodeParam,
@@ -659,6 +644,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           thumbnailPath: thumbnailPathParam,
           sourceType: sourceTypeParam,
           legacyEmbedding768: legacyEmbedding768Param,
+          legacyEmbedding384: legacyEmbedding384Param,
           embedding: embeddingParam,
           embeddingModelId: embeddingModelIdParam,
           embeddingDimensions: embeddingDimensionsParam,
@@ -793,143 +779,138 @@ class InvoiceEntity_ {
     _entities[1].properties[2],
   );
 
-  /// See [InvoiceEntity.documentType].
-  static final documentType = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[3],
-  );
-
   /// See [InvoiceEntity.purchaseDate].
   static final purchaseDate = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[4],
+    _entities[1].properties[3],
   );
 
   /// See [InvoiceEntity.totalMinor].
   static final totalMinor = obx.QueryIntegerProperty<InvoiceEntity>(
-    _entities[1].properties[5],
+    _entities[1].properties[4],
   );
 
   /// See [InvoiceEntity.currencyCode].
   static final currencyCode = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[6],
+    _entities[1].properties[5],
   );
 
   /// See [InvoiceEntity.warrantyMonths].
   static final warrantyMonths = obx.QueryIntegerProperty<InvoiceEntity>(
-    _entities[1].properties[7],
+    _entities[1].properties[6],
   );
 
   /// See [InvoiceEntity.warrantyEndDate].
   static final warrantyEndDate = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[8],
+    _entities[1].properties[7],
   );
 
   /// See [InvoiceEntity.invoiceNumber].
   static final invoiceNumber = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[9],
+    _entities[1].properties[8],
   );
 
   /// See [InvoiceEntity.rawExtractedText].
   static final rawExtractedText = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[10],
+    _entities[1].properties[9],
   );
 
   /// See [InvoiceEntity.searchableText].
   static final searchableText = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[11],
+    _entities[1].properties[10],
   );
 
   /// See [InvoiceEntity.keywordText].
   static final keywordText = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[12],
+    _entities[1].properties[11],
   );
 
   /// See [InvoiceEntity.imagePath].
   static final imagePath = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[13],
+    _entities[1].properties[12],
   );
 
   /// See [InvoiceEntity.thumbnailPath].
   static final thumbnailPath = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[14],
+    _entities[1].properties[13],
   );
 
   /// See [InvoiceEntity.sourceType].
   static final sourceType = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[15],
+    _entities[1].properties[14],
   );
 
   /// See [InvoiceEntity.legacyEmbedding768].
   static final legacyEmbedding768 = obx.QueryHnswProperty<InvoiceEntity>(
-    _entities[1].properties[16],
+    _entities[1].properties[15],
   );
 
   /// See [InvoiceEntity.embeddingModelId].
   static final embeddingModelId = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[17],
+    _entities[1].properties[16],
   );
 
   /// See [InvoiceEntity.embeddingDimensions].
   static final embeddingDimensions = obx.QueryIntegerProperty<InvoiceEntity>(
-    _entities[1].properties[18],
+    _entities[1].properties[17],
   );
 
   /// See [InvoiceEntity.searchTextSchemaVersion].
   static final searchTextSchemaVersion =
-      obx.QueryIntegerProperty<InvoiceEntity>(_entities[1].properties[19]);
+      obx.QueryIntegerProperty<InvoiceEntity>(_entities[1].properties[18]);
 
   /// See [InvoiceEntity.extractionModelId].
   static final extractionModelId = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[20],
+    _entities[1].properties[19],
   );
 
   /// See [InvoiceEntity.createdAt].
   static final createdAt = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[21],
+    _entities[1].properties[20],
   );
 
   /// See [InvoiceEntity.updatedAt].
   static final updatedAt = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[22],
+    _entities[1].properties[21],
   );
 
   /// See [InvoiceEntity.reviewedAt].
   static final reviewedAt = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[23],
+    _entities[1].properties[22],
   );
 
   /// See [InvoiceEntity.embeddingStatus].
   static final embeddingStatus = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[24],
+    _entities[1].properties[23],
   );
 
   /// See [InvoiceEntity.embeddingSchemaVersion].
   static final embeddingSchemaVersion = obx.QueryIntegerProperty<InvoiceEntity>(
-    _entities[1].properties[25],
+    _entities[1].properties[24],
   );
 
   /// See [InvoiceEntity.embeddingUpdatedAt].
   static final embeddingUpdatedAt = obx.QueryDateProperty<InvoiceEntity>(
-    _entities[1].properties[26],
+    _entities[1].properties[25],
   );
 
   /// See [InvoiceEntity.embeddingFailureCode].
   static final embeddingFailureCode = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[27],
-  );
-
-  /// See [InvoiceEntity.documentTypeNormalized].
-  static final documentTypeNormalized = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[28],
+    _entities[1].properties[26],
   );
 
   /// See [InvoiceEntity.embeddingAttemptId].
   static final embeddingAttemptId = obx.QueryStringProperty<InvoiceEntity>(
-    _entities[1].properties[29],
+    _entities[1].properties[27],
+  );
+
+  /// See [InvoiceEntity.legacyEmbedding384].
+  static final legacyEmbedding384 = obx.QueryHnswProperty<InvoiceEntity>(
+    _entities[1].properties[28],
   );
 
   /// See [InvoiceEntity.embedding].
   static final embedding = obx.QueryHnswProperty<InvoiceEntity>(
-    _entities[1].properties[30],
+    _entities[1].properties[29],
   );
 }
 

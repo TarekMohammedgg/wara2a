@@ -10,7 +10,6 @@ enum SearchParseIssue {
   ambiguousCurrency,
   ambiguousDate,
   ambiguousWarrantyDate,
-  ambiguousDocumentType,
   lowConfidenceFilter,
 }
 

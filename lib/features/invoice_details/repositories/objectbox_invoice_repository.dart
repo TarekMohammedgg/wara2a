@@ -25,7 +25,6 @@ class ObjectBoxInvoiceRepository implements InvoiceRepository {
 
     final searchText = InvoiceSearchTextBuilder.build(
       merchant: invoice.merchant,
-      documentType: invoice.documentType,
       invoiceNumber: invoice.invoiceNumber,
       purchaseDate: invoice.purchaseDate,
       totalMinor: invoice.totalMinor,

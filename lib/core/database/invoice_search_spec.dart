@@ -33,21 +33,18 @@ class InvoiceSearchFilter {
     this.purchaseDate,
     this.warrantyEndDate,
     this.currencyCode,
-    this.documentType,
   });
 
   final InvoiceAmountFilter? amount;
   final InvoiceDateFilter? purchaseDate;
   final InvoiceDateFilter? warrantyEndDate;
   final String? currencyCode;
-  final String? documentType;
 
   bool get isEmpty =>
       amount == null &&
       purchaseDate == null &&
       warrantyEndDate == null &&
-      _isBlank(currencyCode) &&
-      _isBlank(documentType);
+      _isBlank(currencyCode);
 
   bool get isNotEmpty => !isEmpty;
 }

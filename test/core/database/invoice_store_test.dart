@@ -116,7 +116,6 @@ InvoiceEntity _invoice() {
   return InvoiceEntity(
     merchant: 'متجر محلي',
     merchantNormalized: 'متجر محلي',
-    documentType: 'فاتورة شراء',
     purchaseDate: now,
     totalMinor: 10000,
     currencyCode: 'EGP',

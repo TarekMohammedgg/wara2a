@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/invoice_card.dart';
-import '../../../core/widgets/invoice_card_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../invoice_details/models/invoice.dart';
 import '../models/search_filters.dart';
 import '../models/search_result.dart';
-import '../repositories/search_repository.dart';
 import '../view_models/search_cubit.dart';
 
 class SearchView extends StatefulWidget {
@@ -40,13 +36,6 @@ class _SearchViewState extends State<SearchView> {
     if (mounted) setState(() {});
   }
 
-  void _setQuery(String query) {
-    _controller
-      ..text = query
-      ..selection = TextSelection.collapsed(offset: query.length);
-    context.read<SearchCubit>().submit(query);
-  }
-
   Future<void> _editFilters(SearchFilters filters) async {
     final edited = await showModalBottomSheet<SearchFilters>(
       context: context,
@@ -65,116 +54,84 @@ class _SearchViewState extends State<SearchView> {
     final textTheme = Theme.of(context).textTheme;
     return BlocBuilder<SearchCubit, SearchState>(
       builder: (context, state) {
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 26),
-          children: [
-            Text(l10n.search, style: textTheme.headlineSmall),
-            const SizedBox(height: 7),
-            Text(l10n.searchModelNote, style: textTheme.bodyMedium),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _controller,
-              onSubmitted: context.read<SearchCubit>().submit,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _controller.text.trim().isEmpty
-                    ? null
-                    : IconButton(
-                        onPressed: () {
-                          _controller.clear();
-                          context.read<SearchCubit>().clear();
-                        },
-                        icon: const Icon(Icons.close_rounded),
+        final showResults =
+            state.hasQuery &&
+            state.status != SearchStatus.failure &&
+            state.status != SearchStatus.empty &&
+            state.results.isNotEmpty;
+
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  Text(l10n.search, style: textTheme.headlineSmall),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _controller,
+                    onSubmitted: context.read<SearchCubit>().submit,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      isDense: true,
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: _controller.text.trim().isEmpty
+                          ? null
+                          : IconButton(
+                              onPressed: () {
+                                _controller.clear();
+                                context.read<SearchCubit>().clear();
+                              },
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                    ),
+                  ),
+                  if (state.hasQuery) ...[
+                    const SizedBox(height: 14),
+                    _ResultsHeader(state: state),
+                    const SizedBox(height: 8),
+                    _FiltersBar(
+                      filters: state.filters,
+                      onEdit: () => _editFilters(state.filters),
+                      onRemove: context.read<SearchCubit>().removeFilter,
+                    ),
+                    if (state.status == SearchStatus.loading &&
+                        state.results.isEmpty) ...[
+                      const SizedBox(height: 12),
+                      const LinearProgressIndicator(minHeight: 2),
+                    ],
+                    const SizedBox(height: 12),
+                    if (state.status == SearchStatus.failure)
+                      _SearchEmptyState(
+                        title: l10n.searchError,
+                        body: state.errorMessage ?? l10n.noResultsBody,
+                      )
+                    else if (state.status == SearchStatus.empty)
+                      _SearchEmptyState(
+                        title: l10n.noResults,
+                        body: l10n.noResultsBody,
                       ),
+                  ],
+                ]),
               ),
             ),
-            const SizedBox(height: 22),
-            if (!state.hasQuery)
-              _Suggestions(onSelected: _setQuery)
-            else ...[
-              _ResultsHeader(state: state),
-              const SizedBox(height: 10),
-              _FiltersBar(
-                filters: state.filters,
-                onEdit: () => _editFilters(state.filters),
-                onRemove: context.read<SearchCubit>().removeFilter,
-              ),
-              if (state.status == SearchStatus.loading) ...[
-                const SizedBox(height: 14),
-                const LinearProgressIndicator(),
-              ],
-              if (state.semanticGate != SemanticSearchGate.none) ...[
-                const SizedBox(height: 14),
-                _SemanticGateBanner(state: state),
-              ],
-              if (state.pendingEmbeddingCount > 0) ...[
-                const SizedBox(height: 10),
-                _InfoBanner(
-                  icon: Icons.pending_actions_rounded,
-                  text: l10n.searchIndexPending(state.pendingEmbeddingCount),
+            if (showResults)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                sliver: SliverList.separated(
+                  itemCount: state.results.length,
+                  separatorBuilder: (_, _) =>
+                      Divider(height: 1, color: Theme.of(context).dividerColor),
+                  itemBuilder: (context, index) =>
+                      _SearchResultTile(result: state.results[index]),
                 ),
-              ],
-              const SizedBox(height: 18),
-              if (state.status == SearchStatus.failure)
-                _SearchEmptyState(
-                  title: l10n.searchError,
-                  body: state.errorMessage ?? l10n.noResultsBody,
-                )
-              else if (state.status == SearchStatus.empty)
-                _SearchEmptyState(
-                  title: l10n.noResults,
-                  body: l10n.noResultsBody,
-                )
-              else
-                ...state.results.map(
-                  (result) => _SearchResultTile(result: result),
-                ),
-            ],
+              )
+            else
+              const SliverToBoxAdapter(child: SizedBox(height: 28)),
           ],
         );
       },
-    );
-  }
-}
-
-class _Suggestions extends StatelessWidget {
-  const _Suggestions({required this.onSelected});
-
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.searchSuggestions,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 9,
-          children: [
-            for (final query in [
-              l10n.recentQueryMerchant,
-              l10n.recentQueryAmount,
-              l10n.recentQueryCategory,
-            ])
-              ActionChip(
-                onPressed: () => onSelected(query),
-                avatar: const Icon(Icons.search_rounded, size: 17),
-                label: Text(query),
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
-              ),
-          ],
-        ),
-        const SizedBox(height: 30),
-        _SearchEmptyState(title: l10n.noResults, body: l10n.noResultsBody),
-      ],
     );
   }
 }
@@ -224,9 +181,9 @@ class _FiltersBar extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ActionChip(
-          avatar: const Icon(Icons.tune_rounded, size: 17),
           label: Text(l10n.filter),
           onPressed: onEdit,
+          visualDensity: VisualDensity.compact,
         ),
         if (filters.amount != null)
           _RemovableFilterChip(
@@ -250,11 +207,6 @@ class _FiltersBar extends StatelessWidget {
             label: filters.currencyCode!,
             onRemoved: () => onRemove(SearchFilterField.currency),
           ),
-        if (filters.documentType != null)
-          _RemovableFilterChip(
-            label: _documentTypeLabel(l10n, filters.documentType!),
-            onRemoved: () => onRemove(SearchFilterField.documentType),
-          ),
       ],
     );
   }
@@ -276,62 +228,6 @@ class _RemovableFilterChip extends StatelessWidget {
   }
 }
 
-class _SemanticGateBanner extends StatelessWidget {
-  const _SemanticGateBanner({required this.state});
-
-  final SearchState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = switch (state.semanticGate) {
-      SemanticSearchGate.calibrationRequired =>
-        l10n.semanticCalibrationRequired,
-      SemanticSearchGate.modelUnavailable => l10n.semanticModelUnavailable,
-      SemanticSearchGate.queryTooLong => l10n.semanticQueryTooLong,
-      SemanticSearchGate.runtimeFailure => l10n.semanticRuntimeFailure,
-      SemanticSearchGate.none => '',
-    };
-    return _InfoBanner(
-      icon: Icons.info_outline_rounded,
-      text: state.usedKeywordFallback ? '$text ${l10n.keywordFallback}' : text,
-    );
-  }
-}
-
-class _InfoBanner extends StatelessWidget {
-  const _InfoBanner({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.softBlue,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppColors.blue, size: 19),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.navy),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SearchResultTile extends StatelessWidget {
   const _SearchResultTile({required this.result});
 
@@ -339,74 +235,51 @@ class _SearchResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final label = switch (result.matchKind) {
-      SearchMatchKind.exact => l10n.exactMatch,
-      SearchMatchKind.filtered => l10n.filteredMatch,
-      SearchMatchKind.semantic || SearchMatchKind.hybrid => l10n.semanticMatch,
-    };
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 11),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 6, bottom: 7),
-            child: Row(
-              children: [
-                Icon(
-                  result.distance == null
-                      ? Icons.check_circle_outline_rounded
-                      : Icons.auto_awesome_rounded,
-                  size: 14,
-                  color: AppColors.blue,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.blue,
-                    fontWeight: FontWeight.w800,
+    final textTheme = Theme.of(context).textTheme;
+    final invoice = result.value;
+    final date = invoice.purchaseDate ?? invoice.reviewedAt;
+
+    return InkWell(
+      onTap: () => context.push('/details/${result.invoiceId}'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _visible(invoice.merchant),
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  Text(
+                    _formatDate(date),
+                    style: textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-          InvoiceCard(
-            invoice: _InvoiceSearchCardData(result.value),
-            onTap: () => context.push('/details/${result.invoiceId}'),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Text(
+              _formatMinor(invoice.totalMinor, invoice.currencyCode),
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-class _InvoiceSearchCardData implements InvoiceCardData {
-  _InvoiceSearchCardData(this.invoice);
-
-  final Invoice invoice;
-
-  @override
-  String get merchant => _visible(invoice.merchant);
-
-  @override
-  String get category => _visible(invoice.documentType);
-
-  @override
-  String get date => _formatDate(invoice.purchaseDate ?? invoice.reviewedAt);
-
-  @override
-  String get total => _formatMinor(invoice.totalMinor, invoice.currencyCode);
-
-  @override
-  String get currency => invoice.currencyCode ?? '';
-
-  @override
-  int get accent => 0xFF246BFD;
-
-  @override
-  int get icon => 0xFFEAF1FF;
 }
 
 class _SearchFiltersSheet extends StatefulWidget {
@@ -424,7 +297,6 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late bool _minimumInclusive;
   late bool _maximumInclusive;
   String? _currency;
-  SearchDocumentType? _documentType;
   SearchDateRange? _purchaseDate;
   SearchDateRange? _warrantyEndDate;
 
@@ -440,7 +312,6 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     _minimumInclusive = widget.initial.amount?.minimumInclusive ?? true;
     _maximumInclusive = widget.initial.amount?.maximumInclusive ?? true;
     _currency = widget.initial.currencyCode;
-    _documentType = widget.initial.documentType;
     _purchaseDate = widget.initial.purchaseDate;
     _warrantyEndDate = widget.initial.warrantyEndDate;
   }
@@ -518,7 +389,6 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
         purchaseDate: _purchaseDate,
         warrantyEndDate: _warrantyEndDate,
         currencyCode: _currency,
-        documentType: _documentType,
       ),
     );
   }
@@ -587,23 +457,6 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                   DropdownMenuItem<String?>(value: code, child: Text(code)),
               ],
               onChanged: (value) => setState(() => _currency = value),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<SearchDocumentType?>(
-              initialValue: _documentType,
-              decoration: InputDecoration(labelText: l10n.documentType),
-              items: [
-                DropdownMenuItem<SearchDocumentType?>(
-                  value: null,
-                  child: Text(l10n.allDocumentTypes),
-                ),
-                for (final type in SearchDocumentType.values)
-                  DropdownMenuItem<SearchDocumentType?>(
-                    value: type,
-                    child: Text(_documentTypeLabel(l10n, type)),
-                  ),
-              ],
-              onChanged: (value) => setState(() => _documentType = value),
             ),
             const SizedBox(height: 12),
             _DateRangeField(
@@ -724,53 +577,20 @@ class _SearchEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).dividerColor),
-      ),
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 28),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 66,
-            height: 66,
-            decoration: const BoxDecoration(
-              color: AppColors.softBlue,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.manage_search_rounded,
-              size: 30,
-              color: AppColors.blue,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(title, style: textTheme.titleMedium),
           const SizedBox(height: 6),
-          Text(
-            body,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(body, style: textTheme.bodyMedium),
         ],
       ),
     );
   }
 }
-
-String _documentTypeLabel(AppLocalizations l10n, SearchDocumentType type) =>
-    switch (type) {
-      SearchDocumentType.purchaseInvoice => l10n.purchaseInvoice,
-      SearchDocumentType.receipt => l10n.receipt,
-      SearchDocumentType.creditNote => l10n.creditNote,
-      SearchDocumentType.warrantyCertificate => l10n.warrantyCertificate,
-    };
 
 String _visible(String? value) =>
     value?.trim().isNotEmpty == true ? value!.trim() : '—';
