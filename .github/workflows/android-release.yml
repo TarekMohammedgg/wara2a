@@ -33,7 +33,7 @@ jobs:
       - name: Set up Android SDK 37
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platforms;android-37'
+          packages: 'platforms;android-37.0'
 
       - name: Install dependencies
         run: flutter pub get
