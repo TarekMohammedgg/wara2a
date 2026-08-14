@@ -51,5 +51,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Local release-signing material
+/android/key.properties
+/android/*.jks
+
 # Optional local renders for synthetic evaluation specs
 /test/fixtures/evaluation/generated_images/

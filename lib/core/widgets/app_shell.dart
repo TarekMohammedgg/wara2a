@@ -56,7 +56,7 @@ class AppShell extends StatelessWidget {
           ),
           NavigationDestination(
             icon: const Icon(Icons.search_rounded),
-            selectedIcon: const Icon(Icons.manage_search_rounded),
+            selectedIcon: const Icon(Icons.search_rounded),
             label: l10n.search,
           ),
           NavigationDestination(
