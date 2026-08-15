@@ -2,6 +2,10 @@
 
 Arabic-first Flutter app for capturing invoices, extracting fields via OpenRouter Gemini, reviewing drafts, storing invoices locally in ObjectBox, and searching with OpenRouter `text-embedding-3-small` embeddings.
 
+[Latest Android APK](https://github.com/TarekMohammedgg/wara2a/releases/latest)
+
+Every commit on the default branch runs CI and publishes a new versioned APK on GitHub Releases.
+
 ## Setup
 
 ```powershell

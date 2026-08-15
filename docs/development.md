@@ -28,7 +28,7 @@ GitHub Actions runs on every push and pull request. The CI workflow installs the
 
 The two current end-to-end widget flows (`test/widget_test.dart` and `test/features/search/search_view_test.dart`) are not included in the automated test command because they do not settle reliably in the current checkout; they should be repaired before treating CI as a full UI regression gate.
 
-The Android release workflow runs when a tag matching `v*` is pushed, or when started manually from the Actions tab. It builds both an APK and an Android App Bundle. A version tag such as `v1.0.1` also creates a GitHub Release with those files attached.
+Every commit on the repository default branch also starts the Android release workflow. That job stamps a new version from `pubspec.yaml` plus the workflow run number (`1.0.0+N`), builds a release APK and Android App Bundle, and publishes them as a GitHub Release such as `v1.0.0-N`. Pushing a `v*` tag or running the workflow from the Actions tab does the same.
 
 For Play Store-ready signed artifacts, add these repository secrets:
 
@@ -37,6 +37,6 @@ For Play Store-ready signed artifacts, add these repository secrets:
 - `ANDROID_KEY_PASSWORD`
 - `ANDROID_KEY_ALIAS`
 
-Without those secrets the workflow still produces release-mode artifacts, but they are unsigned and are not ready for store distribution. The keystore and generated `android/key.properties` file are never committed.
+Without those secrets the workflow signs with a one-off CI debug key so the APK can be sideloaded. That signature changes between runs, so installing a newer GitHub build may require uninstalling the previous one. The keystore and generated `android/key.properties` file are never committed.
 
 iOS and macOS releases need a macOS runner plus Apple signing credentials, so they are not included in this Android workflow.

@@ -2,8 +2,6 @@ name: Android Release
 
 on:
   push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -16,12 +14,43 @@ concurrency:
 jobs:
   build:
     name: Build Android release
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/v') ||
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve app version
+        id: version
+        run: |
+          set -euo pipefail
+          pubspec_version="$(awk '/^version:/ { print $2; exit }' pubspec.yaml)"
+          version_name="${pubspec_version%%+*}"
+          build_number="${{ github.run_number }}"
+
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            tag="${GITHUB_REF_NAME}"
+            tag_version="${tag#v}"
+            version_name="${tag_version%%+*}"
+            version_name="${version_name%%-*}"
+            release_tag="$tag"
+          else
+            release_tag="v${version_name}-${build_number}"
+          fi
+
+          app_version="${version_name}+${build_number}"
+          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
+          echo "build_number=${build_number}" >> "$GITHUB_OUTPUT"
+          echo "app_version=${app_version}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
+          echo "Resolved app version ${app_version} (release ${release_tag})"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -41,25 +70,41 @@ jobs:
       - name: Generate Flutter build configuration
         run: flutter build apk --config-only
 
-      - name: Configure Android signing when secrets are available
+      - name: Configure Android signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ] && \
-             [ -z "$ANDROID_KEYSTORE_PASSWORD" ] && \
-             [ -z "$ANDROID_KEY_PASSWORD" ] && \
-             [ -z "$ANDROID_KEY_ALIAS" ]; then
-            echo "No Android signing secrets configured; release artifacts will be unsigned."
+          set -euo pipefail
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ] && \
+             [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] && \
+             [ -z "${ANDROID_KEY_PASSWORD:-}" ] && \
+             [ -z "${ANDROID_KEY_ALIAS:-}" ]; then
+            echo "No Android signing secrets configured; signing with a CI debug key so the APK is installable."
+            keytool -genkeypair \
+              -keystore android/upload-keystore.jks \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname 'CN=Wara2a CI, OU=CI, O=Wara2a, C=US'
+            cat > android/key.properties <<'EOF'
+          storePassword=android
+          keyPassword=android
+          keyAlias=androiddebugkey
+          storeFile=upload-keystore.jks
+          EOF
             exit 0
           fi
 
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || \
-             [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || \
-             [ -z "$ANDROID_KEY_PASSWORD" ] || \
-             [ -z "$ANDROID_KEY_ALIAS" ]; then
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ] || \
+             [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ] || \
+             [ -z "${ANDROID_KEY_PASSWORD:-}" ] || \
+             [ -z "${ANDROID_KEY_ALIAS:-}" ]; then
             echo "::error::Android signing is partially configured. Set all four Android signing secrets."
             exit 1
           fi
@@ -73,30 +118,58 @@ jobs:
           EOF
 
       - name: Build release APK
-        run: flutter build apk --release --build-number=${{ github.run_number }} --no-pub
+        run: >
+          flutter build apk --release --no-pub
+          --build-name=${{ steps.version.outputs.app_version }}
+          --build-number=${{ steps.version.outputs.build_number }}
 
       - name: Build release app bundle
-        run: flutter build appbundle --release --build-number=${{ github.run_number }} --no-pub
+        run: >
+          flutter build appbundle --release --no-pub
+          --build-name=${{ steps.version.outputs.app_version }}
+          --build-number=${{ steps.version.outputs.build_number }}
+
+      - name: Name versioned artifacts
+        run: |
+          set -euo pipefail
+          version='${{ steps.version.outputs.app_version }}'
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/wara2a-${version}.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "dist/wara2a-${version}.aab"
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wara2a-android-release-${{ github.ref_name }}
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+          name: wara2a-android-release-${{ steps.version.outputs.app_version }}
+          path: dist/wara2a-${{ steps.version.outputs.app_version }}.*
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish tagged GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --generate-notes \
-            build/app/outputs/flutter-apk/app-release.apk \
-            build/app/outputs/bundle/release/app-release.aab
+          set -euo pipefail
+          tag='${{ steps.version.outputs.release_tag }}'
+          version='${{ steps.version.outputs.app_version }}'
+          title="wara2a ${version}"
+          notes="Automated Android build from \`${GITHUB_SHA}\` on \`${GITHUB_REF_NAME}\`."
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" \
+              "dist/wara2a-${version}.apk" \
+              "dist/wara2a-${version}.aab" \
+              --clobber
+            gh release edit "$tag" --title "$title" --notes "$notes" --latest
+          else
+            gh release create "$tag" \
+              --title "$title" \
+              --notes "$notes" \
+              --generate-notes \
+              --latest \
+              "dist/wara2a-${version}.apk" \
+              "dist/wara2a-${version}.aab"
+          fi
 
       - name: Remove signing material
         if: always()
