@@ -22,6 +22,7 @@ class MemorySettingsRepository implements SettingsRepository {
 Future<Directory> pumpTestApp(
   WidgetTester tester, {
   InvoiceImageRepository? imageRepository,
+  String initialLocation = '/',
 }) async {
   final directory = await Directory.systemTemp.createTemp('wara2a_widget_');
   final database = await ObjectBoxDatabase.open(directory: directory.path);
@@ -30,7 +31,11 @@ Future<Directory> pumpTestApp(
     settings: MemorySettingsRepository(),
   );
   await tester.pumpWidget(
-    Wara2aApp(dependencies: dependencies, imageRepository: imageRepository),
+    Wara2aApp(
+      dependencies: dependencies,
+      imageRepository: imageRepository,
+      initialLocation: initialLocation,
+    ),
   );
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));

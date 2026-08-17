@@ -17,6 +17,12 @@ class AppLocalizations {
   String _value(String key) => (isArabic ? _ar : _en)[key] ?? key;
 
   String get appName => _value('appName');
+  String get landingTitle => _value('landingTitle');
+  String get landingBody => _value('landingBody');
+  String get landingStart => _value('landingStart');
+  String get landingCapture => _value('landingCapture');
+  String get landingSearch => _value('landingSearch');
+  String get landingOrganize => _value('landingOrganize');
   String get totalInvoices => _value('totalInvoices');
   String get thisMonth => _value('thisMonth');
   String get recentInvoices => _value('recentInvoices');
@@ -208,6 +214,12 @@ class AppLocalizations {
 
   static const _ar = <String, String>{
     'appName': 'wara2a',
+    'landingTitle': 'كل فواتيرك في مكان واحد',
+    'landingBody': 'صوّر الفاتورة، راجع بياناتها، وارجع إليها وقتما تحتاج.',
+    'landingStart': 'ابدأ الآن',
+    'landingCapture': 'التقاط سريع',
+    'landingSearch': 'بحث سهل',
+    'landingOrganize': 'تنظيم أوضح',
     'totalInvoices': 'إجمالي الفواتير',
     'thisMonth': 'هذا الشهر',
     'recentInvoices': 'الفواتير الأخيرة',
@@ -380,6 +392,13 @@ class AppLocalizations {
 
   static const _en = <String, String>{
     'appName': 'wara2a',
+    'landingTitle': 'Every invoice in one place',
+    'landingBody':
+        'Capture an invoice, review its details, and find it again whenever you need it.',
+    'landingStart': 'Get started',
+    'landingCapture': 'Quick capture',
+    'landingSearch': 'Easy search',
+    'landingOrganize': 'Clear organization',
     'totalInvoices': 'Total invoices',
     'thisMonth': 'This month',
     'recentInvoices': 'Recent invoices',

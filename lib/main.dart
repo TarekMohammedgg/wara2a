@@ -27,10 +27,12 @@ class Wara2aApp extends StatefulWidget {
     required this.dependencies,
     super.key,
     this.imageRepository,
+    this.initialLocation = '/welcome',
   });
 
   final AppDependencies dependencies;
   final InvoiceImageRepository? imageRepository;
+  final String initialLocation;
 
   @override
   State<Wara2aApp> createState() => _Wara2aAppState();
@@ -50,7 +52,10 @@ class _Wara2aAppState extends State<Wara2aApp> with WidgetsBindingObserver {
     );
     _captureCubit.recoverLostData();
     _settingsCubit = SettingsCubit(widget.dependencies.settings)..load();
-    _router = buildAppRouter(widget.dependencies);
+    _router = buildAppRouter(
+      widget.dependencies,
+      initialLocation: widget.initialLocation,
+    );
     // Quietly catch up any invoices that still need semantic vectors.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.dependencies.syncPendingEmbeddingsInBackground();

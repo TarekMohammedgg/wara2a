@@ -6,6 +6,7 @@ import '../app_dependencies.dart';
 import '../widgets/app_shell.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/home/views/home_view.dart';
+import '../../features/landing/views/landing_view.dart';
 import '../../features/search/views/search_view.dart';
 import '../../features/settings/views/settings_view.dart';
 import '../../features/invoice_capture/views/image_preview_view.dart';
@@ -20,10 +21,17 @@ import '../../features/invoice_capture/models/review_route_args.dart';
 import '../../features/invoice_details/view_models/invoice_details_cubit.dart';
 import '../../features/search/view_models/search_cubit.dart';
 
-GoRouter buildAppRouter(AppDependencies dependencies) {
+GoRouter buildAppRouter(
+  AppDependencies dependencies, {
+  String initialLocation = '/welcome',
+}) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: initialLocation,
     routes: [
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const LandingView(),
+      ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
